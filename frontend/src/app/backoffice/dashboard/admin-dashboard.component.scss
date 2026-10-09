@@ -1,0 +1,54 @@
+.admin-welcome-card {
+  background: linear-gradient(135deg, #673ab7 0%, #2196f3 100%);
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -40px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.kpi-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+  }
+
+  h3 {
+    font-weight: 700;
+  }
+}
+
+.kpi-gradient-primary {
+  background: linear-gradient(135deg, #2196f3 0%, #673ab7 100%);
+}
+
+.kpi-gradient-info {
+  background: linear-gradient(135deg, #00bcd4 0%, #2196f3 100%);
+}
+
+.kpi-gradient-success {
+  background: linear-gradient(135deg, #66bb6a 0%, #2e9e5b 100%);
+}
+
+.kpi-gradient-warning {
+  background: linear-gradient(135deg, #ffb74d 0%, #f57c00 100%);
+}
+
+.kpi-gradient-danger {
+  background: linear-gradient(135deg, #ff6b9d 0%, #e91e63 100%);
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}

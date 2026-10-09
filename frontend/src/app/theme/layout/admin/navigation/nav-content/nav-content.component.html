@@ -1,0 +1,28 @@
+<!-- Vertical layout -->
+<ng-scrollbar style="height: calc(100vh - 70px)" visibility="hover">
+  <div class="navbar-content">
+    <ul class="nav coded-inner-navbar" (click)="fireOutClick()" (keydown.space)="fireOutClick()" (keydown.enter)="fireOutClick()">
+      @for (item of navigations; track item) {
+        @if (item.type === 'group') {
+          <app-nav-group [item]="item" />
+        } @else if (item.type === 'collapse') {
+          <app-nav-collapse [item]="item" />
+        } @else if (item.type === 'item') {
+          <app-nav-item [item]="item" />
+        }
+      }
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/backoffice/profile']">
+          <span class="coded-micon"><i class="ti ti-user"></i></span>
+          <span class="coded-mtext">Profil</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="javascript:" (click)="logout()">
+          <span class="coded-micon"><i class="ti ti-logout"></i></span>
+          <span class="coded-mtext">Déconnexion</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</ng-scrollbar>

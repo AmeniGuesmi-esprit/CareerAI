@@ -1,0 +1,11 @@
+<nav class="">
+  <div class="navbar-wrapper">
+    <div class="m-header">
+      <a [routerLink]="['/backoffice/dashboard']" class="b-brand">
+        <span class="brand-mark">◈</span>
+        <span class="brand-text">Career<strong>AI</strong></span>
+      </a>
+    </div>
+    <app-nav-content (NavCollapsedMob)="navCollapseMob()" (SubmenuCollapse)="navSubmenuCollapse()" class="scroll-div w-100 compact" />
+  </div>
+</nav>

@@ -1,0 +1,79 @@
+<div class="register-wrapper">
+  <!-- Background -->
+  <div class="bg-layer">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Navbar partagée avec la landing page -->
+  <app-navbar></app-navbar>
+
+  <div class="register-content">
+
+    <!-- Left Column - Text -->
+    <div class="left-column">
+      <h1 class="title">Créez votre compte</h1>
+      <p class="subtitle">
+        Générez votre CV et votre lettre de motivation, mesurez votre score de matching avec une offre
+        et préparez vos entretiens avec CareerAI.
+      </p>
+       <div class="subtitle">
+        Vous avez déjà un compte ?
+        <a routerLink="/login" class="link">Se connecter</a>
+      </div>
+    </div>
+
+    <!-- Right Column - Form -->
+    <div class="right-column">
+      <div class="register-card">
+        <h2 class="form-title">Inscription</h2>
+
+        <form (ngSubmit)="onSubmit()">
+
+          <!-- Prénom + Nom -->
+          <div class="grid-2">
+            <div>
+              <label>Prénom *</label>
+              <input type="text" [(ngModel)]="prenom" name="prenom" required class="form-input">
+            </div>
+            <div>
+              <label>Nom *</label>
+              <input type="text" [(ngModel)]="nom" name="nom" required class="form-input">
+            </div>
+          </div>
+
+          <div>
+            <label>Adresse e-mail *</label>
+            <input type="email" [(ngModel)]="email" name="email" required class="form-input">
+          </div>
+
+          <div>
+            <label>Numéro de téléphone *</label>
+            <input type="tel" [(ngModel)]="telephone" name="telephone" required class="form-input" placeholder="+216 XX XXX XXX">
+          </div>
+
+          <div>
+            <label>Adresse *</label>
+            <input type="text" [(ngModel)]="adresse" name="adresse" required class="form-input">
+          </div>
+
+          <div>
+            <label>Mot de passe * (min. 8 caractères)</label>
+            <input type="password" [(ngModel)]="password" name="password" required class="form-input">
+          </div>
+
+          @if (error()) { <div class="error-message">{{ error() }}</div> }
+          @if (success()) { <div class="success-message">{{ success() }}</div> }
+
+          <button type="submit" class="btn-primary" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> }
+            Créer mon compte
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+.me-0 {
+  margin: 0 0 0 16px !important;
+}
+
+// Le thème Berry fixe une largeur de 92px pour .header-user-profile .pc-head-link
+// (prévue pour "avatar + icône réglages"), ce qui coupait "Prénom Nom" sur 2 lignes.
+.header-user-profile .pc-head-link {
+  width: auto !important;
+  padding: 0 14px;
+  white-space: nowrap;
+  flex-direction: row-reverse;
+  gap: 10px;
+
+  .user-avtar {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    object-fit: cover;
+    margin-right: 0 !important;
+  }
+}
+
+.user-fullname {
+  color: #010b2b;
+  margin-right: 0.5rem;
+  margin-left: 0 !important;
+}
+.user-initials {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #7c5cfc;
+  background: #ede9fe;
+}
