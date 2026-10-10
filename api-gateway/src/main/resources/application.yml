@@ -26,6 +26,10 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: compatibility-service
+          uri: lb://compatibility-service
+          predicates:
+            - Path=/api/compatibility/**
 
 
 eureka:
