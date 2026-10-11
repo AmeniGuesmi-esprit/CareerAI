@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AnswerView, CreateSessionRequest, CvSummary, Page, SessionDetail, SessionSummary
+  AnswerView, CreateSessionRequest, CvSummary, KnowledgeOverview, KnowledgeSearchRequest, KnowledgeSearchResult,
+  Page, RagView, SessionDetail, SessionSummary
 } from './models/interview.model';
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +33,18 @@ export class InterviewService {
 
   getSession(id: number): Observable<SessionDetail> {
     return this.http.get<SessionDetail>(`${this.API}/sessions/${id}`);
+  }
+
+  getRag(id: number): Observable<RagView> {
+    return this.http.get<RagView>(`${this.API}/sessions/${id}/rag`);
+  }
+
+  knowledgeOverview(): Observable<KnowledgeOverview> {
+    return this.http.get<KnowledgeOverview>(`${this.API}/knowledge`);
+  }
+
+  knowledgeSearch(request: KnowledgeSearchRequest): Observable<KnowledgeSearchResult> {
+    return this.http.post<KnowledgeSearchResult>(`${this.API}/knowledge/search`, request);
   }
 
   createSession(request: CreateSessionRequest): Observable<SessionDetail> {
