@@ -1,0 +1,109 @@
+<div class="page">
+  <div class="inner">
+    <a routerLink="/frontoffice/compatibility" class="back">
+      <i class="ti ti-arrow-left"></i> Mes analyses
+    </a>
+
+    <h1>Nouvelle analyse de compatibilité</h1>
+    <p class="subtitle">
+      Déposez votre CV (PDF) et collez l'offre d'emploi : l'IA estime votre taux de compatibilité
+      et vous indique comment améliorer votre candidature.
+    </p>
+
+    @if (loading()) {
+      <div class="card loading-card" aria-live="polite">
+        <div class="spinner"></div>
+        <h2>Analyse en cours…</h2>
+        <ul class="steps">
+          @for (step of steps; track step; let i = $index) {
+            <li [class.done]="i < stepIndex()" [class.current]="i === stepIndex()">
+              <i class="ti"
+                 [class.ti-circle-check]="i < stepIndex()"
+                 [class.ti-loader-2]="i === stepIndex()"
+                 [class.ti-circle]="i > stepIndex()"></i>
+              {{ step }}
+            </li>
+          }
+        </ul>
+        <p class="hint">Cela peut prendre jusqu'à 30 secondes.</p>
+      </div>
+    } @else {
+      <form class="card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (error(); as message) {
+          <div class="alert-error" role="alert">
+            <i class="ti ti-alert-triangle"></i>
+            <span>{{ message }}</span>
+          </div>
+        }
+
+        <!-- CV -->
+        <label class="label">Votre CV (PDF)</label>
+        <div class="dropzone"
+             [class.dragging]="dragging()"
+             [class.has-file]="file()"
+             [class.invalid]="fileError()"
+             tabindex="0"
+             role="button"
+             aria-label="Choisir un fichier PDF"
+             (click)="fileInput.click()"
+             (keydown.enter)="fileInput.click()"
+             (dragover)="onDragOver($event)"
+             (dragleave)="dragging.set(false)"
+             (drop)="onDrop($event)">
+          <input #fileInput type="file" accept="application/pdf,.pdf" hidden (change)="onFileInput($event)" />
+          @if (file(); as f) {
+            <i class="ti ti-file-type-pdf big"></i>
+            <div class="drop-text">
+              <strong>{{ f.name }}</strong>
+              <span>{{ formatSize(f.size) }}</span>
+            </div>
+            <button type="button" class="icon-btn" aria-label="Retirer le fichier" (click)="removeFile($event)">
+              <i class="ti ti-x"></i>
+            </button>
+          } @else {
+            <i class="ti ti-cloud-upload big"></i>
+            <div class="drop-text">
+              <strong>Glissez votre CV ici</strong>
+              <span>ou cliquez pour parcourir · PDF · 5 Mo maximum</span>
+            </div>
+          }
+        </div>
+        @if (fileError(); as message) {
+          <p class="field-error">{{ message }}</p>
+        }
+
+        <!-- Intitulé -->
+        <label class="label" for="jobTitle">Intitulé du poste</label>
+        <input id="jobTitle" type="text" class="input" formControlName="jobTitle" maxlength="150"
+               placeholder="Ex. Développeur Full-Stack Java / Angular" />
+        @if (invalid('jobTitle')) {
+          <p class="field-error">L'intitulé du poste est obligatoire (150 caractères maximum).</p>
+        }
+
+        <!-- Offre -->
+        <label class="label" for="jobDescription">Description de l'offre</label>
+        <textarea id="jobDescription" class="input" rows="10" formControlName="jobDescription"
+                  placeholder="Collez ici le texte complet de l'offre d'emploi (missions, compétences requises, profil recherché…)"></textarea>
+        <div class="counter" [class.bad]="invalid('jobDescription')">
+          {{ descriptionLength }} / 8000 caractères (50 minimum)
+        </div>
+        @if (invalid('jobDescription')) {
+          <p class="field-error">La description doit contenir entre 50 et 8000 caractères.</p>
+        }
+
+        <p class="privacy">
+          <i class="ti ti-shield-lock"></i>
+          Vos coordonnées (e-mail, téléphone, liens) sont masquées avant l'envoi à l'IA,
+          et le texte de votre CV n'est pas conservé.
+        </p>
+
+        <div class="actions">
+          <a routerLink="/frontoffice/compatibility" class="btn btn-ghost">Annuler</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-sparkles"></i> Lancer l'analyse
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

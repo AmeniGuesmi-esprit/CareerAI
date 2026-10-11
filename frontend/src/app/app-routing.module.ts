@@ -93,6 +93,11 @@ const routes: Routes = [
           import('./frontoffice/home/home.component').then(c => c.HomeComponent)
       },
       {
+        path: 'compatibility',
+        loadChildren: () =>
+          import('./compatibility/compatibility.routes').then(m => m.COMPATIBILITY_ROUTES)
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./Gestion-Utilisateur/profile/profile.component').then(c => c.ProfileComponent)

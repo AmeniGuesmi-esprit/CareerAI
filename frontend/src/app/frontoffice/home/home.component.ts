@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../../Gestion-Utilisateur/services/auth.service';
 import { User } from '../../Gestion-Utilisateur/models/user.model';
 
@@ -8,7 +9,7 @@ interface Tool {
   title: string;
   description: string;
   available: boolean;
-  // route: string;  // à renseigner quand le module devient disponible
+  route?: string; // à renseigner quand le module devient disponible
 }
 
 /**
@@ -48,7 +49,8 @@ export class HomeComponent implements OnInit {
       icon: 'ti-chart-donut',
       title: 'Score de matching',
       description: 'Mesurez la compatibilité entre votre CV et une description d\'offre.',
-      available: false
+      available: true,
+      route: '/frontoffice/compatibility'
     },
     {
       icon: 'ti-messages',
@@ -58,10 +60,16 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.user = this.auth.getCurrentUser();
     this.auth.user$.subscribe(u => (this.user = u));
+  }
+
+  open(tool: Tool) {
+    if (tool.available && tool.route) {
+      this.router.navigate([tool.route]);
+    }
   }
 }

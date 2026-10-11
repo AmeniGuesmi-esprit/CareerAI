@@ -1,0 +1,89 @@
+// Palette identique au reste de CareerAI (violet + turquoise)
+$primary:      #7c5cfc;
+$primary-dark: #5b3de8;
+$teal:         #00c2a8;
+$text:         #1f2937;
+$muted:        #6b7280;
+$border:       #ececf5;
+$success:      #16a34a;
+$warning:      #d97706;
+$danger:       #dc2626;
+
+@mixin card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(31, 20, 90, .04);
+}
+
+@mixin page {
+  min-height: calc(100vh - 73px);
+  background: #fff;
+  padding: 40px 24px 64px;
+  box-sizing: border-box;
+}
+
+@mixin buttons {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+
+    &:disabled { opacity: .55; cursor: not-allowed; }
+    &:not(:disabled):hover { transform: translateY(-1px); }
+  }
+  .btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, $primary, $primary-dark);
+    box-shadow: 0 6px 16px rgba(124, 92, 252, .28);
+  }
+  .btn-ghost {
+    color: $text;
+    background: #fff;
+    border-color: $border;
+    &:hover { background: #f7f5ff; }
+  }
+  .btn-danger {
+    color: #fff;
+    background: $danger;
+  }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid $border;
+    background: #fff;
+    color: $muted;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+
+    &:hover { background: #f7f5ff; color: $primary; }
+    &.danger:hover { background: #fef2f2; color: $danger; }
+  }
+}
+
+@mixin alert-error {
+  .alert-error {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: .85rem;
+    margin-bottom: 16px;
+  }
+}

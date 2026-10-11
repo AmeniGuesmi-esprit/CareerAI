@@ -1,0 +1,117 @@
+@use '../compat-vars' as *;
+
+:host { display: block; }
+
+.page { @include page; }
+.inner { max-width: 760px; margin: 0 auto; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: $muted;
+  font-size: .82rem;
+  text-decoration: none;
+  margin-bottom: 14px;
+  &:hover { color: $primary; }
+}
+
+h1 { font-size: 1.6rem; font-weight: 700; color: $text; margin: 0 0 6px; letter-spacing: -.02em; }
+.subtitle { color: $muted; font-size: .85rem; line-height: 1.6; margin: 0 0 24px; }
+
+.card { @include card; padding: 28px; }
+
+@include buttons;
+@include alert-error;
+
+.label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 600;
+  color: $text;
+  margin: 20px 0 8px;
+  &:first-of-type { margin-top: 0; }
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dcdcec;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font: inherit;
+  font-size: .88rem;
+  color: $text;
+  resize: vertical;
+  transition: border-color .15s ease, box-shadow .15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(124, 92, 252, .15);
+  }
+  &.ng-invalid.ng-touched { border-color: $danger; }
+}
+
+.counter { font-size: .72rem; color: $muted; text-align: right; margin-top: 6px; &.bad { color: $danger; } }
+.field-error { font-size: .76rem; color: $danger; margin: 6px 0 0; }
+
+.dropzone {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 2px dashed #cfcdf0;
+  border-radius: 12px;
+  padding: 22px;
+  background: #faf9ff;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+
+  &:hover, &:focus-visible, &.dragging { border-color: $primary; background: #f3efff; outline: none; }
+  &.has-file { border-style: solid; border-color: $teal; background: #f0fdfa; }
+  &.invalid { border-color: $danger; }
+
+  .big { font-size: 2rem; color: $primary; }
+  .drop-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    strong { font-size: .9rem; color: $text; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    span { font-size: .76rem; color: $muted; margin-top: 2px; }
+  }
+}
+
+.privacy {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: #f7f5ff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: .76rem;
+  color: $muted;
+  line-height: 1.5;
+  margin: 20px 0 0;
+  i { color: $primary; font-size: 1rem; }
+}
+
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+/* ── Chargement ── */
+.loading-card { text-align: center; padding: 48px 28px; }
+.loading-card h2 { font-size: 1.1rem; margin: 18px 0 16px; color: $text; }
+.spinner {
+  width: 46px; height: 46px; margin: 0 auto;
+  border: 4px solid #ece8ff; border-top-color: $primary;
+  border-radius: 50%; animation: spin .9s linear infinite;
+}
+.steps {
+  list-style: none; padding: 0; margin: 0 auto; max-width: 320px; text-align: left;
+  li { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: .85rem; color: $muted; }
+  li.done { color: $success; }
+  li.current { color: $text; font-weight: 600; i { animation: spin 1s linear infinite; } }
+}
+.hint { font-size: .75rem; color: $muted; margin: 18px 0 0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }

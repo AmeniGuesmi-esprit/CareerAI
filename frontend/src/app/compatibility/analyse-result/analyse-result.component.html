@@ -1,0 +1,122 @@
+<div class="page">
+  <div class="inner">
+    <a routerLink="/frontoffice/compatibility" class="back">
+      <i class="ti ti-arrow-left"></i> Mes analyses
+    </a>
+
+    @if (loading()) {
+      <div class="card state"><div class="spinner"></div><p>Chargement de l'analyse…</p></div>
+    } @else if (error(); as message) {
+      <div class="card state">
+        <i class="ti ti-alert-triangle state-icon"></i>
+        <p>{{ message }}</p>
+        <a routerLink="/frontoffice/compatibility" class="btn btn-ghost">Retour à l'historique</a>
+      </div>
+    } @else if (analysis(); as a) {
+
+      <!-- En-tête : titre éditable + actions -->
+      <div class="head">
+        <div class="head-title">
+          @if (editing()) {
+            <input #titleInput class="title-input" type="text" maxlength="150" [value]="a.jobTitle"
+                   aria-label="Intitulé du poste"
+                   (keydown.enter)="saveTitle(titleInput.value)" (keydown.escape)="cancelEdit()" />
+            <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="saveTitle(titleInput.value)">
+              <i class="ti ti-check"></i> Enregistrer
+            </button>
+            <button type="button" class="btn btn-ghost" (click)="cancelEdit()">Annuler</button>
+          } @else {
+            <h1>{{ a.jobTitle }}</h1>
+            <button type="button" class="icon-btn" aria-label="Renommer" title="Renommer" (click)="startEdit()">
+              <i class="ti ti-pencil"></i>
+            </button>
+          }
+        </div>
+        <p class="meta">
+          <i class="ti ti-file-type-pdf"></i> {{ a.cvFileName }}
+          <span class="dot">·</span>
+          {{ a.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+
+      @if (actionError(); as message) {
+        <div class="alert-error" role="alert"><i class="ti ti-alert-triangle"></i><span>{{ message }}</span></div>
+      }
+
+      <!-- Score + synthèse -->
+      <div class="card score-card" [attr.data-level]="level()">
+        <svg class="gauge" viewBox="0 0 120 120" role="img" [attr.aria-label]="'Score de compatibilité : ' + a.score + ' pour cent'">
+          <circle class="track" cx="60" cy="60" r="54" />
+          <circle class="value" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"
+                  [attr.stroke-dasharray]="circumference" [attr.stroke-dashoffset]="dashOffset()" />
+          <text x="60" y="68" text-anchor="middle" class="gauge-text">{{ a.score }}%</text>
+        </svg>
+        <div class="score-text">
+          <span class="badge">{{ label() }}</span>
+          <p>{{ a.summary }}</p>
+        </div>
+      </div>
+
+      <!-- Points forts / Manques -->
+      <div class="two-cols">
+        <section class="card block strengths">
+          <h2><i class="ti ti-circle-check"></i> Points forts</h2>
+          @if (a.strengths.length) {
+            <ul>@for (item of a.strengths; track $index) { <li>{{ item }}</li> }</ul>
+          } @else {
+            <p class="empty">Aucun point fort identifié.</p>
+          }
+        </section>
+
+        <section class="card block missing">
+          <h2><i class="ti ti-alert-circle"></i> Compétences manquantes</h2>
+          @if (a.missingSkills.length) {
+            <ul>@for (item of a.missingSkills; track $index) { <li>{{ item }}</li> }</ul>
+          } @else {
+            <p class="empty">Aucune compétence manquante identifiée.</p>
+          }
+        </section>
+      </div>
+
+      <!-- Suggestions -->
+      <section class="card block suggestions">
+        <h2><i class="ti ti-bulb"></i> Comment améliorer votre CV pour cette offre</h2>
+        @if (a.suggestions.length) {
+          <ol>@for (item of a.suggestions; track $index) { <li>{{ item }}</li> }</ol>
+        } @else {
+          <p class="empty">Aucune suggestion.</p>
+        }
+      </section>
+
+      <!-- Offre analysée -->
+      <section class="card block">
+        <button type="button" class="toggle" (click)="showOffer.set(!showOffer())" [attr.aria-expanded]="showOffer()">
+          <i class="ti" [class.ti-chevron-down]="!showOffer()" [class.ti-chevron-up]="showOffer()"></i>
+          Offre analysée
+        </button>
+        @if (showOffer()) {
+          <pre class="offer">{{ a.jobDescription }}</pre>
+        }
+      </section>
+
+      <!-- Actions -->
+      <div class="footer-actions">
+        <a routerLink="/frontoffice/compatibility/new" class="btn btn-primary">
+          <i class="ti ti-plus"></i> Nouvelle analyse
+        </a>
+
+        @if (confirmDelete()) {
+          <span class="confirm">
+            Supprimer définitivement cette analyse ?
+            <button type="button" class="btn btn-danger" [disabled]="deleting()" (click)="remove()">Oui, supprimer</button>
+            <button type="button" class="btn btn-ghost" (click)="confirmDelete.set(false)">Annuler</button>
+          </span>
+        } @else {
+          <button type="button" class="btn btn-ghost" (click)="confirmDelete.set(true)">
+            <i class="ti ti-trash"></i> Supprimer
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
