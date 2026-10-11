@@ -30,6 +30,10 @@ spring:
           uri: lb://compatibility-service
           predicates:
             - Path=/api/compatibility/**
+        - id: interview-service
+          uri: lb://interview-service
+          predicates:
+            - Path=/api/interview/**
 
 
 eureka:
@@ -41,4 +45,4 @@ eureka:
 
 app:
   jwt:
-    secret: 
+    secret: ${JWT_SECRET}
