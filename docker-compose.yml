@@ -126,46 +126,57 @@ services:
       DB_USER: ${DB_USER:-root}
       DB_PASSWORD: ${DB_PASSWORD:-}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_BASE_URL: http://ollama:11434
       RAG_KNOWLEDGE_PATH: /app/knowledge
     volumes:
       - ./knowledge:/app/knowledge:ro   # base de connaissances versionnée (indexée par POST /api/interview/admin/rag/reindex)
-    extra_hosts:
-      - "host.docker.internal:host-gateway"   # Ollama installé sur l'hôte Windows
     depends_on:
       mysql:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
     networks:
       - careerai-net
     restart: unless-stopped
 
-  # ========================= OLLAMA (optionnel) =========================
-  # Activer avec : docker compose --profile ollama-docker up -d
-  # Sinon, Ollama de l'hôte est utilisé via OLLAMA_BASE_URL.
+  # ========================= OLLAMA (IA locale, dans Docker) =========================
+  # Le serveur Ollama et les modèles épinglés (qwen3.5:4b, bge-m3) sont stockés dans le volume ollama_data.
+  # Le premier démarrage télécharge environ 5 Go. Pas de port publié : seul interview-service y accède.
 
   ollama:
     image: ollama/ollama:0.21.2
     container_name: ollama
-    profiles: ["ollama-docker"]
-    ports:
-      - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 15s
+      retries: 30
+      start_period: 20s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia   # GPU NVIDIA via Docker Desktop (WSL2) ; sans GPU, Ollama tourne sur le CPU (plus lent)
+              count: all
+              capabilities: [gpu]
     networks:
       - careerai-net
     restart: unless-stopped
 
   ollama-init:
     image: ollama/ollama:0.21.2
-    profiles: ["ollama-docker"]
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     environment:
       OLLAMA_HOST: http://ollama:11434
     # Télécharge les modèles épinglés (identiques à scripts/ollama-pull.ps1)
     entrypoint: ["sh", "-c", "ollama pull qwen3.5:4b && ollama pull bge-m3"]
+    restart: "no"
     networks:
       - careerai-net
 
