@@ -64,6 +64,9 @@ public class InterviewSession {
     @Column(name = "error_code", length = 60)
     private String errorCode;
 
+    @Column(name = "rag_trace", columnDefinition = "MEDIUMTEXT")
+    private String ragTrace;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

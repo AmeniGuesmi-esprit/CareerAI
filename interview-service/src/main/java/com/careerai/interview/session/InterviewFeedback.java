@@ -47,6 +47,9 @@ public class InterviewFeedback {
     @Column(name = "cited_source_ids", columnDefinition = "TEXT")
     private String citedSourceIds;
 
+    @Column(name = "retrieved_sources", columnDefinition = "TEXT")
+    private String retrievedSources;
+
     @Column(name = "answer_hash", nullable = false, length = 64)
     private String answerHash;
 

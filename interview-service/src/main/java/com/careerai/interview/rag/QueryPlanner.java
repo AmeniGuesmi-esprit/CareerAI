@@ -55,7 +55,7 @@ public class QueryPlanner {
         return new QueryPlan(track, level, matched, gaps, queries);
     }
 
-    static String routeTrack(String foldedText) {
+    public static String routeTrack(String foldedText) {
         String best = DEFAULT_TRACK;
         int bestScore = 0;
         for (Map.Entry<String, List<String>> e : TRACK_KEYWORDS.entrySet()) {

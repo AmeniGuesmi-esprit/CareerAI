@@ -7,6 +7,7 @@ import com.careerai.interview.exception.ApiException;
 import com.careerai.interview.rag.QueryPlanner;
 import com.careerai.interview.rag.QueryPlanner.QueryPlan;
 import com.careerai.interview.rag.RagIndex;
+import com.careerai.interview.rag.RagTraces;
 import com.careerai.interview.session.CompatAnalysisClient.CompatAnalysis;
 import com.careerai.interview.session.GenerationEvents.FeedbackRequested;
 import com.careerai.interview.session.GenerationEvents.QuestionsRequested;
@@ -192,8 +193,23 @@ public class SessionService {
         FeedbackView fv = f == null ? null : new FeedbackView(f.getStatus(), f.getErrorCode(), f.getScore(), f.getVerdict(),
                 json.strings(f.getStrengths()), json.strings(f.getGaps()), f.getImprovedAnswer(),
                 f.getStar() == null ? null : json.map(f.getStar()), json.strings(f.getCitedSourceIds()),
-                f.getModel(), f.getPromptVersion(), f.getUpdatedAt());
+                f.getModel(), f.getPromptVersion(), f.getUpdatedAt(),
+                json.list(f.getRetrievedSources(), RagTraces.Source.class));
         return new AnswerView(a.getId(), a.getContent(), a.getUpdatedAt(), fv);
+    }
+
+    @Transactional(readOnly = true)
+    public RagView ragView(Long userId, Long id) {
+        InterviewSession s = find(userId, id);
+        RagTraces.Trace t = json.object(s.getRagTrace(), RagTraces.Trace.class);
+        if (t == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "RAG_TRACE_MISSING", "Pas encore de trace RAG pour cette session.");
+        }
+        List<RagQuestionView> questions = s.getQuestions().stream()
+                .map(q -> new RagQuestionView(q.getId(), q.getPosition(), q.getQuestion(), json.strings(q.getSourceIds())))
+                .toList();
+        return new RagView(t.track(), t.level(), t.mode(), t.matchedSkills(), t.gapSkills(), t.queries(), t.hits(),
+                t.promptVersion(), t.model(), t.seed(), t.manifestHash(), questions);
     }
 
     static String sha256(String text) {

@@ -2,6 +2,7 @@ package com.careerai.interview.generation;
 
 import com.careerai.interview.generation.GenerationModels.*;
 import com.careerai.interview.rag.RagManifestRepository;
+import com.careerai.interview.rag.RagTraces;
 import com.careerai.interview.session.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,9 +28,10 @@ public class GenerationPersistence {
     }
 
     @Transactional
-    public void saveQuestions(Long sessionId, List<QuestionDraft> drafts, Trace trace) {
+    public void saveQuestions(Long sessionId, List<QuestionDraft> drafts, Trace trace, RagTraces.Trace rag) {
         sessions.findById(sessionId).ifPresent(session -> {
             session.getQuestions().clear();
+            session.setRagTrace(json.write(rag));
             int position = 1;
             for (QuestionDraft d : drafts) {
                 session.getQuestions().add(InterviewQuestion.builder()
@@ -73,12 +75,14 @@ public class GenerationPersistence {
     }
 
     @Transactional
-    public void saveFeedback(Long answerId, String expectedHash, FeedbackDraft d, Trace trace) {
+    public void saveFeedback(Long answerId, String expectedHash, FeedbackDraft d, Trace trace,
+                             List<RagTraces.Source> retrieved) {
         answers.findById(answerId).filter(a -> expectedHash.equals(a.getAnswerHash())).ifPresent(a -> {
             InterviewFeedback f = a.getFeedback();
             if (f == null) {
                 return;
             }
+            f.setRetrievedSources(json.write(retrieved));
             f.setStatus(InterviewFeedback.Status.READY);
             f.setErrorCode(null);
             f.setScore(d.score());

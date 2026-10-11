@@ -33,6 +33,28 @@ public class JsonCodec {
         return read(json, new TypeReference<Map<String, String>>() { }, null);
     }
 
+    public <T> T object(String json, Class<T> type) {
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+        try {
+            return mapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "STORED_JSON_INVALID", "Donnée stockée illisible.");
+        }
+    }
+
+    public <T> List<T> list(String json, Class<T> type) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
+        try {
+            return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, type));
+        } catch (JsonProcessingException e) {
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "STORED_JSON_INVALID", "Donnée stockée illisible.");
+        }
+    }
+
     private <T> T read(String json, TypeReference<T> type, T fallback) {
         if (json == null || json.isBlank()) {
             return fallback;
