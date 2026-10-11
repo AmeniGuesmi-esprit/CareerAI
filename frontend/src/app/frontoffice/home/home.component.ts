@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../../Gestion-Utilisateur/services/auth.service';
 import { User } from '../../Gestion-Utilisateur/models/user.model';
 
@@ -8,7 +9,7 @@ interface Tool {
   title: string;
   description: string;
   available: boolean;
-  // route: string;  // à renseigner quand le module devient disponible
+  route?: string;
 }
 
 /**
@@ -23,6 +24,9 @@ interface Tool {
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   user: User | null = null;
 
   tools: Tool[] = [
@@ -54,14 +58,19 @@ export class HomeComponent implements OnInit {
       icon: 'ti-messages',
       title: 'Questions d\'entretien',
       description: 'Préparez-vous avec les questions les plus probables pour le poste.',
-      available: false
+      available: true,
+      route: '/frontoffice/interview'
     }
   ];
-
-  constructor(private auth: AuthService) {}
 
   ngOnInit() {
     this.user = this.auth.getCurrentUser();
     this.auth.user$.subscribe(u => (this.user = u));
+  }
+
+  open(tool: Tool) {
+    if (tool.available && tool.route) {
+      this.router.navigateByUrl(tool.route);
+    }
   }
 }

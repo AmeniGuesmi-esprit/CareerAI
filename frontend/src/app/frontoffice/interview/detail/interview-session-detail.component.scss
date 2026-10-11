@@ -1,0 +1,112 @@
+.interview-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.back { color: #4338ca; text-decoration: none; font-size: 0.9rem; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 12px 0 20px;
+
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+}
+
+.title-input {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-right: 8px;
+  min-width: 260px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.status { background: #eef2ff; border-color: #c7d2fe; }
+.status.failed { background: #fef2f2; border-color: #fecaca; }
+
+.question h3 { margin: 8px 0 6px; font-size: 1.05rem; }
+.intent { margin: 0 0 10px; }
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.q-head { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.q-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+.feedback {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #f3f4f6;
+
+  h4 { margin: 14px 0 6px; font-size: 0.95rem; }
+  ul { margin: 0; padding-left: 18px; }
+}
+
+.score { font-size: 1.05rem; margin: 0 0 6px; }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.star {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  dt { font-weight: 600; }
+  dd { margin: 0; }
+}
+
+.improved { white-space: pre-line; background: #f9fafb; padding: 10px 12px; border-radius: 8px; }
+
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: none;
+}
+.btn-primary { background: #4f46e5; color: #fff; }
+.btn-outline { border-color: #c7d2fe; color: #4338ca; }
+.btn-danger { background: #dc2626; color: #fff; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.link { background: none; border: none; color: #4338ca; cursor: pointer; padding: 0; font-size: 0.85rem; }
+
+.muted { color: #6b7280; font-size: 0.9rem; }
+.alert {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .cols { grid-template-columns: 1fr; }
+}

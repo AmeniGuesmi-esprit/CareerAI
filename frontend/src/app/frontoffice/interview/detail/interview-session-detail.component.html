@@ -1,0 +1,100 @@
+<div class="interview-page">
+  <a routerLink="/frontoffice/interview" class="back">← Toutes les sessions</a>
+
+  @if (error) { <p class="alert">{{ error }}</p> }
+
+  @if (session; as s) {
+    <header class="page-header">
+      <div>
+        @if (editingTitle) {
+          <input class="title-input" [(ngModel)]="titleDraft" maxlength="150" />
+          <button class="btn btn-primary" (click)="saveTitle()">Enregistrer</button>
+          <button class="btn btn-outline" (click)="editingTitle = false">Annuler</button>
+        } @else {
+          <h1>{{ s.jobTitle }}</h1>
+          <button class="link" (click)="startEditTitle()">Modifier l'intitulé</button>
+        }
+        <p class="muted">CV : {{ s.cvLabel }} · Piste : {{ s.track }} · Niveau visé : {{ s.level }}</p>
+        @if (s.matchedSkills.length || s.gapSkills.length) {
+          <p class="muted">
+            Compétences communes : {{ s.matchedSkills.join(', ') || '—' }}
+            · Lacunes à travailler : {{ s.gapSkills.join(', ') || '—' }}
+          </p>
+        }
+      </div>
+      <button class="btn btn-danger" (click)="deleteSession()">Supprimer la session</button>
+    </header>
+
+    @if (s.status === 'GENERATING') {
+      <div class="card status">
+        <p>Génération des questions en cours… cette page se met à jour automatiquement.</p>
+      </div>
+    } @else if (s.status === 'FAILED') {
+      <div class="card status failed">
+        <p>La génération a échoué ({{ s.errorCode }}).</p>
+        <button class="btn btn-primary" (click)="retry()">Relancer la génération</button>
+      </div>
+    }
+
+    @for (q of s.questions; track q.id) {
+      <article class="card question">
+        <header class="q-head">
+          <span class="chip">Q{{ q.position }}</span>
+          <span class="chip">{{ q.category === 'comportementale' ? 'Comportementale' : 'Technique' }}</span>
+          <span class="chip">{{ q.difficulty }}</span>
+        </header>
+        <h3>{{ q.question }}</h3>
+        <p class="muted intent">Objectif : {{ q.intent }}</p>
+
+        <textarea rows="5" maxlength="5000" placeholder="Votre réponse…" [(ngModel)]="drafts[q.id]"
+          [disabled]="s.status !== 'READY'"></textarea>
+        <div class="q-actions">
+          <button class="btn btn-primary" [disabled]="s.status !== 'READY' || !(drafts[q.id]?.trim()) || savingQuestionId === q.id"
+            (click)="saveAnswer(q)">
+            {{ q.answer ? 'Mettre à jour la réponse' : 'Enregistrer la réponse' }}
+          </button>
+          @if (q.answer) {
+            <button class="btn btn-danger" (click)="deleteAnswer(q)">Supprimer la réponse</button>
+          }
+        </div>
+
+        @if (q.answer?.feedback; as f) {
+          <section class="feedback">
+            @if (f.status === 'PENDING') {
+              <p class="muted">Analyse de votre réponse en cours…</p>
+            } @else if (f.status === 'FAILED') {
+              <p class="alert">Feedback indisponible ({{ f.errorCode }}). Modifiez la réponse pour relancer l'analyse.</p>
+            } @else {
+              <p class="score">Note : <strong>{{ f.score }} / 10</strong></p>
+              <p>{{ f.verdict }}</p>
+              <div class="cols">
+                <div>
+                  <h4>Points forts</h4>
+                  <ul>@for (x of f.strengths; track $index) { <li>{{ x }}</li> }</ul>
+                </div>
+                <div>
+                  <h4>Points à améliorer</h4>
+                  <ul>@for (x of f.gaps; track $index) { <li>{{ x }}</li> }</ul>
+                </div>
+              </div>
+              @if (f.star) {
+                <h4>Méthode STAR</h4>
+                <dl class="star">
+                  <dt>Situation</dt><dd>{{ f.star['situation'] }}</dd>
+                  <dt>Tâche</dt><dd>{{ f.star['tache'] }}</dd>
+                  <dt>Action</dt><dd>{{ f.star['action'] }}</dd>
+                  <dt>Résultat</dt><dd>{{ f.star['resultat'] }}</dd>
+                </dl>
+              }
+              <h4>Réponse modèle améliorée</h4>
+              <p class="improved">{{ f.improvedAnswer }}</p>
+              <p class="muted">Sources : {{ f.citedSourceIds.join(', ') || '—' }}</p>
+            }
+          </section>
+        }
+      </article>
+    }
+  } @else if (!error) {
+    <p class="muted">Chargement…</p>
+  }
+</div>
