@@ -15,6 +15,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro   # crée les bases des services
     networks:
       - careerai-net
     healthcheck:
@@ -25,9 +26,10 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # LLM local utilisé par compatibility-service
+  # LLM local partagé (compatibility-service + interview-service). Version épinglée : les
+  # vieilles versions refusent les modèles récents des registres Ollama.
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.40.4
     container_name: ollama
     volumes:
       - ollama_data:/root/.ollama   # conserve les modèles téléchargés
@@ -39,15 +41,17 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    # GPU NVIDIA sous Docker Desktop/WSL2 : ajouter sous "volumes" si votre PC en a un :
+    #   deploy.resources.reservations.devices: [{driver: nvidia, count: all, capabilities: [gpu]}]
     restart: unless-stopped
 
-  # Télécharge le modèle une seule fois (~4,7 Go pour qwen2.5:7b), puis s'arrête
+  # Télécharge les modèles une seule fois, puis s'arrête (~4,7 Go qwen2.5, ~3,3 Go qwen3.5, ~1,2 Go bge-m3)
   ollama-pull:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.40.4
     container_name: ollama-pull
     environment:
       OLLAMA_HOST: ollama:11434
-    entrypoint: ["ollama", "pull", "${OLLAMA_MODEL:-qwen2.5:7b}"]
+    entrypoint: ["sh", "-c", "ollama pull ${OLLAMA_MODEL:-qwen2.5:7b} && ollama pull qwen3.5:4b && ollama pull bge-m3"]
     depends_on:
       ollama:
         condition: service_healthy
@@ -106,8 +110,8 @@ services:
     container_name: user-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_users?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
       MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME manquant}
@@ -174,6 +178,34 @@ services:
         condition: service_healthy
       ollama-pull:
         condition: service_completed_successfully
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
+  # ========================= INTERVIEW SERVICE =========================
+
+  interview-service:
+    build:
+      context: ./interview-service
+      dockerfile: Dockerfile
+    container_name: interview-service
+    # Pas de port publié : l'accès passe uniquement par l'API Gateway
+    environment:
+      INTERVIEW_DB_URL: jdbc:mysql://mysql:3306/interview_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      OLLAMA_BASE_URL: http://ollama:11434      # Ollama partagé (même conteneur que compatibility-service)
+      RAG_KNOWLEDGE_PATH: /app/knowledge
+    volumes:
+      - ./knowledge:/app/knowledge:ro   # base de connaissances versionnée (indexée par POST /api/interview/admin/rag/reindex)
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      ollama-pull:
+        condition: service_completed_successfully   # attend qwen3.5:4b et bge-m3
     networks:
       - careerai-net
     restart: unless-stopped
