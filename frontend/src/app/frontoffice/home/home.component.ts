@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../Gestion-Utilisateur/services/auth.service';
@@ -24,6 +24,9 @@ interface Tool {
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   user: User | null = null;
 
   tools: Tool[] = [
@@ -57,11 +60,10 @@ export class HomeComponent implements OnInit {
       icon: 'ti-messages',
       title: 'Questions d\'entretien',
       description: 'Préparez-vous avec les questions les plus probables pour le poste.',
-      available: false
+      available: true,
+      route: '/frontoffice/interview'
     }
   ];
-
-  constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.user = this.auth.getCurrentUser();
@@ -70,7 +72,7 @@ export class HomeComponent implements OnInit {
 
   open(tool: Tool) {
     if (tool.available && tool.route) {
-      this.router.navigate([tool.route]);
+      this.router.navigateByUrl(tool.route);
     }
   }
 }

@@ -5,7 +5,9 @@
 
     <div class="tools-grid">
       @for (tool of tools; track tool.title) {
-        <div class="tool-card" [class.disabled]="!tool.available" [class.clickable]="tool.available" (click)="open(tool)">
+        <div class="tool-card" [class.disabled]="!tool.available" [class.clickable]="tool.available"
+          [attr.role]="tool.available ? 'link' : null" [attr.tabindex]="tool.available ? 0 : null"
+          (click)="open(tool)" (keydown.enter)="open(tool)">
           <span class="tool-icon"><i class="ti {{ tool.icon }}"></i></span>
           <h3>{{ tool.title }}</h3>
           <p>{{ tool.description }}</p>
