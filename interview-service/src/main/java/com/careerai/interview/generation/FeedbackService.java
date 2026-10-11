@@ -10,6 +10,7 @@ import com.careerai.interview.rag.RagIndex.Entry;
 import com.careerai.interview.rag.RagRetriever;
 import com.careerai.interview.rag.RagRetriever.Filter;
 import com.careerai.interview.rag.RagRetriever.Hit;
+import com.careerai.interview.rag.RagTraces;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,7 +86,8 @@ public class FeedbackService {
             }
             FeedbackDraft draft = generateValid(ctx, behavioral, sources);
             persistence.saveFeedback(answerId, ctx.answerHash(), draft,
-                    new Trace(rag.promptVersion(), ollama.chatModel(), ollama.seed(), persistence.manifestHash()));
+                    new Trace(rag.promptVersion(), ollama.chatModel(), ollama.seed(), persistence.manifestHash()),
+                    sources.values().stream().map(RagTraces::source).toList());
         } catch (ApiException e) {
             log.warn("Feedback {} : échec ({})", answerId, e.getCode());
             persistence.failFeedback(answerId, ctx.answerHash(), e.getCode());

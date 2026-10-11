@@ -43,6 +43,11 @@ public class SessionController {
         return service.detail(userId, id);
     }
 
+    @GetMapping("/{id}/rag")
+    public RagView rag(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long id) {
+        return service.ragView(userId, id);
+    }
+
     @PatchMapping("/{id}")
     public SessionDetail rename(
             @RequestHeader(USER_HEADER) Long userId,

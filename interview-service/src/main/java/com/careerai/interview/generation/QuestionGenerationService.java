@@ -12,6 +12,7 @@ import com.careerai.interview.rag.RagRetriever;
 import com.careerai.interview.rag.RagRetriever.Filter;
 import com.careerai.interview.rag.RagRetriever.Hit;
 import com.careerai.interview.rag.RagRetriever.Retrieval;
+import com.careerai.interview.rag.RagTraces;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,8 +71,12 @@ public class QuestionGenerationService {
             Set<String> allowed = r.hits().stream().map(h -> h.entry().citationId()).collect(Collectors.toSet());
             List<QuestionDraft> drafts = generateValid(ctx, allowed, renderSources(r.hits()));
             log.info("Session {} : {} questions générées (recherche {})", sessionId, drafts.size(), r.mode());
+            String manifest = persistence.manifestHash();
             persistence.saveQuestions(sessionId, drafts,
-                    new Trace(rag.promptVersion(), ollama.chatModel(), ollama.seed(), persistence.manifestHash()));
+                    new Trace(rag.promptVersion(), ollama.chatModel(), ollama.seed(), manifest),
+                    new RagTraces.Trace(ctx.track(), ctx.level(), plan.matchedSkills(), plan.gapSkills(), plan.queries(),
+                            r.mode(), r.hits().stream().map(RagTraces::hit).toList(), rag.promptVersion(),
+                            ollama.chatModel(), ollama.seed(), manifest));
         } catch (ApiException e) {
             log.warn("Session {} : génération échouée ({})", sessionId, e.getCode());
             persistence.failSession(sessionId, e.getCode());
