@@ -26,6 +26,10 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: skill-gap-service
+          uri: lb://skill-gap-service
+          predicates:
+            - Path=/api/skill-gap/**
 
 
 eureka:
@@ -37,4 +41,4 @@ eureka:
 
 app:
   jwt:
-    secret: 
+    secret: ${JWT_SECRET:}

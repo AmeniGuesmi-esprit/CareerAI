@@ -1,0 +1,129 @@
+<div class="tr-page">
+  <div class="tr-inner">
+    <h1 class="tr-title">Analyse CV / offre d'emploi</h1>
+    <p class="tr-subtitle">Importez votre CV et collez la description d'une offre : l'IA indique les compétences à améliorer pour l'obtenir.</p>
+
+    @if (error()) {
+      <div class="tr-alert"><i class="ti ti-alert-circle"></i> {{ error() }}</div>
+    }
+
+    <div class="tr-grid">
+      <!-- ── Colonne gauche : CV + offre ── -->
+      <section class="tr-card">
+        <h2>1. Mon CV</h2>
+
+        <input #fileInput type="file" accept=".pdf,.docx,.txt" hidden (change)="onFile($event)" />
+        <button class="btn-outline" (click)="fileInput.click()" [disabled]="uploading()">
+          <i class="ti ti-upload"></i>
+          {{ uploading() ? 'Import en cours…' : 'Importer un CV (PDF, DOCX, TXT)' }}
+        </button>
+
+        @if (!cvs().length) {
+          <p class="muted">Aucun CV importé pour le moment.</p>
+        }
+
+        <ul class="cv-list">
+          @for (cv of cvs(); track cv.id) {
+            <li [class.selected]="cv.id === selectedCvId()" (click)="selectedCvId.set(cv.id)">
+              <i class="ti ti-file-text cv-icon"></i>
+              <div class="cv-meta">
+                <strong>{{ cv.fileName }}</strong>
+                <small>{{ cv.uploadedAt | date: 'dd/MM/yyyy HH:mm' }} · {{ formatSize(cv.sizeBytes) }}</small>
+              </div>
+              <button class="icon-btn" title="Supprimer" (click)="deleteCv(cv, $event)">
+                <i class="ti ti-trash"></i>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <h2>2. L'offre d'emploi</h2>
+        <input class="field" type="text" maxlength="200" placeholder="Intitulé du poste (facultatif)"
+               [value]="jobTitle()" (input)="onJobTitle($event)" />
+        <textarea class="field job-area" rows="9" [attr.maxlength]="JOB_MAX"
+                  placeholder="Collez ici la description de l'offre (missions, profil recherché, compétences requises…)"
+                  [value]="jobDescription()" (input)="onJobDescription($event)"></textarea>
+        <small class="counter" [class.invalid]="jobLength() > 0 && jobLength() < JOB_MIN">
+          {{ jobLength() }} / {{ JOB_MAX }} caractères (minimum {{ JOB_MIN }})
+        </small>
+
+        <button class="btn-primary" (click)="analyze()" [disabled]="!canAnalyze()">
+          <i class="ti ti-sparkles"></i>
+          {{ analyzing() ? 'Analyse en cours…' : 'Analyser mon CV' }}
+        </button>
+      </section>
+
+      <!-- ── Colonne droite : résultat ── -->
+      <section class="tr-card result-card">
+        <h2>Résultat</h2>
+
+        @if (analyzing()) {
+          <div class="loading"><span class="spinner"></span> Analyse en cours… (jusqu'à 1 minute)</div>
+        } @else if (result(); as r) {
+          <div class="result-head">
+            <div>
+              <strong>{{ r.jobTitle || 'Offre sans titre' }}</strong>
+              <small class="muted">{{ r.cvFileName }} · {{ r.model }}</small>
+            </div>
+          </div>
+
+          <p class="summary">{{ r.result.summary }}</p>
+
+          <h3 class="block-title"><i class="ti ti-target-arrow"></i> Compétences à améliorer</h3>
+          @if (!r.result.missingSkills.length) {
+            <p class="muted">Aucune lacune importante détectée pour cette offre.</p>
+          }
+          <ul class="skill-list">
+            @for (m of r.result.missingSkills; track m.skill) {
+              <li>
+                <div class="skill-head">
+                  <strong>{{ m.skill }}</strong>
+                  <span class="prio" [ngClass]="m.priority.toLowerCase()">{{ priorityLabel(m.priority) }}</span>
+                </div>
+                @if (m.reason) { <p class="skill-reason">{{ m.reason }}</p> }
+                @if (m.howToImprove) {
+                  <p class="skill-how"><i class="ti ti-bulb"></i> {{ m.howToImprove }}</p>
+                }
+              </li>
+            }
+          </ul>
+
+          @if (r.result.strengths.length) {
+            <h3 class="block-title"><i class="ti ti-circle-check"></i> Points forts de votre CV</h3>
+            <div class="chips">
+              @for (s of r.result.strengths; track s) { <span class="chip">{{ s }}</span> }
+            </div>
+          }
+
+          @if (r.result.cvTips.length) {
+            <h3 class="block-title"><i class="ti ti-edit"></i> Conseils pour votre CV</h3>
+            <ul class="tips">
+              @for (t of r.result.cvTips; track t) { <li>{{ t }}</li> }
+            </ul>
+          }
+        } @else {
+          <p class="muted">Le résultat de l'analyse apparaîtra ici.</p>
+        }
+      </section>
+    </div>
+
+    <!-- ── Historique ── -->
+    @if (history().length) {
+      <section class="tr-card history">
+        <h2>Historique</h2>
+        <ul class="history-list">
+          @for (a of history(); track a.id) {
+            <li (click)="view(a)" [class.selected]="result()?.id === a.id">
+              <i class="ti ti-file-analytics"></i>
+              <span class="h-name">{{ a.jobTitle || 'Offre sans titre' }} <small class="muted">· {{ a.cvFileName }}</small></span>
+              <small class="muted">{{ a.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+              <button class="icon-btn" title="Supprimer" (click)="deleteAnalysis(a, $event)">
+                <i class="ti ti-trash"></i>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+</div>

@@ -93,6 +93,11 @@ const routes: Routes = [
           import('./frontoffice/home/home.component').then(c => c.HomeComponent)
       },
       {
+        path: 'skill-gap',
+        loadComponent: () =>
+          import('./skill-gap/skill-gap/skill-gap.component').then(c => c.SkillGapComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./Gestion-Utilisateur/profile/profile.component').then(c => c.ProfileComponent)
