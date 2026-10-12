@@ -2,16 +2,23 @@ package com.careerai.skillgap.service;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Remplace les données de contact (email, téléphone, URL) par des jetons [[EMAIL_1]], [[PHONE_1]]...
- * avant l'envoi au LLM, (le LLM ne voit jamais les coordonnees du candidat).
- * Le nom et l'adresse postale ne sont pas masqués (ils font partie du texte à traduire).
+ * Protège les données personnelles avant l'envoi au LLM :
+ *  - e-mail, téléphone, URL : remplacés par des jetons [[EMAIL_1]], [[PHONE_1]]...
+ *  - nom du candidat et adresse postale : SUPPRIMÉS du texte (méthode {@link #anonymizeCv}).
+ * L'analyse d'écart de compétences n'a besoin ni du nom ni de l'adresse.
  */
 @Component
 public class PiiMasker {
@@ -23,6 +30,84 @@ public class PiiMasker {
             "(?i)\\b(?:https?://|www\\.)[^\\s<>\"]+|\\b(?:linkedin|github)\\.com/[^\\s<>\"]+");
     private static final Pattern PHONE = Pattern.compile("(?<![\\w])\\+?\\d[\\d ().-]{6,}\\d");
     private static final Pattern YEAR_RANGE = Pattern.compile("(19|20)\\d{2}\\s*[-–]\\s*(19|20)\\d{2}");
+
+    private static final Set<String> SECTION_WORDS = Set.of(
+            "cv", "curriculum", "vitae", "resume", "résumé", "profil", "profile", "profil professionnel",
+            "expérience", "experience", "expériences", "formation", "education", "compétences", "competences",
+            "skills", "projets", "projects", "langues", "languages", "contact", "contacts", "ingénieur",
+            "ingenieur", "développeur", "developpeur", "developer", "engineer", "stagiaire", "étudiant", "etudiant");
+
+    private static final Pattern NAME_LABEL = Pattern.compile(
+            "(?im)^[ \\t]*(?:nom(?:\\s+et\\s+pr[ée]nom)?|pr[ée]nom|name|full\\s*name)[ \\t]*:[ \\t]*(.+)$");
+    private static final Pattern NAME_LINE = Pattern.compile(
+            "^\\p{Lu}[\\p{L}'’-]+(?:\\s+\\p{L}[\\p{L}'’.-]*){1,3}$");
+    private static final Pattern ADDRESS_LABEL = Pattern.compile(
+            "(?i)^\\s*(?:adresse|address|domicile|localisation|location|habite|r[ée]sidence)\\s*:.*$");
+    private static final String STREET_WORDS =
+            "rue|avenue|av\\.?|boulevard|bd|impasse|route|cit[ée]|r[ée]sidence|lotissement|street|st\\.|road|rd\\.|lane|drive";
+    private static final Pattern STREET_NUMBERED = Pattern.compile(
+            "(?i).*(?:\\b\\d{1,4}\\s*(?:bis|ter)?\\s*,?\\s*(?:" + STREET_WORDS + ")\\b|\\b(?:" + STREET_WORDS
+                    + ")\\s+[\\p{L}'’. -]{2,40},?\\s*\\d{1,4}\\b).*");
+    private static final Pattern POSTAL_CITY = Pattern.compile(
+            "^[\\s,|•·-]*(?:[A-Za-zÀ-ÿ'’. -]+,\\s*)?\\d{4,5}\\s+\\p{Lu}[\\p{L}'’ -]{2,30}(?:,\\s*[\\p{L} ]{2,30})?[\\s,|•·-]*$");
+
+    /**
+     * Prépare le texte d'un CV pour le LLM : jetons pour e-mail/téléphone/URL puis suppression
+     * du nom du candidat (toutes ses occurrences) et de l'adresse postale.
+     */
+    public String anonymizeCv(String cvText) {
+        if (cvText == null) return "";
+        String text = mask(cvText).text();
+
+        // 1) Nom : lignes « Nom : ... » + première ligne de l'en-tête qui ressemble à un nom
+        Set<String> names = new LinkedHashSet<>();
+        Matcher lm = NAME_LABEL.matcher(text);
+        while (lm.find()) names.add(lm.group(1).trim());
+        String[] lines = text.split("\\R", -1);
+        int seen = 0;
+        for (String line : lines) {
+            String t = line.trim();
+            if (t.isEmpty()) continue;
+            if (++seen > 5) break;
+            if (looksLikeName(t)) { names.add(t); break; }
+        }
+        for (String name : names) {
+            for (String part : nameVariants(name)) {
+                text = Pattern.compile("(?i)(?<![\\p{L}])" + Pattern.quote(part) + "(?![\\p{L}])")
+                        .matcher(text).replaceAll("");
+            }
+        }
+
+        // 2) Adresse postale : suppression des lignes concernées
+        StringBuilder sb = new StringBuilder();
+        int nonBlank = 0;
+        for (String line : text.split("\\R", -1)) {
+            String t = line.trim();
+            if (!t.isEmpty()) nonBlank++;
+            boolean address = ADDRESS_LABEL.matcher(t).matches()
+                    || (t.length() <= 120 && STREET_NUMBERED.matcher(t).matches())
+                    || (nonBlank <= 15 && t.length() <= 70 && POSTAL_CITY.matcher(t).matches());
+            if (!address) sb.append(line).append('\n');
+        }
+        return sb.toString().replaceAll("(?m)^[ \\t|•·,-]+$", "").replaceAll("\\n{3,}", "\n\n").trim();
+    }
+
+    private static boolean looksLikeName(String t) {
+        if (t.length() > 40 || t.chars().anyMatch(Character::isDigit) || t.contains("@") || t.contains("[[")) return false;
+        if (!NAME_LINE.matcher(t).matches()) return false;
+        return Arrays.stream(t.toLowerCase(Locale.ROOT).split("\\s+")).noneMatch(SECTION_WORDS::contains)
+                && !SECTION_WORDS.contains(t.toLowerCase(Locale.ROOT));
+    }
+
+    /** Nom complet puis chaque mot de 3+ lettres (prénom, nom) pour retirer les occurrences isolées. */
+    private static List<String> nameVariants(String name) {
+        List<String> out = new ArrayList<>();
+        out.add(name.trim());
+        for (String w : name.trim().split("\\s+")) {
+            if (w.length() >= 3 && !SECTION_WORDS.contains(w.toLowerCase(Locale.ROOT))) out.add(w);
+        }
+        return out;
+    }
 
     public Masked mask(String input) {
         Map<String, String> tokens = new LinkedHashMap<>();

@@ -11,6 +11,7 @@ import com.careerai.skillgap.repository.SkillGapAnalysisRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SkillGapService {
@@ -35,9 +37,11 @@ public class SkillGapService {
         CvUpload cv = cvService.findMine(userId, req.getCvId());
 
         String job = req.getJobDescription().strip();
-        // Emails / téléphones / URL remplacés par des jetons avant envoi au LLM
-        String cvText = masker.mask(cv.getExtractedText()).text();
+        // CV : e-mail/tél./URL en jetons, nom et adresse supprimés avant envoi au LLM
+        String cvText = masker.anonymizeCv(cv.getExtractedText());
         String jobText = masker.mask(job).text();
+        // Vérification RGPD : activer avec logging.level.com.careerai.skillgap.service.SkillGapService=DEBUG
+        log.debug("=== CV envoyé au LLM ===\n{}", cvText);
 
         String raw = llm.complete(systemPrompt(),
                 "<offre>\n" + jobText + "\n</offre>\n\n<cv>\n" + cvText + "\n</cv>");
