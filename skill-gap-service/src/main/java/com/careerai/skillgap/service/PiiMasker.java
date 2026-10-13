@@ -48,8 +48,14 @@ public class PiiMasker {
     private static final Pattern STREET_NUMBERED = Pattern.compile(
             "(?i).*(?:\\b\\d{1,4}\\s*(?:bis|ter)?\\s*,?\\s*(?:" + STREET_WORDS + ")\\b|\\b(?:" + STREET_WORDS
                     + ")\\s+[\\p{L}'’. -]{2,40},?\\s*\\d{1,4}\\b).*");
+    /** Code postal hors plage d'années (ex. 1002 Tunis, 75001 Paris) + ville, sur une ligne qui ne contient que cela. */
     private static final Pattern POSTAL_CITY = Pattern.compile(
-            "^[\\s,|•·-]*(?:[A-Za-zÀ-ÿ'’. -]+,\\s*)?\\d{4,5}\\s+\\p{Lu}[\\p{L}'’ -]{2,30}(?:,\\s*[\\p{L} ]{2,30})?[\\s,|•·-]*$");
+            "^[\\s,|•·-]*(?:[A-Za-zÀ-ÿ'’. -]+,\\s*)?(?:(?!19|20)\\d{4}|\\d{5})\\s+\\p{Lu}[\\p{L}'’-]+(?:\\s+\\p{L}[\\p{L}'’-]*){0,2}"
+                    + "(?:,\\s*[\\p{L} ]{2,30})?[\\s,|•·-]*$");
+    /** Code postal dans la plage 1900-2099 (ex. 2080 Ariana) : exige un pays derrière pour ne pas confondre avec une année. */
+    private static final Pattern POSTAL_CITY_COUNTRY = Pattern.compile(
+            "^[\\s,|•·-]*(?:[A-Za-zÀ-ÿ'’. -]+,\\s*)?(?:19|20)\\d{2}\\s+\\p{Lu}[\\p{L}'’-]+(?:\\s+\\p{L}[\\p{L}'’-]*){0,2}"
+                    + ",\\s*(?i:tunisie|tunisia|france|maroc|alg[ée]rie|belgique|canada|suisse)[\\s,|•·-]*$");
 
     /**
      * Prépare le texte d'un CV pour le LLM : jetons pour e-mail/téléphone/URL puis suppression
@@ -86,7 +92,8 @@ public class PiiMasker {
             if (!t.isEmpty()) nonBlank++;
             boolean address = ADDRESS_LABEL.matcher(t).matches()
                     || (t.length() <= 120 && STREET_NUMBERED.matcher(t).matches())
-                    || (nonBlank <= 15 && t.length() <= 70 && POSTAL_CITY.matcher(t).matches());
+                    || (nonBlank <= 15 && t.length() <= 70
+                    && (POSTAL_CITY.matcher(t).matches() || POSTAL_CITY_COUNTRY.matcher(t).matches()));
             if (!address) sb.append(line).append('\n');
         }
         return sb.toString().replaceAll("(?m)^[ \\t|•·,-]+$", "").replaceAll("\\n{3,}", "\n\n").trim();

@@ -104,6 +104,7 @@ services:
       LLM_API_URL: ${LLM_API_URL:-https://api.groq.com/openai/v1}
       LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
       LLM_REASONING_EFFORT: ${LLM_REASONING_EFFORT:-low}
+      HF_API_KEY: ${HF_API_KEY:-}                # RAG (embeddings Hugging Face) ; vide = RAG désactivé
       CV_STORAGE_DIR: /app/uploads
     volumes:
       - cv_uploads:/app/uploads      # conserve les CV importes
