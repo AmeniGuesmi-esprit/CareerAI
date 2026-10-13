@@ -81,6 +81,14 @@ public class RagService {
 
     /** Retourne le contexte à insérer dans le prompt ("" si aucune fiche pertinente). */
     public String retrieve(String jobText) {
+        return retrieve(jobText, null);
+    }
+
+    /**
+     * Idem, mais écarte les fiches des compétences que le CV démontre déjà : le contexte sert à
+     * conseiller des ressources pour les compétences MANQUANTES, inutile d'y gaspiller la place.
+     */
+    public String retrieve(String jobText, String cvText) {
         if (jobText == null || jobText.isBlank()) return "";
         try {
             List<Scored> scored = null;
@@ -97,11 +105,19 @@ public class RagService {
             if (scored == null) scored = lexical(jobText);
             scored.sort(Comparator.comparingDouble(Scored::score).reversed());
 
+            CvCoverage coverage = (cvText == null || cvText.isBlank()) ? null : new CvCoverage(cvText);
             StringBuilder ctx = new StringBuilder();
-            for (Scored s : scored.subList(0, Math.min(topK, scored.size()))) {
+            int kept = 0;
+            for (Scored s : scored) {
+                if (kept >= topK) break;
+                if (coverage != null && coverage.covers(s.doc().getSkill())) {
+                    log.debug("RAG ({}) : fiche ignorée {} (déjà démontrée dans le CV)", mode, s.doc().getSkill());
+                    continue;
+                }
                 String line = "- " + s.doc().getSkill() + " : " + s.doc().getContent() + "\n";
                 if (ctx.length() + line.length() > contextMaxChars) break;
                 ctx.append(line);
+                kept++;
                 log.debug("RAG ({}) : fiche retenue {} (similarité {})", mode, s.doc().getSkill(),
                         String.format("%.2f", s.score()));
             }

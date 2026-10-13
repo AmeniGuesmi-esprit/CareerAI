@@ -45,7 +45,7 @@ public class SkillGapService {
         log.debug("=== CV envoyé au LLM ===\n{}", cvText);
 
         // RAG : fiches de la base de connaissances les plus proches de l'offre (vide si RAG indisponible)
-        String context = rag.retrieve(jobText);
+        String context = rag.retrieve(jobText, cvText);
         log.debug("=== Contexte RAG ===\n{}", context);
 
         String userPrompt = "<offre>\n" + jobText + "\n</offre>\n\n<cv>\n" + cvText + "\n</cv>"
