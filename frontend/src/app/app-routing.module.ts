@@ -92,6 +92,24 @@ const routes: Routes = [
         loadComponent: () =>
           import('./frontoffice/home/home.component').then(c => c.HomeComponent)
       },
+
+      // Gestion des expériences
+      {
+        path: 'experiences',
+        loadComponent: () =>
+          import('./Gestion-Experience/experience-list/experience-list.component').then(c => c.ExperienceListComponent)
+      },
+      {
+        path: 'experiences/new',
+        loadComponent: () =>
+          import('./Gestion-Experience/experience-form/experience-form.component').then(c => c.ExperienceFormComponent)
+      },
+      {
+        path: 'experiences/:id/edit',
+        loadComponent: () =>
+          import('./Gestion-Experience/experience-form/experience-form.component').then(c => c.ExperienceFormComponent)
+      },
+
       {
         path: 'profile',
         loadComponent: () =>
