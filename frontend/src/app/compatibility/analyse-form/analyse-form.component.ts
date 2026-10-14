@@ -33,7 +33,7 @@ export class AnalyseFormComponent {
   readonly steps = [
     'Lecture du CV (PDF)',
     'Masquage des données personnelles',
-    'Analyse par l\'IA',
+    'Analyse par l\'IA locale (Ollama)',
     'Validation du résultat'
   ];
   readonly stepIndex = signal(0);
@@ -136,7 +136,7 @@ export class AnalyseFormComponent {
     this.stopSteps();
     this.timer = setInterval(() => {
       this.stepIndex.update(i => Math.min(i + 1, this.steps.length - 1));
-    }, 2500);
+    }, 4000); // un modèle local est plus lent
   }
 
   private stopSteps(): void {

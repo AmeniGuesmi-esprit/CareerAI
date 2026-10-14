@@ -13,6 +13,7 @@ export interface AnalysisResponse extends AnalysisListItem {
   strengths: string[];
   missingSkills: string[];
   suggestions: string[];
+    verifiedSkills: string[];
   jobDescription: string;
 }
 

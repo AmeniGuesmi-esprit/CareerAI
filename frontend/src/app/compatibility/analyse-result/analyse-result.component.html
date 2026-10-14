@@ -88,6 +88,17 @@
         }
       </section>
 
+      <!-- Compétences vérifiées par l'agent IA (Tool Use) -->
+      @if (a.verifiedSkills?.length) {
+        <section class="card block verified">
+          <h2><i class="ti ti-robot"></i> Compétences vérifiées par l'agent IA</h2>
+          <p class="hint">L'IA a interrogé le référentiel de compétences pour reconnaître les équivalences (ex. MySQL ⇒ SQL).</p>
+          <div class="chips">
+            @for (skill of a.verifiedSkills; track skill) { <span class="chip">{{ skill }}</span> }
+          </div>
+        </section>
+      }
+
       <!-- Offre analysée -->
       <section class="card block">
         <button type="button" class="toggle" (click)="showOffer.set(!showOffer())" [attr.aria-expanded]="showOffer()">
