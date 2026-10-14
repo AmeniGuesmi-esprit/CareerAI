@@ -4,11 +4,13 @@ import com.careerai.compatibility_service.dto.AnalysisDtos.AiResult;
 import com.careerai.compatibility_service.exception.ApiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 
 /** Extrait et VALIDE le JSON renvoyé par l'IA : on ne fait jamais confiance à la sortie brute. */
@@ -37,6 +39,20 @@ public class AiResponseParser {
         }
     }
 
+    /** Valide les arguments de l'outil "enregistrer_analyse" renvoyés par l'agent. */
+    public AiResult fromToolInput(JsonNode input) {
+        if (input == null || !input.isObject()) {
+            throw invalid("entrée d'outil absente");
+        }
+        try {
+            return validate(mapper.readerFor(AiResult.class)
+                    .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .readValue(input));
+        } catch (IOException e) {
+            throw invalid("entrée d'outil mal formée");
+        }
+    }
+
     private AiResult validate(AiResult r) {
         if (r == null || r.score() == null || r.score() < 0 || r.score() > 100) {
             throw invalid("score hors de l'intervalle 0-100");
@@ -45,7 +61,8 @@ public class AiResponseParser {
             throw invalid("résumé manquant");
         }
         return new AiResult(r.score(), clip(r.summary().trim(), 600),
-                clean(r.strengths()), clean(r.missingSkills()), clean(r.suggestions()));
+                clean(r.strengths()), clean(r.missingSkills()), clean(r.suggestions()),
+                List.of());
     }
 
     private static List<String> clean(List<String> items) {

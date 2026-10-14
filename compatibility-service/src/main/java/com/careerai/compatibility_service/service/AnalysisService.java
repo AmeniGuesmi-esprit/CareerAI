@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,7 +25,7 @@ public class AnalysisService {
     private final AnalysisRepository repository;
     private final PdfTextExtractor pdfTextExtractor;
     private final PersonalDataAnonymizer anonymizer;
-    private final ClaudeAnalysisClient aiClient;
+    private final OllamaAnalysisClient aiClient;
     private final ObjectMapper mapper;
 
     /** Volontairement SANS @Transactional : on ne garde pas une connexion SQL ouverte pendant l'appel réseau à l'IA. */
@@ -94,6 +96,7 @@ public class AnalysisService {
             AiResult r = mapper.readValue(a.getResultJson(), AiResult.class);
             return new AnalysisResponse(a.getId(), a.getCvFileName(), a.getJobTitle(), a.getScore(),
                     r.summary(), r.strengths(), r.missingSkills(), r.suggestions(),
+                    r.verifiedSkills() == null ? List.of() : r.verifiedSkills(), // anciennes analyses
                     a.getJobDescription(), a.getCreatedAt());
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Résultat stocké illisible pour l'analyse " + a.getId(), e);

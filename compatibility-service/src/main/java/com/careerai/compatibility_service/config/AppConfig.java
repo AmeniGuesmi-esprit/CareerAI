@@ -9,5 +9,5 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     @ConfigurationProperties(prefix = "app.ai")
-    public record AiProperties(String apiKey, String model, String url, int timeoutSeconds) { }
+    public record AiProperties(String model, String url, int timeoutSeconds, int numCtx) { }
 }

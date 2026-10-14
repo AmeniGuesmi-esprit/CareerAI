@@ -17,12 +17,18 @@ public final class AnalysisDtos {
             @JsonProperty("resume") String summary,
             @JsonProperty("points_forts") List<String> strengths,
             @JsonProperty("competences_manquantes") List<String> missingSkills,
-            @JsonProperty("suggestions") List<String> suggestions) { }
+            @JsonProperty("suggestions") List<String> suggestions,
+            @JsonProperty("competences_verifiees") List<String> verifiedSkills) {
+
+        public AiResult withVerifiedSkills(List<String> skills) {
+            return new AiResult(score, summary, strengths, missingSkills, suggestions, List.copyOf(skills));
+        }
+    }
 
     public record AnalysisResponse(
             Long id, String cvFileName, String jobTitle, int score, String summary,
             List<String> strengths, List<String> missingSkills, List<String> suggestions,
-            String jobDescription, LocalDateTime createdAt) { }
+            List<String> verifiedSkills, String jobDescription, LocalDateTime createdAt) { }
 
     public record AnalysisListItem(
             Long id, String cvFileName, String jobTitle, int score, LocalDateTime createdAt) { }
