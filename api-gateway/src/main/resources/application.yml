@@ -27,6 +27,11 @@ spring:
           predicates:
             - Path=/api/users/**
 
+        - id: competence-service
+          uri: lb://competence-service
+          predicates:
+            - Path=/api/formations/**, /api/competences/**
+
 
 eureka:
   client:
@@ -35,6 +40,6 @@ eureka:
   instance:
     prefer-ip-address: true
 
-app:
-  jwt:
-    secret: 
+    app:
+      jwt:
+        secret=${JWT_SECRET:}:

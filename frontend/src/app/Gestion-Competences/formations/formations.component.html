@@ -1,0 +1,120 @@
+<div class="page">
+  <div class="page-inner">
+
+    @if (success()) { <div class="toast-success">{{ success() }}</div> }
+    @if (pageError()) { <div class="toast-error" (click)="pageError.set('')">{{ pageError() }}</div> }
+
+    <div class="page-head">
+      <div>
+        <h1>Mes formations</h1>
+        <p>Votre parcours académique, utilisé pour générer vos CV et lettres.</p>
+      </div>
+      <button class="btn-primary-g" (click)="openCreate()"><i class="ti ti-plus"></i> Ajouter une formation</button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-ring"></div><p>Chargement...</p></div>
+    } @else if (formations().length === 0) {
+      <div class="empty-state">
+        <i class="ti ti-school"></i>
+        <p>Aucune formation pour le moment.</p>
+        <button class="btn-primary-g" (click)="openCreate()"><i class="ti ti-plus"></i> Ajouter ma première formation</button>
+      </div>
+    } @else {
+      <div class="timeline">
+        @for (f of formations(); track f.id) {
+          <div class="card-item formation">
+            <div class="f-icon"><i class="ti ti-school"></i></div>
+            <div class="f-body">
+              <h3 class="f-title">{{ f.diplome }}</h3>
+              <p class="f-school">{{ f.etablissement }}</p>
+              <div class="f-meta">
+                <span class="chip"><i class="ti ti-calendar"></i>
+                  {{ f.dateDebut | date:'MM/yyyy' }} – {{ f.enCours ? 'Aujourd\'hui' : (f.dateFin | date:'MM/yyyy') }}
+                </span>
+                @if (f.enCours) { <span class="chip ongoing">En cours</span> }
+                @if (f.domaine) { <span class="chip domain">{{ f.domaine }}</span> }
+              </div>
+              @if (f.description) { <p class="f-desc">{{ f.description }}</p> }
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn" title="Modifier" (click)="openEdit(f)"><i class="ti ti-pencil"></i></button>
+              <button class="icon-btn danger" title="Supprimer" (click)="askDelete(f)"><i class="ti ti-trash"></i></button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ===== MODAL AJOUT / MODIFICATION ===== -->
+@if (showForm) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingId == null ? 'Ajouter une formation' : 'Modifier la formation' }}</h3>
+        <button class="icon-btn" (click)="closeForm()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="save()">
+          <div class="field">
+            <label>Diplôme *</label>
+            <input class="input" name="diplome" [(ngModel)]="form.diplome" placeholder="Ex : Ingénieur en informatique" maxlength="255">
+          </div>
+          <div class="field">
+            <label>Établissement *</label>
+            <input class="input" name="etablissement" [(ngModel)]="form.etablissement" placeholder="Ex : ESPRIT" maxlength="255">
+          </div>
+          <div class="field">
+            <label>Domaine <span class="optional">(facultatif)</span></label>
+            <input class="input" name="domaine" [(ngModel)]="form.domaine" placeholder="Ex : Génie logiciel" maxlength="255">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Date de début *</label>
+              <input class="input" type="date" name="dateDebut" [(ngModel)]="form.dateDebut">
+            </div>
+            <div class="field">
+              <label>Date de fin</label>
+              <input class="input" type="date" name="dateFin" [(ngModel)]="form.dateFin" [disabled]="form.enCours" [min]="form.dateDebut">
+            </div>
+          </div>
+          <label class="check">
+            <input type="checkbox" name="enCours" [(ngModel)]="form.enCours" (ngModelChange)="onEnCoursChange()"> Formation en cours
+          </label>
+          <div class="field">
+            <label>Description <span class="optional">(facultatif)</span></label>
+            <textarea class="input" name="description" [(ngModel)]="form.description" maxlength="2000"
+                      placeholder="Projets, mention, matières clés..."></textarea>
+          </div>
+
+          @if (formError()) { <div class="form-error">{{ formError() }}</div> }
+
+          <div class="actions">
+            <button type="button" class="btn-cancel" (click)="closeForm()">Annuler</button>
+            <button type="submit" class="btn-primary-g" [disabled]="saving()">
+              @if (saving()) { <span class="spinner"></span> }
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL SUPPRESSION ===== -->
+@if (toDelete) {
+  <div class="modal-backdrop">
+    <div class="modal-box confirm-box">
+      <div class="confirm-icon"><i class="ti ti-alert-triangle"></i></div>
+      <h4>Supprimer cette formation ?</h4>
+      <p>« {{ toDelete.diplome }} » sera définitivement supprimée.</p>
+      <div class="actions">
+        <button class="btn-cancel" (click)="toDelete = null">Annuler</button>
+        <button class="btn-danger" (click)="confirmDelete()">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+}
