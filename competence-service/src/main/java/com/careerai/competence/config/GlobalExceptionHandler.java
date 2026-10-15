@@ -1,6 +1,7 @@
 package com.careerai.competence.config;
 
 import com.careerai.competence.dto.ApiResponse;
+import com.careerai.competence.exception.AiException;
 import com.careerai.competence.exception.BadRequestException;
 import com.careerai.competence.exception.ConflictException;
 import com.careerai.competence.exception.ResourceNotFoundException;
@@ -44,5 +45,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleConflict(Exception ex) {
         String message = ex instanceof ConflictException ? ex.getMessage() : "Cette donnée existe déjà";
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(message));
+    }
+
+    @ExceptionHandler(AiException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAi(AiException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(ApiResponse.error(ex.getMessage()));
     }
 }

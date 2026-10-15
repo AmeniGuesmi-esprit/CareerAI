@@ -1,0 +1,63 @@
+<div class="page">
+  <div class="page-inner">
+
+    <div class="page-head">
+      <div>
+        <h1>Conseiller d'orientation</h1>
+        <p>Pose ta question sur tes formations, certifications et compétences.</p>
+      </div>
+    </div>
+
+    <div class="card-item guide">
+      <h3><i class="ti ti-bulb"></i> Un bon prompt contient 4 éléments</h3>
+      <div class="guide-grid">
+        <div><b>Rôle</b><span>qui doit répondre</span></div>
+        <div><b>Contexte</b><span>ton profil et ta situation</span></div>
+        <div><b>Question</b><span>ce que tu veux précisément</span></div>
+        <div><b>Format</b><span>comment tu veux la réponse</span></div>
+      </div>
+      <div class="guide-actions">
+        <button type="button" class="btn-cancel" (click)="prompt = modele"><i class="ti ti-template"></i> Insérer le modèle</button>
+        <button type="button" class="btn-cancel" (click)="prompt = exemple"><i class="ti ti-eye"></i> Voir un exemple</button>
+      </div>
+    </div>
+
+    <div class="card-item composer">
+      <textarea [(ngModel)]="prompt" name="prompt" rows="9" [attr.maxlength]="MAX"
+                placeholder="Écris ton prompt ici…"></textarea>
+      <div class="composer-foot">
+        <small [class.warn]="prompt.length > 0 && prompt.length < MIN">
+          {{ prompt.length }} / {{ MAX }} · N'écris pas d'informations personnelles sensibles.
+        </small>
+        <button class="btn-primary-g" (click)="envoyer()" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> Réflexion… } @else { <i class="ti ti-send"></i> Envoyer }
+        </button>
+      </div>
+    </div>
+
+    @if (error()) { <div class="form-error" (click)="error.set('')">{{ error() }}</div> }
+
+    @if (advice(); as a) {
+      <div class="card-item reponse">
+        <div class="reponse-head"><i class="ti ti-sparkles"></i> Réponse</div>
+        <div class="reponse-text">
+          @for (s of segments(a.reponse); track $index) {
+            @if (s.bold) { <strong>{{ s.t }}</strong> } @else { {{ s.t }} }
+          }
+        </div>
+
+        @switch (a.statut) {
+          @case ('VERIFIEE') {
+            <div class="badge ok"><i class="ti ti-circle-check"></i> Réponse relue par un second contrôle automatique.</div>
+          }
+          @case ('A_VERIFIER') {
+            <div class="badge warn"><i class="ti ti-alert-triangle"></i> À vérifier : {{ a.avertissement }}</div>
+          }
+          @default {
+            <div class="badge info"><i class="ti ti-info-circle"></i> Réponse non relue automatiquement. Vérifie les certifications citées.</div>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>

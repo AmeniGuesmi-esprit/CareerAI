@@ -102,6 +102,12 @@ const routes: Routes = [
   loadComponent: () =>
     import('./Gestion-Competences/competences/competences.component').then(c => c.CompetencesComponent)
 },
+ {
+         path: 'orientation',
+         loadComponent: () =>
+           import('./Gestion-Orientation/orientation/orientation.component').then(c => c.OrientationComponent)
+       },
+
       {
         path: 'profile',
         loadComponent: () =>
