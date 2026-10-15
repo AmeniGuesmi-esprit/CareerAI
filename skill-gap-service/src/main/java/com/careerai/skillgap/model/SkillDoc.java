@@ -29,4 +29,7 @@ public class SkillDoc {
     /** Vecteur d'embedding au format JSON ([0.12,-0.87,...]), null tant que la fiche n'est pas indexée. */
     @Column(columnDefinition = "LONGTEXT")
     private String embedding;
+
+    /** Modèle qui a produit {@link #embedding} : un vecteur d'un autre modèle n'est pas comparable. */
+    private String embeddingModel;
 }

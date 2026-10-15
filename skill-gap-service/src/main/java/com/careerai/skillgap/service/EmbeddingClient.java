@@ -26,6 +26,7 @@ public class EmbeddingClient {
     private final ObjectMapper mapper;
     private final RestClient http;
     private final String url;
+    private final String model;
     private final String apiKey;
 
     public EmbeddingClient(ObjectMapper mapper,
@@ -35,11 +36,16 @@ public class EmbeddingClient {
                            @Value("${rag.timeout-seconds:30}") int timeoutSeconds) {
         this.mapper = mapper;
         this.apiKey = apiKey;
+        this.model = model;
         this.url = baseUrl + "/" + model + "/pipeline/feature-extraction";
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10_000);
         factory.setReadTimeout(timeoutSeconds * 1000);
         this.http = RestClient.builder().requestFactory(factory).build();
+    }
+
+    public String model() {
+        return model;
     }
 
     /** false si HF_API_KEY est absente : le RAG est alors simplement désactivé. */

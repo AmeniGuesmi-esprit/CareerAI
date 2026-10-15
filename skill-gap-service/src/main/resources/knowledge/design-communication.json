@@ -1,0 +1,44 @@
+[
+ {
+  "slug": "ux-ui-design",
+  "skill": "UX/UI design (Figma)",
+  "category": "Design",
+  "content": "Recherche utilisateur, persona, parcours, wireframes, prototypes interactifs, design system, tests utilisateurs, accessibilité. Projet : refonte de l'interface d'une application existante. Ressources : help.figma.com, nngroup.com, Google UX Design Certificate (Coursera)."
+ },
+ {
+  "slug": "graphisme",
+  "skill": "Design graphique (Photoshop, Illustrator)",
+  "category": "Design",
+  "content": "Composition, typographie, couleur, identité visuelle, retouche photo, illustration vectorielle, préparation pour l'impression et le web. Projet : charte graphique complète d'une marque. Ressources : helpx.adobe.com, certification Adobe Certified Professional."
+ },
+ {
+  "slug": "montage-video",
+  "skill": "Montage vidéo (Premiere Pro, DaVinci Resolve)",
+  "category": "Design",
+  "content": "Dérushage, montage, étalonnage, son, sous-titres, export pour les réseaux sociaux. Projet : vidéo promotionnelle de 60 secondes. Ressources : formations et certification gratuites DaVinci Resolve (blackmagicdesign.com/training), helpx.adobe.com/premiere-pro."
+ },
+ {
+  "slug": "motion-design",
+  "skill": "Motion design (After Effects)",
+  "category": "Design",
+  "content": "Animation graphique : images clés, courbes d'animation, typographie animée, habillage vidéo, export. Projet : animer un logo et une infographie. Ressources : helpx.adobe.com/after-effects, certification Adobe Certified Professional."
+ },
+ {
+  "slug": "redaction-web",
+  "skill": "Rédaction web et copywriting",
+  "category": "Communication",
+  "content": "Écrire pour le web : structure, titres, accroches, appels à l'action, ton de marque, rédaction optimisée pour le SEO. Projet : réécrire les pages clés d'un site. Ressources : HubSpot Academy (Content Marketing Certification), developers.google.com/search/docs."
+ },
+ {
+  "slug": "community-management",
+  "skill": "Community management",
+  "category": "Communication",
+  "content": "Animer une communauté en ligne : planning éditorial, création de publications, modération, gestion de crise, veille, reporting. Projet : animer une page pendant un mois avec un rapport de performance. Ressources : Hootsuite Academy, Meta Blueprint."
+ },
+ {
+  "slug": "communication-corporate",
+  "skill": "Communication corporate et relations presse",
+  "category": "Communication",
+  "content": "Stratégie de communication, communiqués et dossiers de presse, relations médias, communication interne, communication de crise, événementiel. Projet : plan de communication pour le lancement d'un produit. Ressources : Coursera, LinkedIn Learning."
+ }
+]

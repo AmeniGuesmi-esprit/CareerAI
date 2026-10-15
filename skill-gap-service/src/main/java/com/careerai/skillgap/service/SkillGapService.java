@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -25,6 +26,7 @@ import java.util.Set;
 public class SkillGapService {
 
     private static final Set<String> PRIORITIES = Set.of("HIGH", "MEDIUM", "LOW");
+    private static final Pattern MASK_TOKEN = Pattern.compile("\\[\\[[A-Z]+_\\d+]]");
 
     private final CvService cvService;
     private final SkillGapAnalysisRepository repository;
@@ -123,8 +125,12 @@ public class SkillGapService {
                 """;
     }
 
-    /** Extrait et normalise le JSON du LLM (score borné, listes plafonnées, priorités valides). */
-    private AnalysisResult parse(String raw) {
+    /**
+     * Extrait et normalise le JSON du LLM avant stockage et affichage : score borné, listes plafonnées,
+     * priorités valides, textes nettoyés des jetons de masquage et de longueur bornée.
+     */
+    AnalysisResult parse(String raw) {
+        if (raw == null) throw invalidOutput();
         int start = raw.indexOf('{');
         int end = raw.lastIndexOf('}');
         if (start < 0 || end <= start) throw invalidOutput();
@@ -137,31 +143,40 @@ public class SkillGapService {
         }
 
         int score = Math.max(0, Math.min(100, node.path("matchScore").asInt(0)));
-        String summary = node.path("summary").asText("").strip();
-        List<String> strengths = strings(node.path("strengths"), 8);
-        List<String> tips = strings(node.path("cvTips"), 5);
+        String summary = clean(node.path("summary"), 1000);
+        List<String> strengths = strings(node.path("strengths"), 8, 200);
+        List<String> tips = strings(node.path("cvTips"), 5, 300);
 
         List<MissingSkill> missing = new ArrayList<>();
         for (JsonNode m : node.path("missingSkills")) {
-            String skill = m.path("skill").asText("").strip();
+            if (!m.isObject()) continue;
+            String skill = clean(m.path("skill"), 100);
             if (skill.isEmpty() || missing.size() >= 10) continue;
             String priority = m.path("priority").asText("MEDIUM").strip().toUpperCase(Locale.ROOT);
             if (!PRIORITIES.contains(priority)) priority = "MEDIUM";
             missing.add(new MissingSkill(skill, priority,
-                    m.path("reason").asText("").strip(), m.path("howToImprove").asText("").strip()));
+                    clean(m.path("reason"), 400), clean(m.path("howToImprove"), 400)));
         }
 
         if (summary.isEmpty() && missing.isEmpty() && strengths.isEmpty()) throw invalidOutput();
         return new AnalysisResult(score, summary, strengths, missing, tips);
     }
 
-    private static List<String> strings(JsonNode array, int max) {
+    private static List<String> strings(JsonNode array, int max, int maxChars) {
         List<String> out = new ArrayList<>();
+        if (!array.isArray()) return out;
         for (JsonNode n : array) {
-            String s = n.asText("").strip();
+            String s = clean(n, maxChars);
             if (!s.isEmpty() && out.size() < max) out.add(s);
         }
         return out;
+    }
+
+    /** Texte affichable : uniquement une valeur simple, sans jeton [[TYPE_n]] (donnée masquée), longueur bornée. */
+    static String clean(JsonNode n, int maxChars) {
+        if (n == null || !n.isValueNode()) return "";
+        String s = MASK_TOKEN.matcher(n.asText("")).replaceAll("").replaceAll("[ \\t]{2,}", " ").strip();
+        return s.length() <= maxChars ? s : s.substring(0, maxChars - 1).strip() + "…";
     }
 
     private AnalysisResponse toResponse(SkillGapAnalysis a) {

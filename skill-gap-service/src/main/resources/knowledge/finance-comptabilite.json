@@ -1,0 +1,62 @@
+[
+ {
+  "slug": "comptabilite-generale",
+  "skill": "Comptabilité générale",
+  "category": "Comptabilité",
+  "content": "Enregistrer les opérations, rapprochements bancaires, clôture, bilan et état de résultat. Référentiels : système comptable des entreprises et normes comptables tunisiennes (NCT), PCG en France. Parcours : tenir la comptabilité d'une société fictive sur un logiciel (Sage, Odoo)."
+ },
+ {
+  "slug": "ifrs",
+  "skill": "Normes IFRS",
+  "category": "Comptabilité",
+  "content": "Normes comptables internationales : présentation des états financiers, IFRS 15 (revenus), IFRS 16 (contrats de location), IFRS 9 (instruments financiers), consolidation. Ressources : ifrs.org, diplôme DipIFR de l'ACCA."
+ },
+ {
+  "slug": "analyse-financiere",
+  "skill": "Analyse financière",
+  "category": "Finance",
+  "content": "Lire et interpréter les états financiers : soldes intermédiaires de gestion, ratios de rentabilité, de liquidité et d'endettement, BFR, tableau de flux de trésorerie. Projet : analyser les comptes publiés d'une entreprise cotée. Ressources : corporatefinanceinstitute.com, Coursera."
+ },
+ {
+  "slug": "modelisation-financiere",
+  "skill": "Modélisation financière et évaluation (Excel)",
+  "category": "Finance",
+  "content": "Construire un modèle financier sur Excel : prévisions, trois états liés, valorisation par DCF et multiples, analyses de sensibilité. Projet : modéliser le business plan d'une start-up. Ressources : certification FMVA du Corporate Finance Institute."
+ },
+ {
+  "slug": "controle-gestion",
+  "skill": "Contrôle de gestion",
+  "category": "Finance",
+  "content": "Piloter la performance : budgets, calcul des coûts (complets, ABC), analyse des écarts, tableaux de bord et KPI, reporting. Projet : tableau de bord mensuel sur Excel ou Power BI. Ressources : certification CMA (Institute of Management Accountants)."
+ },
+ {
+  "slug": "audit",
+  "skill": "Audit interne et externe",
+  "category": "Finance",
+  "content": "Évaluer le contrôle interne et la fiabilité des comptes : cartographie des risques, programme de travail, tests, échantillonnage, rapport. Référentiels : normes ISA (IAASB), normes de l'IIA. Ressources : certification CIA (theiia.org), parcours ACCA."
+ },
+ {
+  "slug": "fiscalite",
+  "skill": "Fiscalité des entreprises",
+  "category": "Finance",
+  "content": "Impôt sur les sociétés, TVA, retenues à la source, déclarations fiscales, contrôle fiscal. En Tunisie : Code de l'IRPP et de l'IS, Code de la TVA. Parcours : préparer les déclarations d'une entreprise fictive. Ressources : site du ministère des Finances du pays concerné."
+ },
+ {
+  "slug": "marches-financiers",
+  "skill": "Marchés financiers et gestion de portefeuille",
+  "category": "Finance",
+  "content": "Actions, obligations, produits dérivés, taux, risque et rendement, diversification, analyse fondamentale. Ressources : Bloomberg Market Concepts (BMC), certification CFA (cfainstitute.org), Coursera (Financial Markets, Yale)."
+ },
+ {
+  "slug": "conformite-bancaire",
+  "skill": "Conformité bancaire et lutte anti-blanchiment (LAB-FT)",
+  "category": "Finance",
+  "content": "Connaissance client (KYC), détection des opérations suspectes, gel des avoirs, déclarations de soupçon. Références : recommandations du GAFI (fatf-gafi.org), en Tunisie la CTAF. Ressources : certification CAMS (ACAMS)."
+ },
+ {
+  "slug": "tresorerie",
+  "skill": "Gestion de trésorerie",
+  "category": "Finance",
+  "content": "Prévisions de trésorerie, gestion du BFR, relations bancaires, financements court terme, placements, couverture du risque de change. Projet : plan de trésorerie sur 12 mois. Ressources : corporatefinanceinstitute.com, Coursera."
+ }
+]

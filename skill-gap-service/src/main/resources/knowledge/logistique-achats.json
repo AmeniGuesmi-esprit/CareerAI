@@ -1,0 +1,32 @@
+[
+ {
+  "slug": "supply-chain",
+  "skill": "Supply chain management",
+  "category": "Logistique",
+  "content": "Piloter la chaîne logistique de bout en bout : prévision de la demande, approvisionnement, production, distribution, indicateurs (taux de service, rotation des stocks). Ressources : MITx MicroMasters Supply Chain Management (edX), certification CSCP (ASCM)."
+ },
+ {
+  "slug": "planification-production",
+  "skill": "Planification et gestion de production (MRP)",
+  "category": "Logistique",
+  "content": "Plan industriel et commercial, calcul des besoins (MRP), ordonnancement, capacités, flux tirés et juste-à-temps. Projet : planifier la production d'un atelier dans un ERP. Ressources : certification CPIM (ASCM), module Fabrication d'Odoo."
+ },
+ {
+  "slug": "gestion-stocks",
+  "skill": "Gestion des stocks et entreposage (WMS)",
+  "category": "Logistique",
+  "content": "Méthodes de réapprovisionnement, classification ABC, inventaires, FIFO, implantation d'entrepôt, préparation de commandes, logiciel WMS. Projet : optimiser le stock d'un magasin avec une analyse ABC. Ressources : Coursera (Supply Chain Logistics), module Inventaire d'Odoo."
+ },
+ {
+  "slug": "achats",
+  "skill": "Achats et approvisionnements",
+  "category": "Achats",
+  "content": "Sourcing fournisseurs, appels d'offres, négociation, contrats, évaluation des fournisseurs, coût total de possession. Projet : comparer trois fournisseurs avec une grille multicritère. Ressources : certifications CIPS (cips.org)."
+ },
+ {
+  "slug": "commerce-international",
+  "skill": "Commerce international et transport (Incoterms)",
+  "category": "Logistique",
+  "content": "Incoterms 2020, modes de transport, documents d'import-export, crédit documentaire, procédures douanières. Projet : chiffrer une opération d'export complète. Ressources : iccwbo.org (Incoterms 2020), site de la douane du pays concerné."
+ }
+]

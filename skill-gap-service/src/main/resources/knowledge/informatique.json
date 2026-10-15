@@ -220,5 +220,77 @@
   "skill": "Anglais technique",
   "category": "Langues",
   "content": "Lire la documentation, rédiger des commits et rapports, communiquer en réunion. Parcours : documentation et vidéos techniques en anglais, préparation d'un test TOEIC ou IELTS. Ressources : cambridgeenglish.org, ets.org/toeic."
+ },
+ {
+  "slug": "cybersecurite-defense",
+  "skill": "Cybersécurité défensive (SOC, SIEM)",
+  "category": "Cybersécurité",
+  "content": "Surveiller et protéger un système d'information : journaux, détection d'incidents, SIEM (Splunk, Wazuh), réponse à incident, durcissement. Parcours : monter un lab Wazuh et analyser des alertes. Ressources : tryhackme.com (parcours SOC Level 1), certification CompTIA Security+."
+ },
+ {
+  "slug": "pentest",
+  "skill": "Tests d'intrusion (pentest)",
+  "category": "Cybersécurité",
+  "content": "Sécurité offensive : reconnaissance, scan (Nmap), exploitation, élévation de privilèges, rédaction du rapport. Parcours : challenges sur plateformes légales d'entraînement. Ressources : root-me.org, hackthebox.com, portswigger.net/web-security, certifications eJPT puis OSCP."
+ },
+ {
+  "slug": "reseaux",
+  "skill": "Réseaux informatiques (TCP/IP, Cisco)",
+  "category": "Réseaux",
+  "content": "Modèle OSI, adressage IP et sous-réseaux, routage, commutation, VLAN, DNS, DHCP, pare-feu. Parcours : simuler un réseau d'entreprise dans Cisco Packet Tracer. Ressources : netacad.com (Cisco Networking Academy), certification CCNA."
+ },
+ {
+  "slug": "flutter",
+  "skill": "Développement mobile Flutter",
+  "category": "Mobile",
+  "content": "Applications mobiles multiplateformes (Android, iOS) en Dart : widgets, navigation, gestion d'état, appels API, publication sur les stores. Projet : application mobile connectée à une API REST. Ressources : docs.flutter.dev, dart.dev/language."
+ },
+ {
+  "slug": "android-kotlin",
+  "skill": "Développement Android (Kotlin)",
+  "category": "Mobile",
+  "content": "Applications Android natives : Kotlin, Jetpack Compose, architecture MVVM, Room, Retrofit. Projet : application de liste de tâches avec stockage local et synchronisation. Ressources : developer.android.com/courses, kotlinlang.org/docs."
+ },
+ {
+  "slug": "react-native",
+  "skill": "Développement mobile React Native",
+  "category": "Mobile",
+  "content": "Applications mobiles iOS et Android en JavaScript ou TypeScript avec les composants React : navigation, état, appels réseau, Expo. Projet : porter une application web React vers le mobile. Ressources : reactnative.dev/docs, docs.expo.dev."
+ },
+ {
+  "slug": "php-laravel",
+  "skill": "PHP et Laravel",
+  "category": "Backend",
+  "content": "Développement web en PHP 8 avec le framework Laravel : routes, contrôleurs, Eloquent ORM, migrations, Blade, authentification. Projet : application CRUD avec MySQL. Ressources : php.net/manual, laravel.com/docs, laracasts.com."
+ },
+ {
+  "slug": "symfony",
+  "skill": "Symfony",
+  "category": "Backend",
+  "content": "Framework PHP : bundles, Doctrine ORM, formulaires, Twig, sécurité, API Platform. Projet : API REST avec authentification. Ressources : symfony.com/doc, symfonycasts.com, certification Symfony officielle (SensioLabs)."
+ },
+ {
+  "slug": "dotnet",
+  "skill": ".NET (C#, ASP.NET Core)",
+  "category": "Backend",
+  "content": "Développement en C# : POO, LINQ, async/await, API web ASP.NET Core, Entity Framework Core. Projet : API REST avec base SQL Server. Ressources : learn.microsoft.com/dotnet, certification Microsoft AZ-204 pour le déploiement sur Azure."
+ },
+ {
+  "slug": "vuejs",
+  "skill": "Vue.js",
+  "category": "Frontend",
+  "content": "Framework JavaScript progressif : composants, Composition API, Vue Router, gestion d'état avec Pinia, Vite. Projet : tableau de bord consommant une API REST. Ressources : vuejs.org/guide, pinia.vuejs.org."
+ },
+ {
+  "slug": "tests-e2e",
+  "skill": "Tests end-to-end (Cypress, Selenium, Playwright)",
+  "category": "Qualité",
+  "content": "Automatiser les tests d'interface d'une application web : scénarios utilisateur, sélecteurs, assertions, exécution en CI. Projet : couvrir le parcours de connexion et de commande d'une application. Ressources : docs.cypress.io, playwright.dev, selenium.dev/documentation."
+ },
+ {
+  "slug": "html-css",
+  "skill": "HTML, CSS et intégration responsive",
+  "category": "Frontend",
+  "content": "Structure sémantique HTML5, CSS3, Flexbox, Grid, responsive design, accessibilité (WCAG). Projet : intégrer une maquette Figma en page responsive. Ressources : developer.mozilla.org, web.dev/learn, freecodecamp.org (Responsive Web Design)."
  }
 ]

@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.net.SocketTimeoutException;
+import java.net.http.HttpTimeoutException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,9 +86,15 @@ public class LlmClient {
             raw = req.body(body).retrieve().body(String.class);
         } catch (RestClientResponseException e) {
             throw mapHttpError(e);
-        } catch (ResourceAccessException e) {
-            log.warn("Appel LLM : timeout ou erreur réseau : {}", e.getMessage());
-            throw ApiException.gatewayTimeout("Le service IA ne répond pas (timeout). Réessayez dans un instant.");
+        } catch (RestClientException e) {
+            // Selon le moment où il survient, un timeout arrive en ResourceAccessException (connexion)
+            // ou en RestClientException (lecture de la réponse) : on cherche la cause réelle.
+            if (isTimeout(e)) {
+                log.warn("Appel LLM : timeout : {}", e.getMessage());
+                throw ApiException.gatewayTimeout("Le service IA ne répond pas (timeout). Réessayez dans un instant.");
+            }
+            log.warn("Appel LLM : erreur réseau : {}", e.getMessage());
+            throw ApiException.unavailable("Service IA injoignable. Vérifiez la connexion et réessayez.");
         }
 
         try {
@@ -104,6 +112,13 @@ public class LlmClient {
         } catch (Exception e) {
             throw ApiException.badGateway("Réponse illisible du service IA. Réessayez.");
         }
+    }
+
+    private static boolean isTimeout(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof SocketTimeoutException || t instanceof HttpTimeoutException) return true;
+        }
+        return false;
     }
 
     private ApiException mapHttpError(RestClientResponseException e) {
