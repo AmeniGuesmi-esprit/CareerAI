@@ -1,3 +1,8 @@
+# Lancement : docker compose up --build   →   application sur http://localhost:4200
+# Les variables obligatoires (JWT_SECRET, LLM_API_KEY, MAIL_*, ADMIN_*) sont lues dans les variables
+# d'environnement du PC ou dans un fichier .env à côté de ce fichier (voir .env.example).
+# Arrêtez d'abord les services lancés en local : les ports 8761, 8222 et 4200 doivent être libres.
+
 services:
   # ========================= INFRASTRUCTURE =========================
 
@@ -5,7 +10,7 @@ services:
     image: mysql:8.0
     container_name: mysql
     ports:
-      - "3306:3306"          # si XAMPP/MySQL tourne déjà en local : "3307:3306"
+      - "3307:3306"          # 3307 côté PC : le 3306 est souvent pris par XAMPP (les services utilisent mysql:3306)
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
@@ -20,11 +25,41 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # LLM local utilisé par compatibility-service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama   # conserve les modèles téléchargés
+    networks:
+      - careerai-net
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  # Télécharge le modèle une seule fois (~4,7 Go pour qwen2.5:7b), puis s'arrête
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: ollama-pull
+    environment:
+      OLLAMA_HOST: ollama:11434
+    entrypoint: ["ollama", "pull", "${OLLAMA_MODEL:-qwen2.5:7b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - careerai-net
+    restart: "no"
+
   # ========================= EUREKA =========================
 
   eureka-server:
     build:
-      context: ./backend/eureka-server
+      context: ./eureka-server
       dockerfile: Dockerfile
     container_name: eureka-server
     ports:
@@ -47,7 +82,7 @@ services:
 
   api-gateway:
     build:
-      context: ./backend/api-gateway
+      context: ./api-gateway
       dockerfile: Dockerfile
     container_name: api-gateway
     ports:
@@ -66,7 +101,7 @@ services:
 
   user-service:
     build:
-      context: ./backend/user-service
+      context: ./user-service
       dockerfile: Dockerfile
     container_name: user-service
     environment:
@@ -77,6 +112,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
       MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME manquant}
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD manquant}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL manquant}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD manquant}
     depends_on:
       mysql:
@@ -91,7 +127,7 @@ services:
 
   skill-gap-service:
     build:
-      context: ./backend/skill-gap-service
+      context: ./skill-gap-service
       dockerfile: Dockerfile
     container_name: skill-gap-service
     environment:
@@ -104,7 +140,7 @@ services:
       LLM_API_URL: ${LLM_API_URL:-https://api.groq.com/openai/v1}
       LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
       LLM_REASONING_EFFORT: ${LLM_REASONING_EFFORT:-low}
-      HF_API_KEY: ${HF_API_KEY:-}                # RAG (embeddings Hugging Face) ; vide = RAG désactivé
+      HF_API_KEY: ${HF_API_KEY:-}                # RAG sémantique (Hugging Face) ; vide = recherche lexicale locale
       CV_STORAGE_DIR: /app/uploads
     volumes:
       - cv_uploads:/app/uploads      # conserve les CV importes
@@ -117,6 +153,46 @@ services:
       - careerai-net
     restart: unless-stopped
 
+  # ========================= COMPATIBILITY SERVICE =========================
+
+  compatibility-service:
+    build:
+      context: ./compatibility-service
+      dockerfile: Dockerfile
+    container_name: compatibility-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/compatibility_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      ollama-pull:
+        condition: service_completed_successfully
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
+  # ========================= FRONTEND =========================
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "4200:80"            # http://localhost:4200 (origine autorisée par le CORS de la gateway)
+    depends_on:
+      - api-gateway
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
 networks:
   careerai-net:
     driver: bridge
@@ -124,3 +200,4 @@ networks:
 volumes:
   mysql_data:
   cv_uploads:
+  ollama_data:
