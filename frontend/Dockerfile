@@ -2,9 +2,9 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Cache des dépendances (ne se relance que si package.json / package-lock.json changent)
-COPY package.json package-lock.json ./
-RUN npm ci
+# Cache des dépendances (ne se relance que si package.json / yarn.lock changent) ; yarn comme en CI
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 COPY . .
 RUN npx ng build --configuration production
