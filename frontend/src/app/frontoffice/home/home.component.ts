@@ -40,10 +40,11 @@ export class HomeComponent implements OnInit {
       available: false
     },
     {
-      icon: 'ti-language',
-      title: 'Traduction du CV',
-      description: 'Traduisez votre CV (FR / EN) avec une adaptation au domaine professionnel.',
-      available: false
+      icon: 'ti-target-arrow',
+      title: 'Analyse CV / offre',
+      description: 'Découvrez les compétences à améliorer pour décrocher une offre d\'emploi grâce à l\'IA.',
+      available: true,
+      route: '/frontoffice/skill-gap'
     },
     {
       icon: 'ti-chart-donut',

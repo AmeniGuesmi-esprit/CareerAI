@@ -1,0 +1,38 @@
+[
+ {
+  "slug": "recrutement",
+  "skill": "Recrutement et sourcing",
+  "category": "Ressources humaines",
+  "content": "Définir le besoin, rédiger l'offre, sourcer (LinkedIn, jobboards, cooptation), présélectionner, conduire un entretien structuré, intégrer le candidat. Ressources : LinkedIn Learning, certification LinkedIn Certified Professional Recruiter."
+ },
+ {
+  "slug": "paie",
+  "skill": "Administration du personnel et paie",
+  "category": "Ressources humaines",
+  "content": "Contrats, dossiers du personnel, absences et congés, éléments variables, bulletin de paie, cotisations sociales (CNSS en Tunisie), déclarations. Parcours : établir la paie d'une PME fictive sur un logiciel (Sage Paie, Odoo Paie)."
+ },
+ {
+  "slug": "gpec",
+  "skill": "Gestion des compétences et des carrières (GPEC)",
+  "category": "Ressources humaines",
+  "content": "Référentiels de compétences, entretiens annuels, plans de développement, mobilité interne, plans de succession. Projet : construire le référentiel de compétences d'un service. Ressources : certification SHRM-CP (shrm.org), aPHR (HRCI)."
+ },
+ {
+  "slug": "formation-pedagogie",
+  "skill": "Ingénierie de formation et e-learning",
+  "category": "Ressources humaines",
+  "content": "Analyser les besoins, concevoir un dispositif (modèle ADDIE), animer, évaluer (modèle de Kirkpatrick), créer des modules e-learning (Moodle, Articulate). Projet : module e-learning de 20 minutes. Ressources : moodle.org, Moodle Educator Certificate."
+ },
+ {
+  "slug": "sirh",
+  "skill": "SIRH (Workday, SAP SuccessFactors)",
+  "category": "Ressources humaines",
+  "content": "Systèmes d'information RH : dossier salarié, workflows, recrutement, entretiens, reporting RH et indicateurs sociaux. Parcours : paramétrer un module RH dans Odoo. Ressources : formations éditeurs (Workday, SAP Learning), odoo.com/slides."
+ },
+ {
+  "slug": "relations-sociales",
+  "skill": "Droit du travail et relations sociales",
+  "category": "Ressources humaines",
+  "content": "Contrat de travail, durée du travail, discipline, rupture, représentants du personnel, dialogue social. En Tunisie : Code du travail et conventions collectives sectorielles. Parcours : analyser des cas pratiques de litiges. Ressources : textes officiels (JORT, Légifrance)."
+ }
+]

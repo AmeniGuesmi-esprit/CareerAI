@@ -69,8 +69,6 @@ services:
       context: ./backend/user-service
       dockerfile: Dockerfile
     container_name: user-service
-    ports:
-      - "8081:8081"          # optionnel : utile pour tester sans passer par la gateway
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_users?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
@@ -89,9 +87,40 @@ services:
       - careerai-net
     restart: unless-stopped
 
+  # ========================= SKILL GAP SERVICE =========================
+
+  skill-gap-service:
+    build:
+      context: ./backend/skill-gap-service
+      dockerfile: Dockerfile
+    container_name: skill-gap-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_skillgap?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: root
+      DB_PASSWORD: ""
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
+      LLM_API_KEY: ${LLM_API_KEY:?LLM_API_KEY manquant (cle Groq)}
+      LLM_API_URL: ${LLM_API_URL:-https://api.groq.com/openai/v1}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
+      LLM_REASONING_EFFORT: ${LLM_REASONING_EFFORT:-low}
+      HF_API_KEY: ${HF_API_KEY:-}                # RAG (embeddings Hugging Face) ; vide = RAG désactivé
+      CV_STORAGE_DIR: /app/uploads
+    volumes:
+      - cv_uploads:/app/uploads      # conserve les CV importes
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
 networks:
   careerai-net:
     driver: bridge
 
 volumes:
   mysql_data:
+  cv_uploads:

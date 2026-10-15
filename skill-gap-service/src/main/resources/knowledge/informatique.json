@@ -1,0 +1,296 @@
+[
+ {
+  "slug": "docker",
+  "skill": "Docker",
+  "category": "DevOps",
+  "content": "Conteneurisation d'applications. Parcours : Dockerfile, images, volumes, réseaux, puis Docker Compose multi-services. Projet : conteneuriser une API Spring Boot + MySQL. Ressources : docs.docker.com/get-started, certification Docker Certified Associate."
+ },
+ {
+  "slug": "kubernetes",
+  "skill": "Kubernetes",
+  "category": "DevOps",
+  "content": "Orchestration de conteneurs : pods, deployments, services, ConfigMaps, ingress. Parcours : minikube ou kind en local, puis déploiement d'un projet multi-services. Ressources : kubernetes.io/docs/tutorials, certifications CKAD et CKA (Linux Foundation)."
+ },
+ {
+  "slug": "ci-cd",
+  "skill": "CI/CD (GitLab CI, GitHub Actions, Jenkins)",
+  "category": "DevOps",
+  "content": "Automatiser build, tests et déploiement à chaque commit. Parcours : écrire un pipeline (build, test, image Docker, déploiement) sur GitHub Actions ou GitLab CI. Ressources : docs.github.com/actions, docs.gitlab.com/ee/ci, jenkins.io/doc/tutorials."
+ },
+ {
+  "slug": "terraform",
+  "skill": "Terraform / Infrastructure as Code",
+  "category": "DevOps",
+  "content": "Décrire l'infrastructure cloud en code déclaratif : providers, ressources, variables, state, modules. Projet : déployer une VM et une base sur AWS ou Azure. Ressources : developer.hashicorp.com/terraform/tutorials, certification Terraform Associate."
+ },
+ {
+  "slug": "ansible",
+  "skill": "Ansible",
+  "category": "DevOps",
+  "content": "Automatisation de configuration de serveurs : inventaires, playbooks, rôles, idempotence. Projet : provisionner un serveur web avec un playbook. Ressource : docs.ansible.com (Getting started)."
+ },
+ {
+  "slug": "monitoring",
+  "skill": "Supervision (Prometheus, Grafana)",
+  "category": "DevOps",
+  "content": "Mesurer et surveiller les services : métriques, alertes, tableaux de bord. Parcours : exposer les métriques Spring Boot Actuator vers Prometheus puis les visualiser dans Grafana. Ressources : prometheus.io/docs, grafana.com/tutorials."
+ },
+ {
+  "slug": "linux-bash",
+  "skill": "Linux et scripts Bash",
+  "category": "DevOps",
+  "content": "Maîtriser la ligne de commande : système de fichiers, droits, processus, réseau, scripts Bash, cron. Parcours : automatiser des tâches de sauvegarde et de déploiement avec des scripts. Ressources : linuxjourney.com, certification LPIC-1."
+ },
+ {
+  "slug": "git",
+  "skill": "Git et travail collaboratif",
+  "category": "Outils",
+  "content": "Branches, merge, rebase, pull requests, résolution de conflits, bonnes pratiques de commits. Parcours : contribuer à un dépôt avec un workflow de branches. Ressources : git-scm.com/book, learngitbranching.js.org."
+ },
+ {
+  "slug": "cloud-aws",
+  "skill": "Cloud AWS",
+  "category": "Cloud",
+  "content": "Services de base : EC2, S3, IAM, RDS, VPC. Parcours : héberger une application web et sa base de données sur AWS (offre gratuite). Ressources : aws.amazon.com/training, certification AWS Cloud Practitioner puis Solutions Architect Associate."
+ },
+ {
+  "slug": "cloud-azure",
+  "skill": "Cloud Microsoft Azure",
+  "category": "Cloud",
+  "content": "Services de base : machines virtuelles, App Service, stockage, Azure DevOps. Parcours : déployer une application conteneurisée sur Azure. Ressources : learn.microsoft.com/training, certification AZ-900 puis AZ-204."
+ },
+ {
+  "slug": "java",
+  "skill": "Java 17 avancé",
+  "category": "Backend",
+  "content": "Streams, lambdas, records, collections, concurrence, gestion mémoire. Parcours : refactorer un projet avec les fonctionnalités modernes de Java. Ressources : dev.java/learn, certification Oracle Certified Professional Java SE 17."
+ },
+ {
+  "slug": "spring-boot",
+  "skill": "Spring Boot",
+  "category": "Backend",
+  "content": "Créer des API REST : contrôleurs, services, injection de dépendances, validation, gestion des exceptions, profils. Parcours : construire une API CRUD avec JPA et MySQL. Ressources : spring.io/guides, spring.io/projects/spring-boot."
+ },
+ {
+  "slug": "spring-security-jwt",
+  "skill": "Spring Security et JWT",
+  "category": "Sécurité",
+  "content": "Authentification et autorisation : filtres, JWT, rôles, CORS, hachage des mots de passe. Parcours : sécuriser une API avec un filtre JWT et des endpoints par rôle. Ressources : docs.spring.io/spring-security, jwt.io/introduction."
+ },
+ {
+  "slug": "spring-cloud",
+  "skill": "Microservices avec Spring Cloud",
+  "category": "Backend",
+  "content": "Architecture microservices : Eureka (découverte), API Gateway, configuration centralisée, résilience (Resilience4j). Projet : découper une application en 2 ou 3 services derrière une gateway. Ressources : spring.io/projects/spring-cloud."
+ },
+ {
+  "slug": "kafka",
+  "skill": "Apache Kafka",
+  "category": "Messagerie",
+  "content": "Messagerie événementielle : topics, partitions, producteurs, consommateurs, groupes. Parcours : faire communiquer deux microservices par événements avec Kafka en Docker. Ressources : kafka.apache.org/quickstart, developer.confluent.io."
+ },
+ {
+  "slug": "rabbitmq",
+  "skill": "RabbitMQ",
+  "category": "Messagerie",
+  "content": "Files de messages : exchanges, queues, routage, acquittements. Projet : traitement asynchrone d'e-mails entre deux services. Ressource : rabbitmq.com/tutorials."
+ },
+ {
+  "slug": "rest-api",
+  "skill": "Conception d'API REST",
+  "category": "Backend",
+  "content": "Ressources, verbes HTTP, codes de statut, pagination, versionnement, documentation OpenAPI/Swagger. Parcours : documenter une API avec springdoc-openapi et la tester avec Postman. Ressource : restfulapi.net."
+ },
+ {
+  "slug": "tests",
+  "skill": "Tests unitaires et d'intégration (JUnit, Mockito)",
+  "category": "Qualité",
+  "content": "Tester la logique métier et les API : JUnit 5, Mockito, MockMvc, Testcontainers, couverture avec JaCoCo. Parcours : atteindre 70 % de couverture sur un service. Ressources : junit.org/junit5/docs, site.mockito.org."
+ },
+ {
+  "slug": "sql",
+  "skill": "SQL et bases relationnelles (MySQL, PostgreSQL)",
+  "category": "Données",
+  "content": "Jointures, agrégations, index, transactions, normalisation, optimisation de requêtes. Parcours : modéliser une base et analyser les plans d'exécution avec EXPLAIN. Ressources : sqlbolt.com, postgresql.org/docs/current/tutorial."
+ },
+ {
+  "slug": "jpa-hibernate",
+  "skill": "JPA et Hibernate",
+  "category": "Données",
+  "content": "Mapping objet-relationnel : entités, relations, chargement lazy/eager, problème N+1, transactions. Parcours : modéliser des relations un-à-plusieurs et corriger un N+1. Ressource : hibernate.org/orm/documentation."
+ },
+ {
+  "slug": "nosql-redis",
+  "skill": "Redis et bases NoSQL (MongoDB)",
+  "category": "Données",
+  "content": "Cache clé-valeur avec Redis (TTL, structures), documents avec MongoDB. Projet : mettre en cache les réponses d'une API avec Redis. Ressources : redis.io/learn, learn.mongodb.com."
+ },
+ {
+  "slug": "angular",
+  "skill": "Angular",
+  "category": "Frontend",
+  "content": "Composants, modules, services, routage, formulaires réactifs, RxJS, intercepteurs HTTP. Parcours : application CRUD connectée à une API sécurisée par JWT. Ressource : angular.dev/tutorials."
+ },
+ {
+  "slug": "react",
+  "skill": "React",
+  "category": "Frontend",
+  "content": "Composants, hooks (useState, useEffect), routage, gestion d'état, appels d'API. Parcours : application CRUD avec React Router et un backend REST. Ressource : react.dev/learn."
+ },
+ {
+  "slug": "typescript",
+  "skill": "TypeScript",
+  "category": "Frontend",
+  "content": "Typage statique : interfaces, génériques, union types, configuration du compilateur. Parcours : migrer un projet JavaScript vers TypeScript. Ressource : typescriptlang.org/docs."
+ },
+ {
+  "slug": "nodejs",
+  "skill": "Node.js et Express",
+  "category": "Backend",
+  "content": "API REST avec Express, middlewares, asynchrone (promises, async/await), accès base de données. Projet : API CRUD avec authentification. Ressource : nodejs.org/en/learn, expressjs.com."
+ },
+ {
+  "slug": "python",
+  "skill": "Python",
+  "category": "Langages",
+  "content": "Syntaxe, structures de données, programmation orientée objet, environnements virtuels, packaging. Parcours : automatiser des tâches et écrire des scripts de traitement de données. Ressource : docs.python.org/3/tutorial."
+ },
+ {
+  "slug": "fastapi-flask",
+  "skill": "FastAPI, Flask et Django",
+  "category": "Backend",
+  "content": "Frameworks web Python : routes, validation Pydantic, ORM, documentation automatique avec FastAPI. Projet : exposer un modèle de machine learning via une API FastAPI. Ressources : fastapi.tiangolo.com/tutorial, flask.palletsprojects.com."
+ },
+ {
+  "slug": "data-analysis",
+  "skill": "Analyse de données (Pandas, NumPy)",
+  "category": "Data",
+  "content": "Manipulation de tableaux et séries : nettoyage, agrégations, visualisation avec Matplotlib. Parcours : analyser un jeu de données Kaggle de bout en bout. Ressources : pandas.pydata.org/docs, kaggle.com/learn."
+ },
+ {
+  "slug": "machine-learning",
+  "skill": "Machine Learning (scikit-learn)",
+  "category": "IA",
+  "content": "Régression, classification, clustering, validation croisée, métriques, sur-apprentissage. Parcours : entraîner et évaluer un modèle sur un jeu de données réel. Ressources : scikit-learn.org/stable/tutorial, cours Machine Learning d'Andrew Ng sur Coursera."
+ },
+ {
+  "slug": "deep-learning",
+  "skill": "Deep Learning (PyTorch, TensorFlow)",
+  "category": "IA",
+  "content": "Réseaux de neurones, rétropropagation, CNN, transformers, entraînement sur GPU. Parcours : classifier des images ou du texte avec PyTorch. Ressources : pytorch.org/tutorials, tensorflow.org/tutorials."
+ },
+ {
+  "slug": "nlp-llm",
+  "skill": "NLP et LLM (prompt engineering, RAG)",
+  "category": "IA",
+  "content": "Traitement du langage : tokenisation, embeddings, transformers, Hugging Face, ingénierie de prompts, RAG, fine-tuning LoRA. Projet : assistant documentaire avec RAG. Ressources : huggingface.co/learn/nlp-course, docs.anthropic.com (prompt engineering)."
+ },
+ {
+  "slug": "mlops",
+  "skill": "MLOps (MLflow, DVC)",
+  "category": "IA",
+  "content": "Industrialiser les modèles : suivi d'expériences avec MLflow, versionnement des données avec DVC, déploiement et surveillance. Parcours : pipeline reproductible entraînement puis API. Ressources : mlflow.org/docs, dvc.org/doc."
+ },
+ {
+  "slug": "airflow",
+  "skill": "Apache Airflow",
+  "category": "Data",
+  "content": "Orchestration de pipelines de données : DAGs, tâches, planification, opérateurs. Projet : pipeline quotidien d'extraction et de transformation. Ressource : airflow.apache.org/docs (tutorial)."
+ },
+ {
+  "slug": "scrum",
+  "skill": "Méthodes agiles (Scrum)",
+  "category": "Gestion de projet",
+  "content": "Rôles, sprints, backlog, user stories, rétrospectives, outils comme Jira ou Trello. Parcours : conduire un projet en sprints avec des user stories. Ressources : scrumguides.org, certification PSM I ou PSPO."
+ },
+ {
+  "slug": "clean-code",
+  "skill": "Clean code et design patterns",
+  "category": "Qualité",
+  "content": "Principes SOLID, patterns courants (Factory, Strategy, Observer), revue de code, refactoring. Parcours : refactorer un module en appliquant SOLID. Ressources : refactoring.guru, livre Clean Code de Robert C. Martin."
+ },
+ {
+  "slug": "web-security",
+  "skill": "Sécurité web (OWASP)",
+  "category": "Sécurité",
+  "content": "Top 10 OWASP : injections, authentification défaillante, XSS, CSRF, gestion des secrets. Parcours : auditer une application avec OWASP ZAP et corriger les failles. Ressources : owasp.org/www-project-top-ten, portswigger.net/web-security."
+ },
+ {
+  "slug": "english",
+  "skill": "Anglais technique",
+  "category": "Langues",
+  "content": "Lire la documentation, rédiger des commits et rapports, communiquer en réunion. Parcours : documentation et vidéos techniques en anglais, préparation d'un test TOEIC ou IELTS. Ressources : cambridgeenglish.org, ets.org/toeic."
+ },
+ {
+  "slug": "cybersecurite-defense",
+  "skill": "Cybersécurité défensive (SOC, SIEM)",
+  "category": "Cybersécurité",
+  "content": "Surveiller et protéger un système d'information : journaux, détection d'incidents, SIEM (Splunk, Wazuh), réponse à incident, durcissement. Parcours : monter un lab Wazuh et analyser des alertes. Ressources : tryhackme.com (parcours SOC Level 1), certification CompTIA Security+."
+ },
+ {
+  "slug": "pentest",
+  "skill": "Tests d'intrusion (pentest)",
+  "category": "Cybersécurité",
+  "content": "Sécurité offensive : reconnaissance, scan (Nmap), exploitation, élévation de privilèges, rédaction du rapport. Parcours : challenges sur plateformes légales d'entraînement. Ressources : root-me.org, hackthebox.com, portswigger.net/web-security, certifications eJPT puis OSCP."
+ },
+ {
+  "slug": "reseaux",
+  "skill": "Réseaux informatiques (TCP/IP, Cisco)",
+  "category": "Réseaux",
+  "content": "Modèle OSI, adressage IP et sous-réseaux, routage, commutation, VLAN, DNS, DHCP, pare-feu. Parcours : simuler un réseau d'entreprise dans Cisco Packet Tracer. Ressources : netacad.com (Cisco Networking Academy), certification CCNA."
+ },
+ {
+  "slug": "flutter",
+  "skill": "Développement mobile Flutter",
+  "category": "Mobile",
+  "content": "Applications mobiles multiplateformes (Android, iOS) en Dart : widgets, navigation, gestion d'état, appels API, publication sur les stores. Projet : application mobile connectée à une API REST. Ressources : docs.flutter.dev, dart.dev/language."
+ },
+ {
+  "slug": "android-kotlin",
+  "skill": "Développement Android (Kotlin)",
+  "category": "Mobile",
+  "content": "Applications Android natives : Kotlin, Jetpack Compose, architecture MVVM, Room, Retrofit. Projet : application de liste de tâches avec stockage local et synchronisation. Ressources : developer.android.com/courses, kotlinlang.org/docs."
+ },
+ {
+  "slug": "react-native",
+  "skill": "Développement mobile React Native",
+  "category": "Mobile",
+  "content": "Applications mobiles iOS et Android en JavaScript ou TypeScript avec les composants React : navigation, état, appels réseau, Expo. Projet : porter une application web React vers le mobile. Ressources : reactnative.dev/docs, docs.expo.dev."
+ },
+ {
+  "slug": "php-laravel",
+  "skill": "PHP et Laravel",
+  "category": "Backend",
+  "content": "Développement web en PHP 8 avec le framework Laravel : routes, contrôleurs, Eloquent ORM, migrations, Blade, authentification. Projet : application CRUD avec MySQL. Ressources : php.net/manual, laravel.com/docs, laracasts.com."
+ },
+ {
+  "slug": "symfony",
+  "skill": "Symfony",
+  "category": "Backend",
+  "content": "Framework PHP : bundles, Doctrine ORM, formulaires, Twig, sécurité, API Platform. Projet : API REST avec authentification. Ressources : symfony.com/doc, symfonycasts.com, certification Symfony officielle (SensioLabs)."
+ },
+ {
+  "slug": "dotnet",
+  "skill": ".NET (C#, ASP.NET Core)",
+  "category": "Backend",
+  "content": "Développement en C# : POO, LINQ, async/await, API web ASP.NET Core, Entity Framework Core. Projet : API REST avec base SQL Server. Ressources : learn.microsoft.com/dotnet, certification Microsoft AZ-204 pour le déploiement sur Azure."
+ },
+ {
+  "slug": "vuejs",
+  "skill": "Vue.js",
+  "category": "Frontend",
+  "content": "Framework JavaScript progressif : composants, Composition API, Vue Router, gestion d'état avec Pinia, Vite. Projet : tableau de bord consommant une API REST. Ressources : vuejs.org/guide, pinia.vuejs.org."
+ },
+ {
+  "slug": "tests-e2e",
+  "skill": "Tests end-to-end (Cypress, Selenium, Playwright)",
+  "category": "Qualité",
+  "content": "Automatiser les tests d'interface d'une application web : scénarios utilisateur, sélecteurs, assertions, exécution en CI. Projet : couvrir le parcours de connexion et de commande d'une application. Ressources : docs.cypress.io, playwright.dev, selenium.dev/documentation."
+ },
+ {
+  "slug": "html-css",
+  "skill": "HTML, CSS et intégration responsive",
+  "category": "Frontend",
+  "content": "Structure sémantique HTML5, CSS3, Flexbox, Grid, responsive design, accessibilité (WCAG). Projet : intégrer une maquette Figma en page responsive. Ressources : developer.mozilla.org, web.dev/learn, freecodecamp.org (Responsive Web Design)."
+ }
+]
