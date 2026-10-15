@@ -1,0 +1,169 @@
+<div class="profile-page">
+
+  @if (success()) {
+    <div class="toast-success">{{ success() }}</div>
+  }
+  @if (error() && !editMode) {
+    <div class="toast-error">{{ error() }}</div>
+  }
+
+  @if (user) {
+
+    <div class="profile-card">
+
+      <!-- Initiales + nom -->
+      <div class="profile-header">
+        <div class="avatar-wrapper">
+          <div class="avatar-initials">{{ initials }}</div>
+          <div class="avatar-badge"><i class="ti ti-check"></i></div>
+        </div>
+        <h2 class="profile-name">{{ user.prenom }} {{ user.nom }}</h2>
+        <span class="profile-role-badge" [class.role-company]="isAdmin">{{ isAdmin ? 'Administrateur' : 'Utilisateur' }}</span>
+      </div>
+
+      <!-- Coordonnées -->
+      <div class="profile-section">
+        <h3 class="section-title">Coordonnées</h3>
+        <div class="info-grid">
+
+          <div class="info-item">
+            <span class="info-icon"><i class="ti ti-user"></i></span>
+            <div>
+              <span class="info-label">Prénom</span>
+              <span class="info-value">{{ user.prenom || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon"><i class="ti ti-user"></i></span>
+            <div>
+              <span class="info-label">Nom</span>
+              <span class="info-value">{{ user.nom || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon"><i class="ti ti-mail"></i></span>
+            <div>
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon"><i class="ti ti-phone"></i></span>
+            <div>
+              <span class="info-label">Téléphone</span>
+              <span class="info-value">{{ user.telephone || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <span class="info-icon"><i class="ti ti-map-pin"></i></span>
+            <div>
+              <span class="info-label">Adresse</span>
+              <span class="info-value">{{ user.adresse || '—' }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-actions">
+        <button class="btn-edit" (click)="openEdit()">
+          <i class="ti ti-pencil"></i> Modifier le profil
+        </button>
+        <button class="btn-delete" (click)="confirmDelete()">
+          <i class="ti ti-trash"></i> Supprimer le compte
+        </button>
+      </div>
+
+    </div>
+
+  } @else {
+    <div class="loading-state">
+      <div class="spinner-ring"></div>
+      <p>Chargement du profil...</p>
+    </div>
+  }
+
+</div>
+
+<!-- ===== MODAL MODIFICATION ===== -->
+@if (editMode && user) {
+  <div class="modal-backdrop" (click)="closeEdit()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+
+      <div class="edit-modal-header">
+        <h3>Modifier le profil</h3>
+        <button class="btn-close" (click)="closeEdit()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="edit-modal-body">
+        <form (ngSubmit)="onUpdate()">
+
+          <div class="edit-row">
+            <div class="edit-field">
+              <label>Prénom</label>
+              <input type="text" class="edit-input" [(ngModel)]="prenom" name="prenom" required>
+            </div>
+            <div class="edit-field">
+              <label>Nom</label>
+              <input type="text" class="edit-input" [(ngModel)]="nom" name="nom" required>
+            </div>
+          </div>
+
+          <div class="edit-field">
+            <label>Email</label>
+            <input type="email" class="edit-input edit-input--disabled" [value]="user.email" disabled>
+          </div>
+
+          <div class="edit-field">
+            <label>Téléphone</label>
+            <input type="tel" class="edit-input" [(ngModel)]="telephone" name="telephone" placeholder="+216 XX XXX XXX" required>
+          </div>
+
+          <div class="edit-field">
+            <label>Adresse</label>
+            <input type="text" class="edit-input" [(ngModel)]="adresse" name="adresse" required>
+          </div>
+
+          <div class="edit-field">
+            <label>Nouveau mot de passe <span class="optional">(laisser vide pour ne pas changer)</span></label>
+            <input type="password" class="edit-input" [(ngModel)]="password" name="password" placeholder="••••••••">
+          </div>
+
+          @if (error()) { <div class="toast-error" style="position: static; margin-bottom: 1rem;">{{ error() }}</div> }
+
+          <div class="edit-actions">
+            <button type="button" class="btn-cancel" (click)="closeEdit()">Annuler</button>
+            <button type="submit" class="btn-save" [disabled]="loading()">
+              @if (loading()) { <span class="spinner"></span> }
+              Enregistrer
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL SUPPRESSION ===== -->
+@if (showDeleteConfirm) {
+  <div class="modal-backdrop">
+    <div class="confirm-modal">
+      <div class="confirm-icon"><i class="ti ti-alert-triangle"></i></div>
+      <h4>Supprimer le compte ?</h4>
+      <p>Cette action est irréversible. Toutes vos données seront définitivement supprimées.</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" (click)="showDeleteConfirm = false">Annuler</button>
+        <button class="btn-delete-confirm" (click)="deleteAccount()">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+}

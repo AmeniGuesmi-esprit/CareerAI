@@ -1,0 +1,19 @@
+<div class="home-page">
+  <div class="home-inner">
+    <h1 class="home-title">Bonjour {{ user?.prenom }} <span class="wave">👋</span></h1>
+    <p class="home-subtitle">Bienvenue sur votre espace. Voici les outils pour préparer votre candidature.</p>
+
+    <div class="tools-grid">
+      @for (tool of tools; track tool.title) {
+        <div class="tool-card" [class.disabled]="!tool.available">
+          <span class="tool-icon"><i class="ti {{ tool.icon }}"></i></span>
+          <h3>{{ tool.title }}</h3>
+          <p>{{ tool.description }}</p>
+          @if (!tool.available) {
+            <span class="soon-badge">Bientôt disponible</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,116 @@
+$primary: #7c5cfc;
+$teal:    #00c2a8;
+$text:    #1f2937;
+$muted:   #6b7280;
+$border:  #ececf5;
+
+:host { display: block; }
+
+.home-page {
+  min-height: calc(100vh - 73px);
+  background: #ffffff;
+  padding: 48px 24px;
+  box-sizing: border-box;
+}
+
+.home-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.home-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0 0 6px;
+  letter-spacing: -.02em;
+}
+
+.wave {
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: wave 2.4s ease-in-out 1;
+}
+@keyframes wave {
+  0%, 60%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(14deg); }
+  20%, 40% { transform: rotate(-8deg); }
+  50% { transform: rotate(10deg); }
+}
+
+.home-subtitle {
+  font-size: .82rem;
+  color: $muted;
+  margin: 0 0 28px;
+}
+
+/* ── Cartes outils ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.tool-card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 18px;
+  min-height: 184px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(31, 20, 90, .04);
+  transition: transform .2s ease, box-shadow .2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(31, 20, 90, .09);
+  }
+
+  h3 {
+    font-size: .92rem;
+    font-weight: 700;
+    color: $text;
+    margin: 16px 0 6px;
+  }
+
+  p {
+    font-size: .78rem;
+    color: $muted;
+    line-height: 1.55;
+    margin: 0 0 14px;
+  }
+}
+
+.tool-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  color: #fff;
+  background: linear-gradient(135deg, $primary, $teal);
+}
+
+.soon-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: $primary;
+  font-size: .66rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .tools-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 760px) {
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .home-page { padding: 32px 16px; }
+  .tools-grid { grid-template-columns: 1fr; }
+}

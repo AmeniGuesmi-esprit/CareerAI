@@ -1,0 +1,248 @@
+<div class="row g-4">
+
+  <div class="col-12">
+    <div class="galaxy-toolbar">
+      <div class="galaxy-heading">
+        <span class="galaxy-eyebrow"><i class="ti ti-users"></i> Utilisateurs</span>
+      </div>
+
+      <div class="toolbar-row">
+        <div class="toolbar-search">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Rechercher (nom, email)..."
+                 [(ngModel)]="search" (ngModelChange)="onSearchChange()">
+        </div>
+
+        <div class="filter-group">
+          <button type="button" class="btn-filter" [class.active]="roleFilter === 'ALL'" (click)="setRoleFilter('ALL')">
+            <i class="ti ti-list"></i><span>Tous</span><span class="count">{{ allUsers.length }}</span>
+          </button>
+          <button type="button" class="btn-filter" [class.active]="roleFilter === 'ADMIN'" (click)="setRoleFilter('ADMIN')">
+            <i class="ti ti-shield"></i><span>Admins</span><span class="count">{{ countByRole('ADMIN') }}</span>
+          </button>
+          <button type="button" class="btn-filter" [class.active]="roleFilter === 'USER'" (click)="setRoleFilter('USER')">
+            <i class="ti ti-user"></i><span>Utilisateurs</span><span class="count">{{ countByRole('USER') }}</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn-add-user" (click)="openCreate()">
+          <i class="ti ti-user-plus"></i> Ajouter un utilisateur
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (actionMessage) {
+    <div class="col-12">
+      <div class="alert d-flex align-items-center justify-content-between gap-2 mb-0"
+           [ngClass]="actionMessage.type === 'success' ? 'alert-success' : 'alert-danger'">
+        <span>{{ actionMessage.text }}</span>
+        <button type="button" class="btn-close" (click)="actionMessage = null"></button>
+      </div>
+    </div>
+  }
+
+  <div class="col-12">
+    <div class="card shadow-sm users-table-card">
+      <div class="card-body">
+        @if (loading) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Chargement des utilisateurs...</p>
+          </div>
+        } @else if (error) {
+          <div class="alert alert-danger d-flex align-items-center gap-2">
+            <i class="ti ti-alert-circle f-20"></i>
+            <span>{{ error }}</span>
+          </div>
+        } @else if (filteredUsers.length === 0) {
+          <p class="text-muted text-center py-4">
+            <i class="ti ti-database-off f-30 d-block mb-2"></i>
+            Aucun utilisateur ne correspond à votre recherche
+          </p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="sortable-th" (click)="toggleSort('id')">
+                    # <i class="ti f-14" [ngClass]="sortField === 'id' ? (sortDirection === 'asc' ? 'ti-sort-ascending text-primary' : 'ti-sort-descending text-primary') : 'ti-selector text-muted'"></i>
+                  </th>
+                  <th class="sortable-th" (click)="toggleSort('name')">
+                    Nom complet <i class="ti f-14" [ngClass]="sortField === 'name' ? (sortDirection === 'asc' ? 'ti-sort-ascending text-primary' : 'ti-sort-descending text-primary') : 'ti-selector text-muted'"></i>
+                  </th>
+                  <th class="sortable-th" (click)="toggleSort('email')">
+                    Email <i class="ti f-14" [ngClass]="sortField === 'email' ? (sortDirection === 'asc' ? 'ti-sort-ascending text-primary' : 'ti-sort-descending text-primary') : 'ti-selector text-muted'"></i>
+                  </th>
+                  <th>Téléphone</th>
+                  <th>Adresse</th>
+                  <th class="sortable-th" (click)="toggleSort('role')">
+                    Rôle <i class="ti f-14" [ngClass]="sortField === 'role' ? (sortDirection === 'asc' ? 'ti-sort-ascending text-primary' : 'ti-sort-descending text-primary') : 'ti-selector text-muted'"></i>
+                  </th>
+                  <th>Email vérifié</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (u of pagedUsers; track u.id) {
+                  <tr>
+                    <td class="text-muted">#{{ u.id }}</td>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="user-avatar"
+                             [ngClass]="{ 'avatar-admin': u.role === 'ADMIN', 'avatar-user': u.role === 'USER' }">
+                          <span>{{ getInitials(u) }}</span>
+                        </div>
+                        <span class="fw-medium">{{ u.prenom }} {{ u.nom }}</span>
+                      </div>
+                    </td>
+                    <td class="text-muted">{{ u.email }}</td>
+                    <td class="text-muted">{{ u.telephone || '—' }}</td>
+                    <td class="text-muted">{{ u.adresse || '—' }}</td>
+                    <td>
+                      <span class="role-badge" [ngClass]="{ 'role-admin': u.role === 'ADMIN', 'role-user': u.role === 'USER' }">
+                        <i class="ti" [ngClass]="u.role === 'ADMIN' ? 'ti-shield' : 'ti-user'"></i>{{ u.role === 'ADMIN' ? 'Admin' : 'Utilisateur' }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (u.emailVerified) {
+                        <span class="verified-badge verified-yes"><i class="ti ti-circle-check"></i>Vérifié</span>
+                      } @else {
+                        <span class="verified-badge verified-no"><i class="ti ti-circle-x"></i>Non vérifié</span>
+                      }
+                    </td>
+                    <td>
+                      @if (u.enabled) {
+                        <span class="status-badge status-on">Actif</span>
+                      } @else {
+                        <span class="status-badge status-off">Désactivé</span>
+                      }
+                    </td>
+                    <td>
+                      <div class="actions-cell">
+                        <select class="role-select" [disabled]="isSelf(u)" [ngModel]="u.role"
+                                (ngModelChange)="onRoleChange(u, $event)"
+                                title="Changer le rôle">
+                          <option value="USER">Utilisateur</option>
+                          <option value="ADMIN">Admin</option>
+                        </select>
+                        <button type="button" class="btn-icon" [disabled]="isSelf(u)"
+                                [title]="u.enabled ? 'Désactiver le compte' : 'Activer le compte'"
+                                (click)="toggleEnabled(u)">
+                          <i class="ti" [ngClass]="u.enabled ? 'ti-lock' : 'ti-lock-open'"></i>
+                        </button>
+                        <button type="button" class="btn-icon danger" [disabled]="isSelf(u)"
+                                title="Supprimer" (click)="askDelete(u)">
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPages > 1) {
+            <div class="d-flex align-items-center justify-content-between px-3 py-3 border-top">
+              <span class="text-muted f-14">
+                Page {{ currentPage }} sur {{ totalPages }} — {{ filteredUsers.length }} utilisateur(s)
+              </span>
+              <nav>
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" [class.disabled]="currentPage === 1">
+                    <button class="page-link" (click)="goToPage(currentPage - 1)"><i class="ti ti-chevron-left"></i></button>
+                  </li>
+                  @for (p of pageNumbers; track p) {
+                    <li class="page-item" [class.active]="p === currentPage">
+                      <button class="page-link" (click)="goToPage(p)">{{ p }}</button>
+                    </li>
+                  }
+                  <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <button class="page-link" (click)="goToPage(currentPage + 1)"><i class="ti ti-chevron-right"></i></button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALE CRÉATION ===== -->
+@if (showCreate) {
+  <div class="um-backdrop" (click)="showCreate = false">
+    <div class="um-modal" (click)="$event.stopPropagation()">
+      <h5><i class="ti ti-user-plus me-2"></i>Ajouter un utilisateur</h5>
+      <p class="text-muted f-13">Le compte est créé déjà vérifié : aucun email de confirmation n'est envoyé.</p>
+
+      <form (ngSubmit)="submitCreate()">
+        <div class="um-row">
+          <div>
+            <label>Prénom *</label>
+            <input class="um-input" type="text" [(ngModel)]="newUser.prenom" name="prenom">
+          </div>
+          <div>
+            <label>Nom *</label>
+            <input class="um-input" type="text" [(ngModel)]="newUser.nom" name="nom">
+          </div>
+        </div>
+
+        <label>Email *</label>
+        <input class="um-input" type="email" [(ngModel)]="newUser.email" name="email">
+
+        <div class="um-row">
+          <div>
+            <label>Téléphone *</label>
+            <input class="um-input" type="tel" [(ngModel)]="newUser.telephone" name="telephone" placeholder="+216 XX XXX XXX">
+          </div>
+          <div>
+            <label>Rôle *</label>
+            <select class="um-input" [(ngModel)]="newUser.role" name="role">
+              <option value="USER">Utilisateur</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Adresse *</label>
+        <input class="um-input" type="text" [(ngModel)]="newUser.adresse" name="adresse">
+
+        <label>Mot de passe * (min. 8 caractères)</label>
+        <input class="um-input" type="password" [(ngModel)]="newUser.motDePasse" name="motDePasse">
+
+        @if (createError) {
+          <div class="alert alert-danger py-2">{{ createError }}</div>
+        }
+
+        <div class="um-actions">
+          <button type="button" class="btn btn-light" (click)="showCreate = false">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="creating">
+            @if (creating) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Créer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ===== MODALE SUPPRESSION ===== -->
+@if (userToDelete) {
+  <div class="um-backdrop" (click)="userToDelete = null">
+    <div class="um-modal" (click)="$event.stopPropagation()">
+      <h5><i class="ti ti-alert-triangle me-2 text-danger"></i>Supprimer l'utilisateur ?</h5>
+      <p>
+        <strong>{{ userToDelete.prenom }} {{ userToDelete.nom }}</strong> ({{ userToDelete.email }})
+        sera définitivement supprimé. Cette action est irréversible.
+      </p>
+      <div class="um-actions">
+        <button type="button" class="btn btn-light" (click)="userToDelete = null">Annuler</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}

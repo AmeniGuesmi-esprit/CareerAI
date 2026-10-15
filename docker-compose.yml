@@ -1,0 +1,97 @@
+services:
+  # ========================= INFRASTRUCTURE =========================
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"          # si XAMPP/MySQL tourne déjà en local : "3307:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - careerai-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # ========================= EUREKA =========================
+
+  eureka-server:
+    build:
+      context: ./backend/eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_USER: ${EUREKA_USER:-admin}
+      EUREKA_PASSWORD: ${EUREKA_PASSWORD:-admin123}
+    networks:
+      - careerai-net
+    healthcheck:
+      # Eureka est protégé par Spring Security (pas d'Actuator) : on teste /eureka/apps avec les identifiants
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null -u \"$$EUREKA_USER:$$EUREKA_PASSWORD\" http://localhost:8761/eureka/apps || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+
+  # ========================= API GATEWAY =========================
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8222:8222"          # seul point d'entrée pour le frontend Angular (http://localhost:8222)
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
+  # ========================= USER SERVICE =========================
+
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"          # optionnel : utile pour tester sans passer par la gateway
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_users?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
+      MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME manquant}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD manquant}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD manquant}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
+networks:
+  careerai-net:
+    driver: bridge
+
+volumes:
+  mysql_data:

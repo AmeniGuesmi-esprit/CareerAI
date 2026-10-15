@@ -1,0 +1,21 @@
+<nav class="navbar">
+  <a routerLink="/" class="nav-logo">
+    <span class="logo-icon">◈</span>
+    <span class="logo-text">Career<span class="logo-accent">AI</span></span>
+  </a>
+
+  <div class="nav-links">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+      <i class="ti ti-home"></i><span>Accueil</span>
+    </a>
+    <a routerLink="/register" routerLinkActive="active" class="nav-link">
+      <i class="ti ti-user-plus"></i><span>Créer un compte</span>
+    </a>
+    <a routerLink="/login" routerLinkActive="active" class="nav-link">
+      <i class="ti ti-login-2"></i><span>Se connecter</span>
+    </a>
+  </div>
+
+  <!-- Colonne vide symétrique, pour que .nav-links reste parfaitement centré -->
+  <div class="nav-spacer"></div>
+</nav>

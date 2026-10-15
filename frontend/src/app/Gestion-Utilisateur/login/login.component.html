@@ -1,0 +1,61 @@
+<div class="login-wrapper">
+  <!-- Background -->
+  <div class="bg-layer">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Navbar partagée avec la landing page -->
+  <app-navbar></app-navbar>
+
+  <div class="login-content">
+
+    <!-- Left Column - Text -->
+    <div class="left-column">
+      <h1 class="title">Content de vous revoir !</h1>
+      <p class="subtitle">
+        Connectez-vous pour retrouver votre espace CareerAI : CV, lettre de motivation, score de matching et préparation d'entretien.
+      </p>
+
+      <div class="register-link">
+        Vous n'avez pas encore de compte ?
+        <a routerLink="/register" class="link">S'inscrire</a>
+      </div>
+    </div>
+
+    <!-- Right Column - Form -->
+    <div class="right-column">
+      <div class="login-card">
+        <h2 class="form-title">Connexion</h2>
+
+        <form (ngSubmit)="onSubmit()">
+
+          <div>
+            <label>Adresse e-mail</label>
+            <input type="email" [(ngModel)]="email" name="email" placeholder="votre@email.com" class="form-input">
+          </div>
+
+          <div>
+            <label>Mot de passe</label>
+            <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" class="form-input">
+            <!-- ✅ Lien "Mot de passe oublié" -->
+            <div class="forgot-link">
+              <a routerLink="/forgot-password" class="link">Mot de passe oublié ?</a>
+            </div>
+          </div>
+
+          @if (error()) { <div class="error-message">{{ error() }}</div> }
+
+          <button type="submit" class="btn-primary" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> }
+            Se connecter
+          </button>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>

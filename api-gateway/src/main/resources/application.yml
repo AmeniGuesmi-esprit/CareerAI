@@ -1,0 +1,44 @@
+server:
+  port: 8222
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    loadbalancer:
+      cache:
+        ttl: 5s            # évite le cache d'une liste de serveurs vide (503)
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      # CORS géré uniquement ici (pas dans les services)
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+        - id: compatibility-service
+          uri: lb://compatibility-service
+          predicates:
+            - Path=/api/compatibility/**
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:admin123}@localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+app:
+  jwt:
+    secret: 

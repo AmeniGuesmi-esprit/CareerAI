@@ -1,0 +1,33 @@
+// This file is intentionally left empty to allow customers to add custom CSS if needed.
+
+.b-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #7c5cfc, #00c2b8);
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--bs-heading-color, #212121);
+  white-space: nowrap;
+
+  strong {
+    color: #7c5cfc;
+  }
+}

@@ -1,0 +1,67 @@
+<div class="modern-navbar">
+  <div class="nav-container">
+    <!-- Logo -->
+    <a routerLink="/frontoffice/home" class="nav-logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">Career<span class="logo-accent">AI</span></span>
+    </a>
+
+    <!-- Navigation Links -->
+    <!-- Les liens des futurs modules (CV, lettre de motivation, matching, entretien) s'ajoutent ici -->
+    <div class="nav-links">
+      <a routerLink="/frontoffice/home" routerLinkActive="active">
+        <i class="ti ti-home"></i><span>Accueil</span>
+      </a>
+      <a routerLink="/frontoffice/compatibility" routerLinkActive="active">
+        <i class="ti ti-chart-donut"></i><span>Matching CV</span>
+      </a>
+      <a routerLink="/frontoffice/profile" routerLinkActive="active">
+        <i class="ti ti-user"></i><span>Mon profil</span>
+      </a>
+    </div>
+
+    <!-- Avatar + Dropdown -->
+    <div class="user-avatar" (click)="toggleDropdown($event)" [class.open]="dropdownOpen">
+      <div class="avatar-frame">
+        <div class="avatar avatar-initials">{{ initials }}</div>
+        <span class="online-dot"></span>
+      </div>
+      <div class="user-meta">
+        <span class="user-name">{{ user?.prenom }}</span>
+        <span class="user-role">Utilisateur</span>
+      </div>
+      <i class="ti ti-chevron-down caret"></i>
+    </div>
+
+    <!-- Dropdown Menu -->
+    @if (dropdownOpen) {
+      <div class="dropdown-menu">
+        <div class="dropdown-user">
+          <div class="dropdown-avatar avatar-initials">{{ initials }}</div>
+          <div>
+            <p class="dropdown-fullname">{{ user?.prenom }} {{ user?.nom }}</p>
+            <p class="dropdown-email">{{ user?.email }}</p>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a routerLink="/frontoffice/profile"
+           (click)="toggleDropdown($event)"
+           class="dropdown-item">
+          <i class="ti ti-user me-2"></i> Mon Profil
+        </a>
+        <a href="#"
+           (click)="logout(); $event.preventDefault()"
+           class="dropdown-item logout-btn">
+          <i class="ti ti-logout me-2"></i> Déconnexion
+        </a>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Content Wrapper - Important pour le style Berry -->
+<div class="pc-container">
+  <div class="coded-content">
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:host {
+  --c-border:  #e9e6f7;
+  --c-purple:  #7c5cfc;
+  --c-purple-h:#5b3de8;
+  --c-cyan:    #00c2a8;
+  --c-text:    #1f2937;
+  --c-muted:   #6b7280;
+  --font-d:    'Syne', sans-serif;
+  --font-b:    'DM Sans', sans-serif;
+
+  display: block;
+  font-family: var(--font-b);
+}
+
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 60px; height: 70px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--c-border);
+  box-shadow: 0 4px 24px rgba(31, 20, 90, .06);
+}
+
+.nav-logo {
+  grid-column: 1;
+  justify-self: start;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-d); font-size: 1.5rem;
+  color: var(--c-text); text-decoration: none; font-weight: 700;
+  flex-shrink: 0;
+}
+.logo-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  font-size: 1.3rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--c-purple), var(--c-cyan));
+  box-shadow: 0 6px 16px rgba(124, 92, 252, .35);
+  transition: transform .3s ease, box-shadow .3s ease;
+  flex-shrink: 0;
+}
+.nav-logo:hover .logo-icon {
+  transform: rotate(-8deg) scale(1.06);
+  box-shadow: 0 8px 22px rgba(124, 92, 252, .45);
+}
+.logo-text {
+  font-family: var(--font-d);
+  font-size: 1.1rem; color: var(--c-text);
+  letter-spacing: -.02em;
+}
+.logo-accent {
+  background: linear-gradient(135deg, var(--c-purple), var(--c-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── 3 boutons centrés : Accueil / Créer un compte / Se connecter ──
+   Même style pill que la navbar du frontoffice (icône + texte, actif =
+   pilule dégradée violette). ── */
+.nav-links {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--c-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: .93rem;
+  padding: 9px 16px;
+  border-radius: 30px;
+  position: relative;
+  transition: color .2s ease, background .2s ease, transform .15s ease;
+
+  i {
+    font-size: 1rem;
+    opacity: .75;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+
+  &:hover {
+    color: var(--c-purple-h);
+    background: rgba(124, 92, 252, 0.07);
+    transform: translateY(-1px);
+
+    i { opacity: 1; transform: scale(1.08); }
+  }
+
+  &.active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--c-purple), var(--c-purple-h));
+    box-shadow: 0 6px 16px rgba(124, 92, 252, .32);
+
+    i { opacity: 1; }
+
+    &:hover { transform: none; color: #fff; }
+  }
+}
+
+.nav-spacer { grid-column: 3; }
+
+@media (max-width: 860px) {
+  .navbar { padding: 0 20px; grid-template-columns: auto 1fr; }
+  .nav-spacer { display: none; }
+  .nav-links { justify-self: end; gap: 4px; }
+  .logo-text { display: none; }
+  .nav-link span { display: none; }
+  .nav-link { padding: 9px 11px; }
+}
