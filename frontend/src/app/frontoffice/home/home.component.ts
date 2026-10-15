@@ -9,7 +9,7 @@ interface Tool {
   title: string;
   description: string;
   available: boolean;
-  route?: string;  // à renseigner quand le module devient disponible
+  route?: string; // à renseigner quand le module devient disponible
 }
 
 /**
@@ -50,7 +50,8 @@ export class HomeComponent implements OnInit {
       icon: 'ti-chart-donut',
       title: 'Score de matching',
       description: 'Mesurez la compatibilité entre votre CV et une description d\'offre.',
-      available: false
+      available: true,
+      route: '/frontoffice/compatibility'
     },
     {
       icon: 'ti-messages',
@@ -68,6 +69,8 @@ export class HomeComponent implements OnInit {
   }
 
   open(tool: Tool) {
-    if (tool.available && tool.route) this.router.navigateByUrl(tool.route);
+    if (tool.available && tool.route) {
+      this.router.navigate([tool.route]);
+    }
   }
 }

@@ -30,6 +30,10 @@ spring:
           uri: lb://skill-gap-service
           predicates:
             - Path=/api/skill-gap/**
+        - id: compatibility-service
+          uri: lb://compatibility-service
+          predicates:
+            - Path=/api/compatibility/**
 
 
 eureka:
