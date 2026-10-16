@@ -110,6 +110,13 @@ const routes: Routes = [
           import('./Gestion-Experience/experience-form/experience-form.component').then(c => c.ExperienceFormComponent)
       },
 
+      // Pitch de 30 secondes
+      {
+        path: 'pitch',
+        loadComponent: () =>
+          import('./Gestion-Experience/pitch/pitch.component').then(c => c.PitchComponent)
+      },
+
       {
         path: 'profile',
         loadComponent: () =>

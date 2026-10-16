@@ -25,6 +25,7 @@ $border: #ececf5;
 }
 .exp-title { font-size: 1.7rem; font-weight: 700; color: $text; margin: 0; }
 .exp-subtitle { margin: 4px 0 0; color: $muted; font-size: .92rem; }
+.exp-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 .btn-primary, .btn-secondary {
   display: inline-flex; align-items: center; gap: 8px;
@@ -37,7 +38,10 @@ $border: #ececf5;
   box-shadow: 0 8px 18px rgba(124, 92, 252, .22);
   &:hover { transform: translateY(-1px); color: #fff; }
 }
-.btn-secondary { background: #fff; color: $primary; border: 1px solid $border; }
+.btn-secondary {
+  background: #fff; color: $primary; border: 1px solid $border;
+  &:hover { background: #f5f2ff; border-color: #d9d0ff; }
+}
 
 /* ===== Toolbar ===== */
 .exp-toolbar { display: flex; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; }
@@ -156,4 +160,5 @@ $border: #ececf5;
 @media (max-width: 600px) {
   .exp-page { padding: 1rem; }
   .exp-card-top { flex-direction: column; }
+  .exp-header-actions { width: 100%; }
 }

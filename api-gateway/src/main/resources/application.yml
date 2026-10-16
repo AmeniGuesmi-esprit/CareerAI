@@ -30,7 +30,7 @@ spring:
         - id: experience-service
           uri: lb://experience-service
           predicates:
-            - Path=/api/experiences/**
+            - Path=/api/experiences/**, /api/pitch/**
 
 
 eureka:

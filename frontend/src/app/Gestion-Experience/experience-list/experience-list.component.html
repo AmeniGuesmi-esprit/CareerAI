@@ -14,9 +14,14 @@
           @if (enCoursCount() > 0) { · {{ enCoursCount() }} en cours }
         </p>
       </div>
-      <a routerLink="/frontoffice/experiences/new" class="btn-primary">
-        <i class="ti ti-plus"></i> Ajouter une expérience
-      </a>
+      <div class="exp-header-actions">
+        <a routerLink="/frontoffice/pitch" class="btn-secondary">
+          <i class="ti ti-sparkles"></i> Pitch de 30 secondes
+        </a>
+        <a routerLink="/frontoffice/experiences/new" class="btn-primary">
+          <i class="ti ti-plus"></i> Ajouter une expérience
+        </a>
+      </div>
     </div>
 
     <!-- Recherche + filtre -->
