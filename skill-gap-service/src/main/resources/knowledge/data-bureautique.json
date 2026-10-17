@@ -1,0 +1,38 @@
+[
+ {
+  "slug": "power-bi",
+  "skill": "Power BI",
+  "category": "Business intelligence",
+  "content": "Tableaux de bord décisionnels : connexion aux sources, Power Query, modélisation en étoile, mesures DAX, visualisations, publication et partage. Projet : tableau de bord des ventes. Ressources : learn.microsoft.com/power-bi, certification PL-300 (Power BI Data Analyst)."
+ },
+ {
+  "slug": "tableau",
+  "skill": "Tableau",
+  "category": "Business intelligence",
+  "content": "Visualisation de données : connexions, calculs, filtres, tableaux de bord interactifs, storytelling. Projet : publier un tableau de bord sur Tableau Public. Ressources : tableau.com/learn, certification Tableau Desktop Specialist."
+ },
+ {
+  "slug": "excel-avance",
+  "skill": "Excel avancé",
+  "category": "Bureautique",
+  "content": "Fonctions avancées (RECHERCHEX, SI imbriqués, INDEX/EQUIV), tableaux croisés dynamiques, graphiques, Power Query, macros VBA. Projet : automatiser un reporting mensuel. Ressources : support.microsoft.com/excel, certifications MOS Excel Associate (MO-200) puis Expert (MO-201)."
+ },
+ {
+  "slug": "statistiques",
+  "skill": "Statistiques et analyse de données (R)",
+  "category": "Données",
+  "content": "Statistique descriptive, probabilités, tests d'hypothèses, régression, analyse de variance, plans d'expérience, langage R et RStudio. Projet : étude statistique complète d'un jeu de données ouvert. Ressources : khanacademy.org (statistiques), r4ds.hadley.nz."
+ },
+ {
+  "slug": "odoo-erp",
+  "skill": "ERP Odoo",
+  "category": "Gestion",
+  "content": "Progiciel de gestion intégré : ventes, achats, stocks, comptabilité, RH, paramétrage des modules et développement de modules en Python. Projet : déployer Odoo pour une PME fictive. Ressources : odoo.com/slides (eLearning gratuit), certification Odoo."
+ },
+ {
+  "slug": "sap",
+  "skill": "ERP SAP (S/4HANA)",
+  "category": "Gestion",
+  "content": "Processus intégrés dans SAP S/4HANA : finance (FI/CO), achats et stocks (MM), ventes (SD), données de base. Parcours : suivre un processus complet de la commande à la facturation. Ressources : learning.sap.com, certifications SAP Certified Associate."
+ }
+]

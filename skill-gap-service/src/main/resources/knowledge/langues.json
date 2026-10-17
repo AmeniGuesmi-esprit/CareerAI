@@ -1,0 +1,38 @@
+[
+ {
+  "slug": "anglais-professionnel",
+  "skill": "Anglais professionnel",
+  "category": "Langues",
+  "content": "Communiquer en anglais au travail : réunions, e-mails, présentations, entretiens, négociation. Objectif courant : niveau B2 du CECRL. Ressources : British Council (learnenglish.britishcouncil.org), certifications TOEIC, IELTS, Linguaskill Business."
+ },
+ {
+  "slug": "francais-professionnel",
+  "skill": "Français professionnel",
+  "category": "Langues",
+  "content": "Expression écrite et orale en contexte professionnel : courriels, comptes rendus, réunions, présentations. Ressources : apprendre.tv5monde.com, certifications DELF, DALF et TCF (France Éducation international), Diplôme de français professionnel (CCI Paris Île-de-France)."
+ },
+ {
+  "slug": "allemand",
+  "skill": "Allemand",
+  "category": "Langues",
+  "content": "Apprentissage de l'allemand jusqu'au niveau professionnel, utile pour l'industrie et les études en Allemagne. Ressources : cours gratuits de la Deutsche Welle (learngerman.dw.com), Goethe-Institut, certifications Goethe-Zertifikat (A1 à C2) et TestDaF."
+ },
+ {
+  "slug": "espagnol",
+  "skill": "Espagnol",
+  "category": "Langues",
+  "content": "Apprentissage de l'espagnol jusqu'au niveau professionnel : compréhension, expression, correspondance professionnelle. Ressources : Instituto Cervantes (cervantes.es), certifications DELE et SIELE."
+ },
+ {
+  "slug": "italien",
+  "skill": "Italien",
+  "category": "Langues",
+  "content": "Apprentissage de l'italien jusqu'au niveau professionnel. Ressources : Istituto Italiano di Cultura, certifications CILS (Université pour étrangers de Sienne), CELI (Pérouse) et PLIDA (Società Dante Alighieri)."
+ },
+ {
+  "slug": "chinois",
+  "skill": "Chinois mandarin",
+  "category": "Langues",
+  "content": "Apprentissage du mandarin : pinyin, caractères, conversation professionnelle, utile pour le commerce international. Ressources : Instituts Confucius, certification HSK (niveaux 1 à 6)."
+ }
+]

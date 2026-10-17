@@ -1,0 +1,68 @@
+[
+ {
+  "slug": "seo",
+  "skill": "Référencement naturel (SEO)",
+  "category": "Marketing digital",
+  "content": "Optimiser la visibilité d'un site sur les moteurs de recherche : mots-clés, SEO technique, contenu, netlinking, Google Search Console. Projet : auditer et optimiser un site existant. Ressources : developers.google.com/search/docs, Semrush Academy, certification SEO de HubSpot Academy."
+ },
+ {
+  "slug": "sea-google-ads",
+  "skill": "Publicité en ligne (Google Ads, SEA)",
+  "category": "Marketing digital",
+  "content": "Campagnes payantes sur les moteurs de recherche : structure de compte, mots-clés, enchères, annonces, suivi des conversions, ROI. Parcours : créer une campagne test avec un petit budget. Ressources : skillshop.withgoogle.com, certification Google Ads Search."
+ },
+ {
+  "slug": "social-ads",
+  "skill": "Marketing des réseaux sociaux (Meta, LinkedIn, TikTok)",
+  "category": "Marketing digital",
+  "content": "Stratégie social media : ligne éditoriale, calendrier, publicité ciblée Meta Ads et LinkedIn Ads, indicateurs d'engagement. Projet : lancer une campagne pour une page. Ressources : Meta Blueprint (facebook.com/business/learn), certification Meta Certified Digital Marketing Associate."
+ },
+ {
+  "slug": "google-analytics",
+  "skill": "Web analytics (Google Analytics 4)",
+  "category": "Marketing digital",
+  "content": "Mesurer l'audience et les conversions : événements, entonnoirs, attribution, Google Tag Manager, tableaux de bord Looker Studio. Projet : installer le suivi d'un site et définir ses KPI. Ressources : skillshop.withgoogle.com, certification Google Analytics."
+ },
+ {
+  "slug": "email-marketing",
+  "skill": "Emailing et marketing automation",
+  "category": "Marketing digital",
+  "content": "Campagnes e-mail et scénarios automatisés : segmentation, personnalisation, tests A/B, délivrabilité, lead nurturing, outils Mailchimp, Brevo ou HubSpot. Projet : séquence de bienvenue automatisée. Ressources : HubSpot Academy (Email Marketing Certification)."
+ },
+ {
+  "slug": "content-marketing",
+  "skill": "Marketing de contenu et inbound marketing",
+  "category": "Marketing digital",
+  "content": "Attirer et convertir avec du contenu utile : persona, parcours client, articles, livres blancs, vidéos, calendrier éditorial. Projet : stratégie de contenu sur trois mois pour une marque. Ressources : HubSpot Academy (Inbound Marketing et Content Marketing Certification)."
+ },
+ {
+  "slug": "strategie-marketing",
+  "skill": "Stratégie marketing et étude de marché",
+  "category": "Marketing",
+  "content": "Analyser un marché et positionner une offre : segmentation, ciblage, positionnement, mix marketing (4P), SWOT, enquêtes et études qualitatives. Projet : plan marketing d'un produit. Ressources : Coursera (Introduction to Marketing, Wharton), ouvrage Marketing Management de Kotler."
+ },
+ {
+  "slug": "e-commerce",
+  "skill": "E-commerce (Shopify, WooCommerce)",
+  "category": "Commerce",
+  "content": "Créer et piloter une boutique en ligne : catalogue, paiement, logistique, taux de conversion, panier moyen, fidélisation. Projet : lancer une boutique test avec Shopify ou WooCommerce. Ressources : shopify.com/learn, woocommerce.com/documentation."
+ },
+ {
+  "slug": "vente-b2b",
+  "skill": "Vente et prospection B2B",
+  "category": "Commerce",
+  "content": "Cycle de vente : prospection, qualification (BANT), découverte des besoins, argumentation, traitement des objections, closing, suivi du pipeline. Parcours : jeux de rôle et prospection sur LinkedIn Sales Navigator. Ressources : HubSpot Academy (Inbound Sales Certification)."
+ },
+ {
+  "slug": "crm-salesforce",
+  "skill": "CRM (Salesforce, HubSpot CRM)",
+  "category": "Commerce",
+  "content": "Gérer la relation client dans un CRM : comptes, contacts, opportunités, pipeline, rapports, automatisations. Parcours : configurer un CRM pour une petite équipe commerciale. Ressources : trailhead.salesforce.com, certification Salesforce Administrator, HubSpot Sales Software Certification."
+ },
+ {
+  "slug": "relation-client",
+  "skill": "Relation et service client",
+  "category": "Commerce",
+  "content": "Accueil, écoute active, gestion des réclamations, satisfaction (NPS, CSAT), relation multicanale (téléphone, e-mail, chat). Parcours : formaliser un processus de traitement des réclamations. Ressources : cours de service client sur Coursera ou LinkedIn Learning, outils Zendesk ou Freshdesk."
+ }
+]

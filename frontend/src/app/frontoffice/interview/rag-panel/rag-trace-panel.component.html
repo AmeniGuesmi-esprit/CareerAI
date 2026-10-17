@@ -1,0 +1,85 @@
+<section class="rag">
+  <header class="rag-head">
+    <div>
+      <p class="eyebrow">Transparence RAG</p>
+      <h2>Comment ces questions ont été construites</h2>
+      <p class="lede">
+        L'IA n'invente pas : elle s'appuie sur notre base de connaissances, puis formule les questions à partir des
+        sources retrouvées ci-dessous.
+      </p>
+    </div>
+    <div class="badges">
+      <span class="pill pill-track">{{ trackLabel(rag.track) }}</span>
+      <span class="pill">Niveau {{ rag.level }}</span>
+      <span class="pill" [class.pill-hybrid]="rag.mode === 'hybrid'" [class.pill-bm25]="rag.mode === 'bm25'">
+        {{ rag.mode === 'hybrid' ? 'Recherche hybride' : 'Mots-clés seuls' }}
+      </span>
+    </div>
+  </header>
+
+  <ol class="pipeline">
+    <li class="step">
+      <span class="step-num">1</span>
+      <h3>Analyse de l'offre</h3>
+      <p>Piste détectée <strong>{{ trackLabel(rag.track) }}</strong> et niveau <strong>{{ rag.level }}</strong>
+        à partir du titre et de la description du poste.</p>
+    </li>
+    <li class="step">
+      <span class="step-num">2</span>
+      <h3>Compétences</h3>
+      <div class="chips">
+        @for (s of rag.matchedSkills; track s) { <span class="chip chip-ok">✓ {{ s }}</span> }
+        @for (s of rag.gapSkills; track s) { <span class="chip chip-gap">△ {{ s }}</span> }
+        @if (!rag.matchedSkills.length && !rag.gapSkills.length) { <span class="muted">Aucune compétence reconnue</span> }
+      </div>
+      <p class="muted small">✓ présent dans votre CV et l'offre · △ demandé par l'offre, absent du CV</p>
+    </li>
+    <li class="step">
+      <span class="step-num">3</span>
+      <h3>Recherche</h3>
+      <ol class="queries">
+        @for (q of rag.queries; track $index) { <li>{{ q }}</li> }
+      </ol>
+      <p class="muted small">{{ rag.retrieved.length }} sources retenues · {{ usedCount }} utilisées dans les questions</p>
+    </li>
+    <li class="step">
+      <span class="step-num">4</span>
+      <h3>Génération</h3>
+      <p><strong>{{ rag.model }}</strong> en JSON contraint, version <code>{{ rag.promptVersion }}</code>.</p>
+      <p class="muted small">Index <code>{{ shortHash }}</code>{{ rag.seed !== null ? ' · graine ' + rag.seed : '' }}</p>
+    </li>
+  </ol>
+
+  <div class="sources-head">
+    <h3>Sources retrouvées</h3>
+    <span class="muted small">Classées par pertinence fusionnée (RRF)</span>
+  </div>
+
+  @if (!rag.retrieved.length) {
+    <p class="muted">Aucune source n'a été retenue pour cette session.</p>
+  }
+
+  <ul class="sources">
+    @for (hit of rag.retrieved; track hit.citationId; let i = $index) {
+      <li class="source" [class.used]="usedBy(hit.citationId)">
+        <div class="rank">#{{ i + 1 }}</div>
+        <div class="source-body">
+          <div class="source-top">
+            <strong>{{ hit.title }}</strong>
+            @if (usedBy(hit.citationId)) { <span class="used-tag">Utilisée · {{ usedBy(hit.citationId) }}</span> }
+          </div>
+          <div class="meta">
+            <span class="doc doc-{{ hit.docType }}">{{ docLabel(hit.docType) }}</span>
+            <span class="muted small">{{ hit.section }}</span>
+            @if (hit.niveau !== 'all') { <span class="muted small">· {{ hit.niveau }}</span> }
+          </div>
+          <div class="bar"><span [style.width.%]="barWidth(hit)"></span></div>
+        </div>
+        <div class="signals">
+          @if (hit.denseRank !== null) { <span class="signal sig-vec" title="Rang sémantique (vecteurs bge-m3)">vecteur #{{ hit.denseRank }}</span> }
+          @if (hit.bm25Rank !== null) { <span class="signal sig-kw" title="Rang par mots-clés (BM25)">mots-clés #{{ hit.bm25Rank }}</span> }
+        </div>
+      </li>
+    }
+  </ul>
+</section>

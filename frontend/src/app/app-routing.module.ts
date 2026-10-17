@@ -118,9 +118,44 @@ const routes: Routes = [
       },
 
       {
+        path: 'skill-gap',
+        loadComponent: () =>
+          import('./skill-gap/skill-gap/skill-gap.component').then(c => c.SkillGapComponent)
+      },
+      {
+        path: 'compatibility',
+        loadChildren: () =>
+          import('./compatibility/compatibility.routes').then(m => m.COMPATIBILITY_ROUTES)
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./Gestion-Utilisateur/profile/profile.component').then(c => c.ProfileComponent)
+      },
+      {
+        path: 'interview',
+        loadComponent: () =>
+          import('./frontoffice/interview/sessions/interview-sessions.component').then(c => c.InterviewSessionsComponent)
+      },
+      {
+        path: 'interview/cvs',
+        loadComponent: () =>
+          import('./frontoffice/interview/cvs/interview-cvs.component').then(c => c.InterviewCvsComponent)
+      },
+      {
+        path: 'interview/new',
+        loadComponent: () =>
+          import('./frontoffice/interview/new-session/interview-new-session.component').then(c => c.InterviewNewSessionComponent)
+      },
+      {
+        path: 'interview/knowledge',
+        loadComponent: () =>
+          import('./frontoffice/interview/knowledge/interview-knowledge.component').then(c => c.InterviewKnowledgeComponent)
+      },
+      {
+        path: 'interview/:id',
+        loadComponent: () =>
+          import('./frontoffice/interview/detail/interview-session-detail.component').then(c => c.InterviewSessionDetailComponent)
       }
     ]
   },

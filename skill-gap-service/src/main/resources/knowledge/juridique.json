@@ -1,0 +1,26 @@
+[
+ {
+  "slug": "protection-donnees",
+  "skill": "Protection des données personnelles (RGPD)",
+  "category": "Juridique",
+  "content": "Principes du RGPD : base légale, minimisation, droits des personnes, registre des traitements, analyse d'impact, sous-traitance. En Tunisie : loi organique 2004-63 et INPDP. Ressources : atelier-rgpd.cnil.fr (MOOC gratuit de la CNIL), certification CIPP/E (IAPP)."
+ },
+ {
+  "slug": "droit-contrats",
+  "skill": "Droit des contrats et rédaction juridique",
+  "category": "Juridique",
+  "content": "Formation du contrat, clauses essentielles (prix, responsabilité, confidentialité, résiliation), contrats commerciaux et informatiques, contentieux. Parcours : rédiger et commenter un contrat de prestation. Ressources : textes officiels (JORT, Légifrance)."
+ },
+ {
+  "slug": "propriete-intellectuelle",
+  "skill": "Propriété intellectuelle",
+  "category": "Juridique",
+  "content": "Brevets, marques, dessins et modèles, droit d'auteur, licences logicielles (open source), dépôt et protection. Ressources : cours gratuit DL-101 de l'OMPI (wipo.int/academy), INNORPI en Tunisie, INPI en France."
+ },
+ {
+  "slug": "conformite",
+  "skill": "Conformité et éthique des affaires (compliance)",
+  "category": "Juridique",
+  "content": "Programme de conformité, prévention de la corruption, conflits d'intérêts, cartographie des risques, code de conduite, lanceurs d'alerte. Référentiel ISO 37001. Ressources : formations PECB (ISO 37001 Lead Implementer), oecd.org."
+ }
+]

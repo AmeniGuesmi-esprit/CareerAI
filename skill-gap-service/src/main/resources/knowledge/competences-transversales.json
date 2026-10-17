@@ -1,0 +1,44 @@
+[
+ {
+  "slug": "prise-de-parole",
+  "skill": "Communication orale et prise de parole en public",
+  "category": "Compétences transversales",
+  "content": "Structurer un message, présenter devant un public, gérer le trac, utiliser des supports visuels, répondre aux questions. Parcours : présentations régulières avec retours d'un public. Ressources : clubs Toastmasters (toastmasters.org), Coursera (Introduction to Public Speaking)."
+ },
+ {
+  "slug": "leadership",
+  "skill": "Leadership et management d'équipe",
+  "category": "Compétences transversales",
+  "content": "Fixer des objectifs, déléguer, motiver, donner du feedback, conduire des réunions, gérer les conflits, accompagner le changement. Parcours : encadrer un projet associatif ou étudiant. Ressources : Coursera (Inspiring Leadership through Emotional Intelligence), LinkedIn Learning."
+ },
+ {
+  "slug": "travail-equipe",
+  "skill": "Travail en équipe et collaboration",
+  "category": "Compétences transversales",
+  "content": "Coopérer, partager l'information, écoute active, communication non violente, travail à distance avec des outils collaboratifs (Teams, Slack, Notion). Parcours : projets de groupe avec répartition claire des rôles. Ressources : Coursera, LinkedIn Learning."
+ },
+ {
+  "slug": "gestion-temps",
+  "skill": "Organisation et gestion du temps",
+  "category": "Compétences transversales",
+  "content": "Prioriser (matrice d'Eisenhower), planifier, éviter la dispersion (technique Pomodoro), méthode GTD, respecter des échéances multiples. Parcours : planifier chaque semaine et faire le bilan. Ressources : Coursera (Work Smarter, Not Harder), ouvrage Getting Things Done de David Allen."
+ },
+ {
+  "slug": "resolution-problemes",
+  "skill": "Résolution de problèmes et esprit critique",
+  "category": "Compétences transversales",
+  "content": "Poser le problème, rechercher les causes (5 pourquoi, Ishikawa), générer et évaluer des solutions, décider, vérifier (PDCA). Parcours : appliquer la démarche à un incident réel. Ressources : Coursera (Creative Problem Solving), outils de la qualité."
+ },
+ {
+  "slug": "negociation",
+  "skill": "Négociation",
+  "category": "Compétences transversales",
+  "content": "Préparer une négociation, identifier les intérêts, BATNA, argumenter, faire des concessions, conclure un accord gagnant-gagnant. Parcours : simulations de négociation commerciale ou salariale. Ressources : Coursera (Successful Negotiation, University of Michigan), pon.harvard.edu."
+ },
+ {
+  "slug": "intelligence-emotionnelle",
+  "skill": "Intelligence émotionnelle et gestion du stress",
+  "category": "Compétences transversales",
+  "content": "Reconnaître et réguler ses émotions, empathie, gestion du stress et de la pression, résilience, relations difficiles. Parcours : journal de bord et retours de pairs. Ressources : Coursera (Inspiring Leadership through Emotional Intelligence), The Science of Well-Being (Yale)."
+ }
+]

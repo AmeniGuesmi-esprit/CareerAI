@@ -1,0 +1,56 @@
+[
+ {
+  "slug": "gestion-projet-pmp",
+  "skill": "Gestion de projet (PMP, PMBOK)",
+  "category": "Gestion de projet",
+  "content": "Cadrer, planifier et piloter un projet : charte, WBS, planning (Gantt, chemin critique), budget, risques, parties prenantes, reporting. Outils : MS Project, GanttProject. Ressources : pmi.org, certification CAPM puis PMP."
+ },
+ {
+  "slug": "prince2",
+  "skill": "PRINCE2",
+  "category": "Gestion de projet",
+  "content": "Méthode structurée de gestion de projet : principes, thèmes, processus, gestion par étapes et par exceptions. Parcours : appliquer la méthode à un projet d'étude. Ressources : axelos.com, certification PRINCE2 Foundation puis Practitioner (PeopleCert)."
+ },
+ {
+  "slug": "kanban-jira",
+  "skill": "Kanban et Jira",
+  "category": "Gestion de projet",
+  "content": "Visualiser et fluidifier le travail : tableau Kanban, limites de travail en cours, flux, métriques (lead time, throughput), gestion des tickets et des sprints dans Jira. Ressources : university.atlassian.com, certification Kanban Management Professional (Kanban University)."
+ },
+ {
+  "slug": "lean-six-sigma",
+  "skill": "Lean Six Sigma",
+  "category": "Qualité",
+  "content": "Amélioration continue : élimination des gaspillages, cartographie VSM, 5S, démarche DMAIC, outils statistiques (Pareto, Ishikawa, maîtrise statistique des procédés). Projet : réduire un délai ou un taux de défaut réel. Ressources : certification Six Sigma Green Belt (ASQ)."
+ },
+ {
+  "slug": "iso-9001",
+  "skill": "Management de la qualité (ISO 9001)",
+  "category": "Qualité",
+  "content": "Système de management de la qualité : approche processus, exigences de la norme, documentation, indicateurs, audits internes, actions correctives, revue de direction. Ressources : iso.org, certifications ISO 9001 Lead Auditor ou Lead Implementer (PECB, IRCA)."
+ },
+ {
+  "slug": "hse",
+  "skill": "Hygiène, sécurité et environnement (HSE, ISO 45001, ISO 14001)",
+  "category": "Qualité",
+  "content": "Évaluation des risques professionnels, document unique, prévention, analyse des accidents, management environnemental. Normes ISO 45001 et ISO 14001. Ressources : certification NEBOSH International General Certificate, formations PECB."
+ },
+ {
+  "slug": "itil",
+  "skill": "Gestion des services IT (ITIL 4)",
+  "category": "Gestion de projet",
+  "content": "Organiser le support et l'exploitation informatique : gestion des incidents, des problèmes, des changements, catalogue de services, niveaux de service (SLA). Ressources : certification ITIL 4 Foundation (PeopleCert), outils ServiceNow ou GLPI."
+ },
+ {
+  "slug": "gestion-risques",
+  "skill": "Gestion des risques (ISO 31000)",
+  "category": "Gestion de projet",
+  "content": "Identifier, évaluer et traiter les risques : cartographie, matrice probabilité-impact, plans de mitigation, suivi. Référentiel ISO 31000. Projet : cartographie des risques d'un projet ou d'un service. Ressources : iso.org, certification ISO 31000 Risk Manager (PECB)."
+ },
+ {
+  "slug": "product-management",
+  "skill": "Product management (Product Owner)",
+  "category": "Gestion de projet",
+  "content": "Définir la vision produit, recueillir les besoins, rédiger les user stories, prioriser le backlog (MoSCoW, valeur), suivre les indicateurs produit. Ressources : scrum.org, certification Professional Scrum Product Owner (PSPO I)."
+ }
+]

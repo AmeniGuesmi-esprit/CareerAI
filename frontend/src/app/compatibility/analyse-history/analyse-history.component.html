@@ -1,0 +1,81 @@
+<div class="page">
+  <div class="inner">
+    <div class="top">
+      <div>
+        <h1>Score de matching</h1>
+        <p class="subtitle">
+          Mesurez la compatibilité entre votre CV et une offre d'emploi, et retrouvez ici vos analyses précédentes.
+        </p>
+      </div>
+      <a routerLink="/frontoffice/compatibility/new" class="btn btn-primary">
+        <i class="ti ti-plus"></i> Nouvelle analyse
+      </a>
+    </div>
+
+    @if (error(); as message) {
+      <div class="alert-error" role="alert">
+        <i class="ti ti-alert-triangle"></i>
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="card state"><div class="spinner"></div><p>Chargement…</p></div>
+    } @else if (items().length === 0 && !error()) {
+      <div class="card state">
+        <i class="ti ti-chart-donut state-icon"></i>
+        <h2>Aucune analyse pour le moment</h2>
+        <p>Déposez votre CV et une offre d'emploi pour obtenir votre premier score.</p>
+        <a routerLink="/frontoffice/compatibility/new" class="btn btn-primary">
+          <i class="ti ti-sparkles"></i> Analyser mon CV
+        </a>
+      </div>
+    } @else {
+      <p class="count">{{ totalElements() }} analyse{{ totalElements() > 1 ? 's' : '' }}</p>
+
+      <div class="list">
+        @for (a of items(); track a.id) {
+          <article class="card row" [attr.data-level]="levelOf(a.score)">
+            <div class="score">{{ a.score }}<small>%</small></div>
+
+            <a class="info" [routerLink]="['/frontoffice/compatibility', a.id]">
+              <strong>{{ a.jobTitle }}</strong>
+              <span>
+                <i class="ti ti-file-type-pdf"></i> {{ a.cvFileName }}
+                <span class="dot">·</span>
+                {{ a.createdAt | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+            </a>
+
+            <div class="row-actions">
+              @if (confirmId() === a.id) {
+                <span class="confirm">Supprimer ?</span>
+                <button type="button" class="btn btn-danger small" [disabled]="deletingId() === a.id" (click)="remove(a.id)">Oui</button>
+                <button type="button" class="btn btn-ghost small" (click)="confirmId.set(null)">Non</button>
+              } @else {
+                <a class="icon-btn" [routerLink]="['/frontoffice/compatibility', a.id]" title="Voir le détail" aria-label="Voir le détail">
+                  <i class="ti ti-eye"></i>
+                </a>
+                <button type="button" class="icon-btn danger" title="Supprimer" aria-label="Supprimer" (click)="confirmId.set(a.id)">
+                  <i class="ti ti-trash"></i>
+                </button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pager">
+          <button type="button" class="btn btn-ghost" [disabled]="page() === 0" (click)="previous()">
+            <i class="ti ti-chevron-left"></i> Précédent
+          </button>
+          <span>Page {{ page() + 1 }} / {{ totalPages() }}</span>
+          <button type="button" class="btn btn-ghost" [disabled]="page() + 1 >= totalPages()" (click)="next()">
+            Suivant <i class="ti ti-chevron-right"></i>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
