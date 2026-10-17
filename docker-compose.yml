@@ -1,5 +1,5 @@
 # Lancement : docker compose up --build   →   application sur http://localhost:4200
-# Les variables obligatoires (JWT_SECRET, LLM_API_KEY, MAIL_*, ADMIN_*) sont lues dans les variables
+# Les variables obligatoires (JWT_SECRET, LLM_API_KEY, GEMINI_API_KEY, MAIL_*, ADMIN_*) sont lues dans les variables
 # d'environnement du PC ou dans un fichier .env à côté de ce fichier (voir .env.example).
 # Arrêtez d'abord les services lancés en local : les ports 8761, 8222 et 4200 doivent être libres.
 
@@ -118,6 +118,31 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD manquant}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL manquant}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD manquant}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
+  # ========================= EXPERIENCE SERVICE =========================
+
+  experience-service:
+    build:
+      context: ./experience-service
+      dockerfile: Dockerfile
+    container_name: experience-service
+    ports:
+      - "8090:8090"          # optionnel : utile pour tester sans passer par la gateway
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_experiences?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY manquant}
     depends_on:
       mysql:
         condition: service_healthy

@@ -39,6 +39,11 @@ spring:
           predicates:
             - Path=/api/interview/**
 
+        - id: experience-service
+          uri: lb://experience-service
+          predicates:
+            - Path=/api/experiences/**, /api/pitch/**
+
 
 eureka:
   client:
@@ -49,4 +54,4 @@ eureka:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:}
+   secret: ${JWT_SECRET:}

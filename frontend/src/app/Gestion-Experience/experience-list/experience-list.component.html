@@ -1,0 +1,127 @@
+<div class="exp-page">
+
+  @if (success()) { <div class="toast-success">{{ success() }}</div> }
+  @if (error() && !loading()) { <div class="toast-error">{{ error() }}</div> }
+
+  <div class="exp-inner">
+
+    <!-- En-tête -->
+    <div class="exp-header">
+      <div>
+        <h1 class="exp-title">Mes expériences</h1>
+        <p class="exp-subtitle">
+          {{ experiences().length }} expérience{{ experiences().length > 1 ? 's' : '' }}
+          @if (enCoursCount() > 0) { · {{ enCoursCount() }} en cours }
+        </p>
+      </div>
+      <div class="exp-header-actions">
+        <a routerLink="/frontoffice/pitch" class="btn-secondary">
+          <i class="ti ti-sparkles"></i> Pitch de 30 secondes
+        </a>
+        <a routerLink="/frontoffice/experiences/new" class="btn-primary">
+          <i class="ti ti-plus"></i> Ajouter une expérience
+        </a>
+      </div>
+    </div>
+
+    <!-- Recherche + filtre -->
+    @if (experiences().length > 0) {
+      <div class="exp-toolbar">
+        <div class="search-box">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Rechercher un poste, une entreprise, un lieu…"
+                 [ngModel]="search()" (ngModelChange)="search.set($event)" />
+        </div>
+        <select class="type-select" [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
+          <option value="">Tous les contrats</option>
+          @for (t of types; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <!-- États -->
+    @if (loading()) {
+      <div class="state-box"><div class="spinner-ring"></div><p>Chargement…</p></div>
+    } @else if (error() && experiences().length === 0) {
+      <div class="state-box">
+        <i class="ti ti-plug-connected-x state-icon"></i>
+        <p>{{ error() }}</p>
+        <button class="btn-secondary" (click)="load()">Réessayer</button>
+      </div>
+    } @else if (experiences().length === 0) {
+      <div class="state-box">
+        <i class="ti ti-briefcase state-icon"></i>
+        <h3>Aucune expérience pour le moment</h3>
+        <p>Ajoutez vos stages, emplois et missions : ils serviront à générer votre CV.</p>
+        <a routerLink="/frontoffice/experiences/new" class="btn-primary">
+          <i class="ti ti-plus"></i> Ajouter ma première expérience
+        </a>
+      </div>
+    } @else if (filtered().length === 0) {
+      <div class="state-box">
+        <i class="ti ti-search-off state-icon"></i>
+        <p>Aucune expérience ne correspond à votre recherche.</p>
+      </div>
+    } @else {
+      <!-- Timeline -->
+      <div class="timeline">
+        @for (e of filtered(); track e.id) {
+          <article class="exp-card">
+            <span class="timeline-dot" [class.current]="e.enCours"></span>
+
+            <div class="exp-card-top">
+              <div class="exp-main">
+                <h3 class="exp-poste">{{ e.poste }}</h3>
+                <p class="exp-company">
+                  <i class="ti ti-building"></i> {{ e.entreprise }}
+                  @if (e.lieu) { <span class="sep">·</span> <i class="ti ti-map-pin"></i> {{ e.lieu }} }
+                </p>
+              </div>
+              <div class="exp-actions">
+                <a [routerLink]="['/frontoffice/experiences', e.id, 'edit']" class="icon-btn" title="Modifier">
+                  <i class="ti ti-pencil"></i>
+                </a>
+                <button class="icon-btn danger" title="Supprimer" (click)="askDelete(e)">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="exp-meta">
+              <span class="badge badge-type">{{ label(e.typeContrat) }}</span>
+              <span class="exp-dates">
+                <i class="ti ti-calendar"></i>
+                {{ e.dateDebut | date:'MMM yyyy' }} – {{ e.enCours ? 'Présent' : (e.dateFin | date:'MMM yyyy') }}
+              </span>
+              <span class="exp-duree">{{ duree(e) }}</span>
+              @if (e.enCours) { <span class="badge badge-current">En cours</span> }
+            </div>
+
+            @if (e.description) {
+              <p class="exp-desc">{{ e.description }}</p>
+            }
+          </article>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Confirmation de suppression -->
+  @if (toDelete(); as exp) {
+    <div class="modal-backdrop" (click)="cancelDelete()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-icon"><i class="ti ti-trash"></i></div>
+        <h3>Supprimer cette expérience ?</h3>
+        <p><strong>{{ exp.poste }}</strong> chez {{ exp.entreprise }} sera supprimée définitivement.</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting()">Annuler</button>
+          <button class="btn-danger" (click)="confirmDelete()" [disabled]="deleting()">
+            {{ deleting() ? 'Suppression…' : 'Supprimer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
