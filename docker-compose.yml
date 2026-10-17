@@ -89,6 +89,31 @@ services:
       - careerai-net
     restart: unless-stopped
 
+  # ========================= EXPERIENCE SERVICE =========================
+
+  experience-service:
+    build:
+      context: ./backend/experience-service
+      dockerfile: Dockerfile
+    container_name: experience-service
+    ports:
+      - "8090:8090"          # optionnel : utile pour tester sans passer par la gateway
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_experiences?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY manquant}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
 networks:
   careerai-net:
     driver: bridge
