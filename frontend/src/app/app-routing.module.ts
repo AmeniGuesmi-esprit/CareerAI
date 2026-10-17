@@ -71,6 +71,11 @@ const routes: Routes = [
         loadComponent: () =>
           import('./Gestion-Utilisateur/users/users-list.component').then(c => c.UsersListComponent)
       },
+            {
+        path: 'lettres',
+        loadComponent: () =>
+          import('./Gestion-Lettre/admin/admin-lettres.component').then(c => c.AdminLettresComponent)
+      },
       {
         path: 'profile',
         loadComponent: () =>
@@ -91,6 +96,37 @@ const routes: Routes = [
         path: 'home',
         loadComponent: () =>
           import('./frontoffice/home/home.component').then(c => c.HomeComponent)
+      },
+            {
+        path: 'lettres',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettres/lettres-list.component').then(c => c.LettresListComponent)
+      },
+      {
+        path: 'lettres/new',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-form/lettre-form.component').then(c => c.LettreFormComponent)
+      },
+      {
+        path: 'lettres/:id/edit',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-form/lettre-form.component').then(c => c.LettreFormComponent)
+      },
+      // Assistant IA (doit rester AVANT 'lettres/:id')
+      {
+        path: 'lettres/ai',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-generator/lettre-generator.component').then(c => c.LettreGeneratorComponent)
+      },
+      {
+        path: 'lettres/:id/ai',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-generator/lettre-generator.component').then(c => c.LettreGeneratorComponent)
+      },
+      {
+        path: 'lettres/:id',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-detail/lettre-detail.component').then(c => c.LettreDetailComponent)
       },
       {
         path: 'profile',

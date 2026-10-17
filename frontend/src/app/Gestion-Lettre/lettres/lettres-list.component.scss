@@ -1,0 +1,104 @@
+@use '../lettre-shared' as *;
+@include lt-common;
+
+.lt-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid $border;
+  border-radius: 999px;
+  background: #fafaff;
+  margin-bottom: 20px;
+
+  i { color: $muted; }
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: .88rem;
+    color: $text;
+  }
+
+  .lt-count { font-size: .75rem; font-weight: 700; color: $primary; background: #ede9fe; padding: 2px 10px; border-radius: 999px; }
+}
+
+.lt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.lt-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 10px rgba(31, 20, 90, .04);
+  transition: transform .2s ease, box-shadow .2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(31, 20, 90, .09);
+  }
+}
+
+.lt-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lt-company-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #fff;
+  background: linear-gradient(135deg, $primary, $teal);
+}
+
+.lt-card-title {
+  min-width: 0;
+
+  h3 {
+    margin: 0;
+    font-size: .98rem;
+    font-weight: 700;
+    color: $text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lt-poste { font-size: .76rem; font-weight: 600; color: $primary; }
+}
+
+.lt-excerpt {
+  flex: 1;
+  margin: 0 0 14px;
+  font-size: .82rem;
+  line-height: 1.6;
+  color: $muted;
+}
+
+.lt-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f1f1f5;
+}
+
+.lt-date { font-size: .75rem; color: $muted; display: inline-flex; align-items: center; gap: 5px; }
+
+.lt-card-actions { display: flex; gap: 6px; }

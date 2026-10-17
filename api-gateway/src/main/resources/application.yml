@@ -26,6 +26,10 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: lettre-service
+          uri: lb://lettre-service
+          predicates:
+            - Path=/api/lettres/**
 
 
 eureka:
@@ -37,4 +41,4 @@ eureka:
 
 app:
   jwt:
-    secret: 
+    secret: ${JWT_SECRET:keujOyFNBRqHWgoEfycC1a/O8vloJYmQ0PFkbLuYaf4=}

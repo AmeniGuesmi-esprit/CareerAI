@@ -1,0 +1,125 @@
+<div class="lt-page">
+  <div class="lt-inner">
+
+    <div class="lt-hero">
+      <div>
+        <span class="lt-eyebrow"><i class="ti ti-mail-opened"></i> Lettres de motivation</span>
+        <h1>Mes lettres de motivation</h1>
+        <p>Une lettre par entreprise, avec le CV utilisé pour la rédiger.</p>
+      </div>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+        <a routerLink="/frontoffice/lettres/ai" class="lt-btn lt-btn-white">
+          <i class="ti ti-sparkles"></i> Générer avec l'IA
+        </a>
+        <a routerLink="/frontoffice/lettres/new" class="lt-btn lt-btn-white">
+          <i class="ti ti-plus"></i> Nouvelle lettre
+        </a>
+      </div>
+    </div>
+
+    @if (actionMessage) {
+      <div class="lt-alert" [ngClass]="actionMessage.type">
+        <span>{{ actionMessage.text }}</span>
+        <button type="button" (click)="actionMessage = null">×</button>
+      </div>
+    }
+
+    @if (loading) {
+      <div class="lt-state">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Chargement de vos lettres...</p>
+      </div>
+    } @else if (error) {
+      <div class="lt-alert danger">
+        <span>{{ error }}</span>
+        <button type="button" class="lt-btn lt-btn-light" (click)="load()">Réessayer</button>
+      </div>
+    } @else if (lettres.length === 0) {
+      <div class="lt-state">
+        <i class="ti ti-mail-off"></i>
+        <h3>Aucune lettre pour le moment</h3>
+        <p>Créez votre première lettre de motivation, à la main ou avec l'IA.</p>
+        <div style="display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap;">
+          <a routerLink="/frontoffice/lettres/ai" class="lt-btn lt-btn-primary">
+            <i class="ti ti-sparkles"></i> Générer avec l'IA
+          </a>
+          <a routerLink="/frontoffice/lettres/new" class="lt-btn lt-btn-light">
+            <i class="ti ti-plus"></i> Créer une lettre
+          </a>
+        </div>
+      </div>
+    } @else {
+
+      <div class="lt-search">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Rechercher (entreprise, poste, texte)..."
+               [(ngModel)]="search" (ngModelChange)="applyFilter()">
+        <span class="lt-count">{{ filtered.length }} / {{ lettres.length }}</span>
+      </div>
+
+      @if (filtered.length === 0) {
+        <div class="lt-state">
+          <i class="ti ti-search-off"></i>
+          <p>Aucune lettre ne correspond à votre recherche.</p>
+        </div>
+      } @else {
+        <div class="lt-grid">
+          @for (l of filtered; track l.id) {
+            <div class="lt-card">
+              <div class="lt-card-head">
+                <span class="lt-company-icon"><i class="ti ti-building"></i></span>
+                <div class="lt-card-title">
+                  <h3>{{ l.nomEntreprise }}</h3>
+                  @if (l.poste) { <span class="lt-poste">{{ l.poste }}</span> }
+                </div>
+              </div>
+
+              <p class="lt-excerpt">{{ excerpt(l.contenu) }}</p>
+
+              <div class="lt-card-foot">
+                <span class="lt-date">
+                  <i class="ti ti-calendar"></i>
+                  {{ (l.updatedAt || l.createdAt) | date:'dd/MM/yyyy' }}
+                </span>
+                <div class="lt-card-actions">
+                  <a class="lt-icon-btn" title="Consulter" [routerLink]="['/frontoffice/lettres', l.id]">
+                    <i class="ti ti-eye"></i>
+                  </a>
+                  <a class="lt-icon-btn" title="Modifier" [routerLink]="['/frontoffice/lettres', l.id, 'edit']">
+                    <i class="ti ti-pencil"></i>
+                  </a>
+                  <a class="lt-icon-btn" title="Améliorer avec l'IA" [routerLink]="['/frontoffice/lettres', l.id, 'ai']">
+                    <i class="ti ti-sparkles"></i>
+                  </a>
+                  <button type="button" class="lt-icon-btn danger" title="Supprimer" (click)="askDelete(l)">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- ===== MODALE SUPPRESSION ===== -->
+@if (lettreToDelete) {
+  <div class="lt-backdrop" (click)="lettreToDelete = null">
+    <div class="lt-modal" (click)="$event.stopPropagation()">
+      <h5><i class="ti ti-alert-triangle me-2 text-danger"></i>Supprimer cette lettre ?</h5>
+      <p>
+        La lettre pour <strong>{{ lettreToDelete.nomEntreprise }}</strong> sera définitivement supprimée.
+        Cette action est irréversible.
+      </p>
+      <div class="lt-modal-actions">
+        <button type="button" class="lt-btn lt-btn-light" (click)="lettreToDelete = null">Annuler</button>
+        <button type="button" class="lt-btn lt-btn-danger" [disabled]="deleting" (click)="confirmDelete()">
+          @if (deleting) { <span class="spinner-border spinner-border-sm"></span> }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}

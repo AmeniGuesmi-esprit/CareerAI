@@ -5,14 +5,23 @@
 
     <div class="tools-grid">
       @for (tool of tools; track tool.title) {
-        <div class="tool-card" [class.disabled]="!tool.available">
-          <span class="tool-icon"><i class="ti {{ tool.icon }}"></i></span>
-          <h3>{{ tool.title }}</h3>
-          <p>{{ tool.description }}</p>
-          @if (!tool.available) {
-            <span class="soon-badge">Bientôt disponible</span>
-          }
-        </div>
+        @if (tool.available && tool.route) {
+          <a class="tool-card tool-link" [routerLink]="tool.route">
+            <span class="tool-icon"><i class="ti {{ tool.icon }}"></i></span>
+            <h3>{{ tool.title }}</h3>
+            <p>{{ tool.description }}</p>
+            <span class="open-badge">Ouvrir <i class="ti ti-arrow-right"></i></span>
+          </a>
+        } @else {
+          <div class="tool-card" [class.disabled]="!tool.available">
+            <span class="tool-icon"><i class="ti {{ tool.icon }}"></i></span>
+            <h3>{{ tool.title }}</h3>
+            <p>{{ tool.description }}</p>
+            @if (!tool.available) {
+              <span class="soon-badge">Bientôt disponible</span>
+            }
+          </div>
+        }
       }
     </div>
   </div>
