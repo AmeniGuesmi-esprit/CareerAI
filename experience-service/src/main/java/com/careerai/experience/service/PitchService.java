@@ -19,18 +19,24 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Generation de pitch en prompt chaining :
- * 1. EXTRACTION (texte brut -> JSON), 2. REDACTION (JSON -> 3 pitchs), 3. JUGE (anti-invention).
- * En cas de rejet par le juge : 1 retry avec les problemes injectes, puis PitchException.
+ * Generation d'une presentation d'entretien ("Presentez-vous", environ 1 minute) en prompt chaining :
+ * 0. MASQUAGE des donnees personnelles (e-mail, lien, telephone) avant tout envoi au LLM,
+ * 1. EXTRACTION (texte brut -> JSON), 2. REDACTION (JSON -> 3 versions), 3. CONTROLES + JUGE (anti-invention).
+ * Controles : longueur, chiffres (deterministe en code), puis juge LLM.
+ * En cas de rejet : 1 retry avec les problemes injectes, puis PitchException.
  * Autour : limite de 10 requetes/minute par utilisateur + cache memoire (TTL 1h).
  */
 @Slf4j
@@ -41,15 +47,18 @@ public class PitchService {
     private static final int MAX_INPUT_LENGTH = 5000;
     private static final int MAX_ATTEMPTS = 2; // 1 essai + 1 retry
 
-    private static final double TEMP_EXTRACTION = 0.4;
-    private static final double TEMP_REDACTION = 0.8;
+    // extraction : tres stricte ; redaction : un peu de variete ; juge : deterministe
+    private static final double TEMP_EXTRACTION = 0.1;
+    private static final double TEMP_REDACTION = 0.6;
     private static final double TEMP_JUGE = 0.0;
 
     // bornes de longueur (en mots) de la validation de sortie
-    private static final int COURTE_MIN = 8, COURTE_MAX = 70;
-    private static final int STANDARD_MIN = 25, STANDARD_MAX = 130;
-    private static final int ENTHOUSIASTE_MIN = 25, ENTHOUSIASTE_MAX = 150;
-    private static final int MAX_CHARS_PER_VERSION = 1200;
+    // cibles des prompts : courte 15-35, standard et enthousiaste 100-140
+    // minimum volontairement bas : une entree pauvre ne doit pas provoquer de rejets en boucle
+    private static final int COURTE_MIN = 8, COURTE_MAX = 60;
+    private static final int STANDARD_MIN = 60, STANDARD_MAX = 180;
+    private static final int ENTHOUSIASTE_MIN = 60, ENTHOUSIASTE_MAX = 180;
+    private static final int MAX_CHARS_PER_VERSION = 1600;
 
     // cache memoire
     private static final long CACHE_TTL_NANOS = TimeUnit.HOURS.toNanos(1);
@@ -63,6 +72,17 @@ public class PitchService {
     /** Balises de delimitation : retirees de toute entree pour empecher l'evasion du bloc de donnees. */
     private static final Pattern DELIMITER_TAGS = Pattern.compile(
             "(?i)</?\\s*(experiences|donnees_extraites|pitch_a_verifier|problemes)\\s*>");
+
+    // ----- masquage des donnees personnelles -----
+    private static final Pattern EMAIL = Pattern.compile("[\\w.+-]+@[\\w-]+(?:\\.[\\w-]+)+");
+    private static final Pattern URL = Pattern.compile("(?i)(?:https?://|www\\.)\\S+");
+    private static final Pattern PHONE_CANDIDATE = Pattern.compile("\\+?\\d[\\d .\\-()]{6,}\\d");
+    /** Une plage d'annees ("2022 - 2024") ressemble a un numero : ses chiffres ne comptent pas comme telephone. */
+    private static final Pattern YEAR_RANGE = Pattern.compile("(?:19|20)\\d{2}\\s*[-\\u2013]\\s*(?:19|20)\\d{2}");
+    private static final int PHONE_MIN_DIGITS = 8;
+
+    // ----- controle deterministe des chiffres -----
+    private static final Pattern NUMBER = Pattern.compile("\\d+(?:[.,]\\d+)?");
 
     private static final String EXTRACTION_SCHEMA = """
             {
@@ -100,14 +120,16 @@ public class PitchService {
             }
             """;
 
+    /** "problemes" avant "valide" : le juge liste d'abord les problemes, puis donne son verdict. */
     private static final String JUGE_SCHEMA = """
             {
               "type": "OBJECT",
               "properties": {
-                "valide": {"type": "BOOLEAN"},
-                "problemes": {"type": "ARRAY", "items": {"type": "STRING"}}
+                "problemes": {"type": "ARRAY", "items": {"type": "STRING"}},
+                "valide": {"type": "BOOLEAN"}
               },
-              "required": ["valide", "problemes"]
+              "required": ["problemes", "valide"],
+              "propertyOrdering": ["problemes", "valide"]
             }
             """;
 
@@ -152,10 +174,10 @@ public class PitchService {
     }
 
     private PitchResponse generateFresh(String input) {
-        // Etape 1 : extraction
-        String extractedJson = extract(input);
+        // Etape 0 + 1 : masquage des donnees personnelles, puis extraction
+        String extractedJson = extract(maskPii(input));
 
-        // Etapes 2 + 3 : redaction puis juge, avec 1 retry
+        // Etapes 2 + 3 : redaction, controles en code, puis juge, avec 1 retry
         List<String> problemes = List.of();
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             String draftJson = geminiClient.generate(
@@ -164,8 +186,18 @@ public class PitchService {
 
             Draft draft = parseDraft(draftJson);
             if (!draft.errors().isEmpty()) {
-                log.warn("Pitch : sortie invalide - tentative {}/{} : {}", attempt, MAX_ATTEMPTS, draft.errors());
+                log.warn("Pitch : sortie invalide - tentative {}/{} ({} probleme(s))",
+                        attempt, MAX_ATTEMPTS, draft.errors().size());
                 problemes = draft.errors();
+                continue;
+            }
+
+            // controle deterministe : aucun chiffre ne doit etre absent des donnees (evite un appel au juge)
+            List<String> numberErrors = checkNumbers(extractedJson, draft.pitch());
+            if (!numberErrors.isEmpty()) {
+                log.warn("Pitch : chiffre invente - tentative {}/{} ({} probleme(s))",
+                        attempt, MAX_ATTEMPTS, numberErrors.size());
+                problemes = numberErrors;
                 continue;
             }
 
@@ -173,7 +205,9 @@ public class PitchService {
             if (verdict.valide()) {
                 return draft.pitch();
             }
-            log.warn("Pitch : rejete par le juge - tentative {}/{} : {}", attempt, MAX_ATTEMPTS, verdict.problemes());
+            log.warn("Pitch : rejete par le juge - tentative {}/{} ({} probleme(s))",
+                    attempt, MAX_ATTEMPTS, verdict.problemes().size());
+            log.debug("Pitch : problemes du juge : {}", verdict.problemes());
             problemes = verdict.problemes();
         }
 
@@ -261,6 +295,27 @@ public class PitchService {
         return new PitchResponse(p.getCourte(), p.getStandard(), p.getEnthousiaste());
     }
 
+    // ---------- etape 0 : masquage des donnees personnelles ----------
+
+    /**
+     * Remplace e-mails, liens et numeros de telephone par des jetons avant l'envoi au LLM.
+     * Les plages d'annees ("2022 - 2024") et les durees ("18 mois") sont conservees.
+     */
+    private String maskPii(String text) {
+        String masked = EMAIL.matcher(text).replaceAll("[EMAIL]");
+        masked = URL.matcher(masked).replaceAll("[LIEN]");
+        masked = PHONE_CANDIDATE.matcher(masked).replaceAll(this::maskPhoneCandidate);
+        return masked;
+    }
+
+    private String maskPhoneCandidate(MatchResult match) {
+        String candidate = match.group();
+        // on retire les plages d'annees avant de compter les chiffres
+        String withoutYears = YEAR_RANGE.matcher(candidate).replaceAll("");
+        long digits = withoutYears.chars().filter(Character::isDigit).count();
+        return digits >= PHONE_MIN_DIGITS ? "[TELEPHONE]" : Matcher.quoteReplacement(candidate);
+    }
+
     // ---------- etape 1 : extraction ----------
 
     private String extract(String input) {
@@ -346,7 +401,34 @@ public class PitchService {
         }
     }
 
-    // ---------- etape 3 : juge ----------
+    // ---------- etape 3a : controle deterministe des chiffres ----------
+
+    /** Tout nombre ecrit en chiffres dans le pitch doit exister dans les donnees extraites. */
+    private List<String> checkNumbers(String extractedJson, PitchResponse pitch) {
+        Set<String> allowed = new HashSet<>();
+        NUMBER.matcher(extractedJson).results().forEach(m -> allowed.add(normalizeNumber(m.group())));
+
+        List<String> errors = new ArrayList<>();
+        checkNumbersIn(errors, "courte", pitch.getCourte(), allowed);
+        checkNumbersIn(errors, "standard", pitch.getStandard(), allowed);
+        checkNumbersIn(errors, "enthousiaste", pitch.getEnthousiaste(), allowed);
+        return errors;
+    }
+
+    private void checkNumbersIn(List<String> errors, String version, String text, Set<String> allowed) {
+        NUMBER.matcher(text).results().forEach(m -> {
+            if (!allowed.contains(normalizeNumber(m.group()))) {
+                errors.add("Version " + version + " : le chiffre " + m.group()
+                        + " n'apparait pas dans les donnees");
+            }
+        });
+    }
+
+    private static String normalizeNumber(String number) {
+        return number.replace(',', '.');
+    }
+
+    // ---------- etape 3b : juge ----------
 
     private Verdict judge(String extractedJson, PitchResponse pitch) {
         String userPrompt = "Verifie qu'aucun fait du pitch n'est invente par rapport aux donnees.\n"
@@ -367,6 +449,10 @@ public class PitchService {
             if (!text.isEmpty()) {
                 problemes.add(text);
             }
+        }
+        // un probleme liste l'emporte sur le verdict : valide = true uniquement si aucun probleme
+        if (!problemes.isEmpty()) {
+            valide = false;
         }
         if (!valide && problemes.isEmpty()) {
             problemes.add("Le pitch contient des faits non presents dans les donnees");
