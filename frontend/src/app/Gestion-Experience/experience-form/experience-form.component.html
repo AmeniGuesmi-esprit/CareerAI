@@ -1,0 +1,84 @@
+<div class="form-page">
+  <div class="form-card">
+
+    <a routerLink="/frontoffice/experiences" class="back-link">
+      <i class="ti ti-arrow-left"></i> Retour à mes expériences
+    </a>
+
+    <h1 class="form-title">{{ isEdit ? 'Modifier l\'expérience' : 'Ajouter une expérience' }}</h1>
+
+    @if (loading()) {
+      <div class="state-box"><div class="spinner-ring"></div></div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        @if (error()) { <div class="alert-error">{{ error() }}</div> }
+
+        <div class="grid">
+          <div class="field">
+            <label for="poste">Poste *</label>
+            <input id="poste" type="text" formControlName="poste" placeholder="Ex. Développeur Full-Stack"
+                   [class.invalid]="invalid('poste')" />
+            @if (invalid('poste')) { <span class="err">Le poste est obligatoire (150 caractères max).</span> }
+          </div>
+
+          <div class="field">
+            <label for="entreprise">Entreprise *</label>
+            <input id="entreprise" type="text" formControlName="entreprise" placeholder="Ex. Vermeg"
+                   [class.invalid]="invalid('entreprise')" />
+            @if (invalid('entreprise')) { <span class="err">L'entreprise est obligatoire (150 caractères max).</span> }
+          </div>
+
+          <div class="field">
+            <label for="lieu">Lieu</label>
+            <input id="lieu" type="text" formControlName="lieu" placeholder="Ex. Tunis, Tunisie"
+                   [class.invalid]="invalid('lieu')" />
+          </div>
+
+          <div class="field">
+            <label for="typeContrat">Type de contrat *</label>
+            <select id="typeContrat" formControlName="typeContrat">
+              @for (t of types; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="dateDebut">Date de début *</label>
+            <input id="dateDebut" type="date" formControlName="dateDebut" [class.invalid]="invalid('dateDebut')" />
+            @if (invalid('dateDebut')) { <span class="err">La date de début est obligatoire.</span> }
+          </div>
+
+          <div class="field">
+            <label for="dateFin">Date de fin {{ enCours ? '' : '*' }}</label>
+            <input id="dateFin" type="date" formControlName="dateFin"
+                   [class.invalid]="submitted() && form.errors && !enCours" />
+            @if (submitted() && form.errors?.['finRequise']) { <span class="err">La date de fin est obligatoire.</span> }
+            @if (form.errors?.['finAvantDebut']) { <span class="err">La date de fin doit être postérieure au début.</span> }
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" formControlName="enCours" (change)="onEnCoursChange()" />
+          <span>J'occupe actuellement ce poste</span>
+        </label>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" rows="5" formControlName="description"
+                    placeholder="Missions, technologies utilisées, réalisations…"
+                    [class.invalid]="invalid('description')"></textarea>
+          <span class="counter" [class.over]="descLength > 2000">{{ descLength }} / 2000</span>
+        </div>
+
+        <div class="actions">
+          <a routerLink="/frontoffice/experiences" class="btn-cancel">Annuler</a>
+          <button type="submit" class="btn-save" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : (isEdit ? 'Enregistrer les modifications' : 'Ajouter') }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

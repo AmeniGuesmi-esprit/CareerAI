@@ -1,0 +1,62 @@
+[
+ {
+  "slug": "autocad",
+  "skill": "Dessin technique (AutoCAD)",
+  "category": "Ingénierie",
+  "content": "Dessin assisté par ordinateur 2D et 3D : calques, cotation, blocs, mise en page, plans techniques. Projet : réaliser un plan coté complet. Ressources : autodesk.com/certification, certification Autodesk Certified Professional AutoCAD for Design and Drafting."
+ },
+ {
+  "slug": "solidworks",
+  "skill": "Conception mécanique (SolidWorks)",
+  "category": "Ingénierie",
+  "content": "CAO mécanique : esquisses, pièces, assemblages, mises en plan, tolérancement, simulation simple. Projet : modéliser un mécanisme complet. Ressources : tutoriels intégrés SolidWorks, my.solidworks.com, certifications CSWA puis CSWP (Dassault Systèmes)."
+ },
+ {
+  "slug": "catia",
+  "skill": "Conception mécanique (CATIA)",
+  "category": "Ingénierie",
+  "content": "CAO utilisée dans l'aéronautique et l'automobile : conception de pièces, surfaces, assemblages, mise en plan. Projet : modéliser une pièce de carrosserie ou un sous-ensemble. Ressources : formations et certifications CATIA de Dassault Systèmes (3DEXPERIENCE Edu)."
+ },
+ {
+  "slug": "bim-revit",
+  "skill": "BIM (Revit)",
+  "category": "Génie civil",
+  "content": "Maquette numérique du bâtiment : modélisation architecturale et structurelle, familles, nomenclatures, coordination, échanges IFC, norme ISO 19650. Projet : maquette d'un petit bâtiment. Ressources : certification Autodesk Certified Professional Revit for Architectural Design."
+ },
+ {
+  "slug": "calcul-structures",
+  "skill": "Calcul de structures (Eurocodes, Robot Structural Analysis)",
+  "category": "Génie civil",
+  "content": "Descente de charges, dimensionnement béton armé et acier, vérifications selon les Eurocodes, modélisation par éléments finis avec Robot Structural Analysis. Projet : dimensionner la structure d'un bâtiment R+2. Ressources : documentation Autodesk, cours de RDM."
+ },
+ {
+  "slug": "automatisme",
+  "skill": "Automatisme industriel (API, Siemens TIA Portal)",
+  "category": "Industrie",
+  "content": "Programmer des automates programmables : langages IEC 61131-3 (Ladder, SCL, Grafcet), entrées-sorties, supervision IHM/SCADA, réseaux industriels (Profinet). Projet : automatiser une petite ligne simulée. Ressources : formations Siemens SITRAIN, simulateur PLCSIM."
+ },
+ {
+  "slug": "electricite-industrielle",
+  "skill": "Électricité industrielle",
+  "category": "Industrie",
+  "content": "Schémas électriques, distribution, protection, moteurs et variateurs, dimensionnement des câbles, logiciels de schéma (EPLAN, See Electrical), habilitation électrique (NF C 18-510). Projet : schéma d'une armoire de commande moteur. Ressources : documentation Schneider Electric."
+ },
+ {
+  "slug": "systemes-embarques",
+  "skill": "Systèmes embarqués (C, Arduino, STM32)",
+  "category": "Électronique",
+  "content": "Programmation de microcontrôleurs en C : GPIO, interruptions, timers, UART, I2C, SPI, temps réel (FreeRTOS). Projet : station de mesure connectée à capteurs. Ressources : docs.arduino.cc, STM32CubeIDE et formations en ligne de STMicroelectronics, freertos.org."
+ },
+ {
+  "slug": "matlab-simulink",
+  "skill": "MATLAB et Simulink",
+  "category": "Ingénierie",
+  "content": "Calcul scientifique, traitement du signal, modélisation et simulation de systèmes dynamiques, régulation (PID). Parcours : modéliser et réguler un moteur à courant continu. Ressources : MATLAB Onramp et Simulink Onramp (matlabacademy.mathworks.com), certification MathWorks Certified MATLAB Associate."
+ },
+ {
+  "slug": "maintenance-industrielle",
+  "skill": "Maintenance industrielle (GMAO, AMDEC, TPM)",
+  "category": "Industrie",
+  "content": "Maintenance préventive et corrective, analyse des défaillances (AMDEC), indicateurs (MTBF, MTTR, TRS), TPM, gestion avec une GMAO. Projet : plan de maintenance préventive d'un équipement. Ressources : norme NF EN 13306, documentation GMAO (Odoo Maintenance)."
+ }
+]

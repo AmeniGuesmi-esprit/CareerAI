@@ -92,6 +92,41 @@ const routes: Routes = [
         loadComponent: () =>
           import('./frontoffice/home/home.component').then(c => c.HomeComponent)
       },
+
+      // Gestion des expériences
+      {
+        path: 'experiences',
+        loadComponent: () =>
+          import('./Gestion-Experience/experience-list/experience-list.component').then(c => c.ExperienceListComponent)
+      },
+      {
+        path: 'experiences/new',
+        loadComponent: () =>
+          import('./Gestion-Experience/experience-form/experience-form.component').then(c => c.ExperienceFormComponent)
+      },
+      {
+        path: 'experiences/:id/edit',
+        loadComponent: () =>
+          import('./Gestion-Experience/experience-form/experience-form.component').then(c => c.ExperienceFormComponent)
+      },
+
+      // Pitch de 30 secondes
+      {
+        path: 'pitch',
+        loadComponent: () =>
+          import('./Gestion-Experience/pitch/pitch.component').then(c => c.PitchComponent)
+      },
+
+      {
+        path: 'skill-gap',
+        loadComponent: () =>
+          import('./skill-gap/skill-gap/skill-gap.component').then(c => c.SkillGapComponent)
+      },
+      {
+        path: 'compatibility',
+        loadChildren: () =>
+          import('./compatibility/compatibility.routes').then(m => m.COMPATIBILITY_ROUTES)
+      },
       {
   path: 'formations',
   loadComponent: () =>
@@ -112,6 +147,31 @@ const routes: Routes = [
         path: 'profile',
         loadComponent: () =>
           import('./Gestion-Utilisateur/profile/profile.component').then(c => c.ProfileComponent)
+      },
+      {
+        path: 'interview',
+        loadComponent: () =>
+          import('./frontoffice/interview/sessions/interview-sessions.component').then(c => c.InterviewSessionsComponent)
+      },
+      {
+        path: 'interview/cvs',
+        loadComponent: () =>
+          import('./frontoffice/interview/cvs/interview-cvs.component').then(c => c.InterviewCvsComponent)
+      },
+      {
+        path: 'interview/new',
+        loadComponent: () =>
+          import('./frontoffice/interview/new-session/interview-new-session.component').then(c => c.InterviewNewSessionComponent)
+      },
+      {
+        path: 'interview/knowledge',
+        loadComponent: () =>
+          import('./frontoffice/interview/knowledge/interview-knowledge.component').then(c => c.InterviewKnowledgeComponent)
+      },
+      {
+        path: 'interview/:id',
+        loadComponent: () =>
+          import('./frontoffice/interview/detail/interview-session-detail.component').then(c => c.InterviewSessionDetailComponent)
       }
     ]
   },

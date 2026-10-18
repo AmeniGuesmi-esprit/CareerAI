@@ -1,0 +1,77 @@
+<div class="pitch-page">
+
+  @if (error() && !loading()) { <div class="toast-error">{{ error() }}</div> }
+
+  <div class="pitch-inner">
+
+        <!-- En-tête -->
+    <div class="pitch-header">
+      <div>
+        <h1 class="pitch-title">Présentez-vous en 1 minute</h1>
+        <p class="pitch-subtitle">Décrivez vos expériences, l'IA rédige trois versions de votre présentation d'entretien, prêtes à dire à l'oral.</p>
+      </div>
+    </div>
+
+    <!-- Saisie -->
+    <section class="pitch-card">
+      <label class="field-label" for="experiences">Vos expériences</label>
+      <textarea id="experiences" class="pitch-textarea" rows="8"
+                placeholder="Ex. : Stage de 2 mois chez XYZ, développement d'une API Spring Boot et d'une interface Angular. Projet universitaire : application de reconnaissance faciale en Python…"
+                [ngModel]="experiences()" (ngModelChange)="experiences.set($event)"
+                [disabled]="loading()"></textarea>
+
+      <div class="pitch-actions">
+        <span class="char-count">{{ experiences().length }} caractères</span>
+        <button class="btn-primary" (click)="generate()" [disabled]="loading() || !experiences().trim()">
+          @if (loading()) {
+            <span class="btn-spinner"></span> Génération…
+          } @else {
+            <i class="ti ti-sparkles"></i> Générer
+          }
+        </button>
+      </div>
+    </section>
+
+    <!-- Loader -->
+    @if (loading()) {
+      <div class="state-box">
+        <div class="spinner-ring"></div>
+        <p>L'IA rédige votre pitch… cela peut prendre quelques secondes.</p>
+      </div>
+    }
+
+    <!-- Résultat -->
+    @if (pitch(); as p) {
+      <section class="pitch-card result-card">
+        <div class="tabs" role="tablist">
+          @for (t of tabs; track t.value) {
+            <button class="tab" role="tab" [class.active]="activeTab() === t.value"
+                    [attr.aria-selected]="activeTab() === t.value"
+                    (click)="selectTab(t.value)">
+              <i class="ti" [ngClass]="t.icon"></i> {{ t.label }}
+            </button>
+          }
+        </div>
+
+        @for (t of tabs; track t.value) {
+          @if (activeTab() === t.value) {
+            <div class="tab-panel" role="tabpanel">
+              <p class="pitch-text">{{ textOf(t.value) }}</p>
+
+              <div class="panel-footer">
+                <span class="word-count"><i class="ti ti-text-size"></i> {{ wordCount(t.value) }} mots</span>
+                <button class="btn-secondary" (click)="copy(t.value)">
+                  @if (copied() === t.value) {
+                    <i class="ti ti-check"></i> Copié
+                  } @else {
+                    <i class="ti ti-copy"></i> Copier
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </section>
+    }
+  </div>
+</div>

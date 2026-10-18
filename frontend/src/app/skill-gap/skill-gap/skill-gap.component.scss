@@ -1,0 +1,316 @@
+$primary: #7c5cfc;
+$text:    #1f2937;
+$muted:   #6b7280;
+$border:  #ececf5;
+$danger:  #dc2626;
+
+:host { display: block; }
+
+.tr-page {
+  min-height: calc(100vh - 73px);
+  background: #ffffff;
+  padding: 48px 24px;
+  box-sizing: border-box;
+}
+
+.tr-inner { max-width: 1100px; margin: 0 auto; }
+
+.tr-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0 0 6px;
+  letter-spacing: -.02em;
+}
+
+.tr-subtitle { font-size: .82rem; color: $muted; margin: 0 0 24px; }
+
+.tr-alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: $danger;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: .82rem;
+  margin-bottom: 16px;
+}
+
+.tr-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+.tr-card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(31, 20, 90, .04);
+
+  h2 {
+    font-size: .92rem;
+    font-weight: 700;
+    color: $text;
+    margin: 0 0 12px;
+
+    &:not(:first-child) { margin-top: 22px; }
+  }
+}
+
+.muted { color: $muted; font-size: .78rem; }
+
+/* ── Boutons ── */
+.btn-primary, .btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s ease, background .15s ease;
+
+  &:disabled { opacity: .55; cursor: not-allowed; }
+}
+
+.btn-primary {
+  background: $primary;
+  border: 1px solid $primary;
+  color: #fff;
+  margin-top: 14px;
+
+  &:hover:not(:disabled) { opacity: .9; }
+}
+
+.btn-outline {
+  background: #fff;
+  border: 1px dashed $primary;
+  color: $primary;
+
+  &:hover:not(:disabled) { background: rgba(124, 92, 252, .06); }
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: $muted;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover { background: rgba(124, 92, 252, .1); color: $primary; }
+}
+
+/* ── Liste des CV ── */
+.cv-list, .history-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cv-list li, .history-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid $border;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+
+  &:hover { border-color: $primary; }
+  &.selected { border-color: $primary; background: rgba(124, 92, 252, .06); }
+}
+
+.cv-icon { font-size: 1.3rem; color: $primary; }
+
+.cv-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    font-size: .82rem;
+    color: $text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  small { font-size: .7rem; color: $muted; }
+}
+
+/* ── Résultat ── */
+.result-card { min-height: 320px; }
+
+.result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  small { margin-left: 8px; }
+}
+
+.badge {
+  display: inline-block;
+  background: rgba(124, 92, 252, .12);
+  color: $primary;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: $muted;
+  font-size: .85rem;
+  padding: 24px 0;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid $border;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Historique ── */
+.history { margin-top: 20px; }
+
+.history-list li {
+  .h-name { flex: 1; font-size: .82rem; color: $text; }
+  small { font-size: .7rem; }
+}
+
+/* ── Formulaire offre ── */
+.field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid $border;
+  border-radius: 10px;
+  font-size: .85rem;
+  font-family: inherit;
+  color: $text;
+  background: #fff;
+  margin-bottom: 10px;
+
+  &:focus { outline: none; border-color: $primary; }
+}
+
+.job-area { resize: vertical; min-height: 160px; line-height: 1.5; margin-bottom: 4px; }
+
+.counter {
+  display: block;
+  font-size: .7rem;
+  color: $muted;
+
+  &.invalid { color: $danger; }
+}
+
+/* ── Résultat de l'analyse ── */
+$good: #16a34a;
+$mid:  #f59e0b;
+$low:  #dc2626;
+
+.summary { margin: 6px 0 18px; font-size: .85rem; line-height: 1.6; color: $text; }
+
+.block-title {
+  font-size: .85rem;
+  font-weight: 700;
+  color: $text;
+  margin: 20px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  i { color: $primary; }
+}
+
+.skill-list, .tips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-list li {
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fafafe;
+}
+
+.skill-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  strong { font-size: .86rem; color: $text; }
+}
+
+.prio {
+  font-size: .68rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.high   { background: rgba(220, 38, 38, .1);  color: $low; }
+  &.medium { background: rgba(245, 158, 11, .14); color: #b45309; }
+  &.low    { background: rgba(107, 114, 128, .12); color: $muted; }
+}
+
+.skill-reason { margin: 6px 0 0; font-size: .78rem; color: $muted; line-height: 1.5; }
+
+.skill-how {
+  margin: 6px 0 0;
+  font-size: .78rem;
+  color: $text;
+  line-height: 1.5;
+
+  i { color: $primary; }
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  background: rgba(22, 163, 74, .1);
+  color: $good;
+  font-size: .74rem;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+
+.tips li {
+  font-size: .8rem;
+  line-height: 1.55;
+  color: $text;
+  padding-inline-start: 14px;
+  position: relative;
+
+  &::before { content: '•'; position: absolute; inset-inline-start: 0; color: $primary; }
+}

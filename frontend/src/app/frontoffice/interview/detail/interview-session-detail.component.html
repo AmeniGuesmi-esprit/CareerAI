@@ -1,0 +1,147 @@
+<div class="interview-page">
+  <a routerLink="/frontoffice/interview" class="back">← Toutes les sessions</a>
+
+  @if (error) { <p class="alert">{{ error }}</p> }
+
+  @if (session; as s) {
+    <header class="page-header">
+      <div>
+        @if (editingTitle) {
+          <input class="title-input" [(ngModel)]="titleDraft" maxlength="150" />
+          <button class="btn btn-primary" (click)="saveTitle()">Enregistrer</button>
+          <button class="btn btn-outline" (click)="editingTitle = false">Annuler</button>
+        } @else {
+          <h1>{{ s.jobTitle }}</h1>
+          <button class="link" (click)="startEditTitle()">Modifier l'intitulé</button>
+        }
+        <p class="muted">CV : {{ s.cvLabel }} · Piste : {{ s.track }} · Niveau visé : {{ s.level }}</p>
+        @if (s.matchedSkills.length || s.gapSkills.length) {
+          <div class="skills">
+            @for (x of s.matchedSkills; track x) { <span class="skill skill-ok">{{ x }}</span> }
+            @for (x of s.gapSkills; track x) { <span class="skill skill-gap">à travailler : {{ x }}</span> }
+          </div>
+        }
+      </div>
+      <div class="header-actions">
+        @if (s.status === 'READY') {
+          <button class="btn btn-rag" (click)="toggleRag()">
+            {{ showRag ? 'Masquer le raisonnement RAG' : '✨ Voir le raisonnement RAG' }}
+          </button>
+        }
+        <button class="btn btn-danger" (click)="deleteSession()">Supprimer la session</button>
+      </div>
+    </header>
+
+    @if (showRag && rag) {
+      <app-rag-trace-panel [rag]="rag" />
+    } @else if (showRag && !rag) {
+      <p class="muted">Chargement du raisonnement RAG…</p>
+    }
+
+    @if (s.status === 'GENERATING') {
+      <div class="card status">
+        <div class="spinner"></div>
+        <p>Recherche dans la base de connaissances et génération des questions… cette page se met à jour automatiquement.</p>
+      </div>
+    } @else if (s.status === 'FAILED') {
+      <div class="card status failed">
+        <p>La génération a échoué ({{ s.errorCode }}).</p>
+        <button class="btn btn-primary" (click)="retry()">Relancer la génération</button>
+      </div>
+    }
+
+    @for (q of s.questions; track q.id) {
+      <article class="card question">
+        <header class="q-head">
+          <span class="chip">Q{{ q.position }}</span>
+          <span class="chip" [class.chip-behav]="q.category === 'comportementale'">
+            {{ q.category === 'comportementale' ? 'Comportementale' : 'Technique' }}
+          </span>
+          <span class="chip">{{ q.difficulty }}</span>
+        </header>
+        <h3>{{ q.question }}</h3>
+        <p class="muted intent">Objectif : {{ q.intent }}</p>
+
+        @if (sourcesFor(q).length) {
+          <div class="q-sources">
+            <span class="q-sources-label">📚 Sources :</span>
+            @for (h of sourcesFor(q); track h.citationId) {
+              <span class="src" [title]="h.section">{{ h.title }}</span>
+            }
+          </div>
+        }
+
+        <textarea rows="5" maxlength="5000" placeholder="Votre réponse…" [(ngModel)]="drafts[q.id]"
+          [disabled]="s.status !== 'READY'"></textarea>
+        <div class="q-actions">
+          <button class="btn btn-primary" [disabled]="s.status !== 'READY' || !(drafts[q.id]?.trim()) || savingQuestionId === q.id"
+            (click)="saveAnswer(q)">
+            {{ q.answer ? 'Mettre à jour la réponse' : 'Enregistrer la réponse' }}
+          </button>
+          @if (q.answer) {
+            <button class="btn btn-danger" (click)="deleteAnswer(q)">Supprimer la réponse</button>
+          }
+        </div>
+
+        @if (q.answer?.feedback; as f) {
+          <section class="feedback">
+            @if (f.status === 'PENDING') {
+              <div class="pending"><span class="spinner small-spinner"></span> Analyse de votre réponse en cours…</div>
+            } @else if (f.status === 'FAILED') {
+              <p class="alert">Feedback indisponible ({{ f.errorCode }}). Modifiez la réponse pour relancer l'analyse.</p>
+            } @else {
+              <div class="score-row">
+                <div class="score-ring" [style.--score]="(f.score ?? 0) * 10">
+                  <span>{{ f.score }}<small>/10</small></span>
+                </div>
+                <p class="verdict">{{ f.verdict }}</p>
+              </div>
+
+              <div class="cols">
+                <div class="panel panel-ok">
+                  <h4>Points forts</h4>
+                  <ul>@for (x of f.strengths; track $index) { <li>{{ x }}</li> }</ul>
+                </div>
+                <div class="panel panel-gap">
+                  <h4>Points à améliorer</h4>
+                  <ul>@for (x of f.gaps; track $index) { <li>{{ x }}</li> }</ul>
+                </div>
+              </div>
+
+              @if (f.star) {
+                <h4>Méthode STAR</h4>
+                <div class="star">
+                  <div><span>S</span><p><strong>Situation</strong>{{ f.star['situation'] }}</p></div>
+                  <div><span>T</span><p><strong>Tâche</strong>{{ f.star['tache'] }}</p></div>
+                  <div><span>A</span><p><strong>Action</strong>{{ f.star['action'] }}</p></div>
+                  <div><span>R</span><p><strong>Résultat</strong>{{ f.star['resultat'] }}</p></div>
+                </div>
+              }
+
+              <h4>Réponse modèle améliorée</h4>
+              <p class="improved">{{ f.improvedAnswer }}</p>
+
+              @if (f.sources.length) {
+                <h4>Références utilisées pour cette évaluation</h4>
+                <ul class="refs">
+                  @for (src of f.sources; track src.citationId) {
+                    <li [class.cited]="f.citedSourceIds.includes(src.citationId)">
+                      <span class="doc doc-{{ src.docType }}">
+                        {{ src.docType === 'rubric' ? 'Grille' : src.docType === 'guide' ? 'Méthode' : 'Question type' }}
+                      </span>
+                      <span class="ref-title">{{ src.title }}</span>
+                      @if (f.citedSourceIds.includes(src.citationId)) { <span class="cited-tag">✓ citée</span> }
+                    </li>
+                  }
+                </ul>
+              }
+              <p class="muted small">Modèle {{ f.model }} · {{ f.promptVersion }}</p>
+            }
+          </section>
+        }
+      </article>
+    }
+  } @else if (!error) {
+    <p class="muted">Chargement…</p>
+  }
+</div>

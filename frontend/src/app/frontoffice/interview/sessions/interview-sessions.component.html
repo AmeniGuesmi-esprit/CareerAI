@@ -1,0 +1,45 @@
+<div class="interview-page">
+  <header class="page-header">
+    <div>
+      <h1>Préparation d'entretien</h1>
+      <p class="subtitle">Générez des questions adaptées à votre CV et à l'offre, puis recevez un feedback sur vos réponses.</p>
+    </div>
+    <div class="actions">
+      <a routerLink="/frontoffice/interview/knowledge" class="btn btn-outline">Base de connaissances</a>
+      <a routerLink="/frontoffice/interview/cvs" class="btn btn-outline">Mes CV</a>
+      <a routerLink="/frontoffice/interview/new" class="btn btn-primary">Nouvelle session</a>
+    </div>
+  </header>
+
+  @if (error) {
+    <p class="alert">{{ error }}</p>
+  }
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else if (sessions.length === 0) {
+    <div class="empty">
+      <p>Aucune session pour le moment.</p>
+      <a routerLink="/frontoffice/interview/new" class="btn btn-primary">Créer ma première session</a>
+    </div>
+  } @else {
+    <ul class="session-list">
+      @for (s of sessions; track s.id) {
+        <li>
+          <a [routerLink]="['/frontoffice/interview', s.id]" class="session-card">
+            <div class="session-main">
+              <h3>{{ s.jobTitle }}</h3>
+              <p class="muted">CV : {{ s.cvLabel }} · {{ s.createdAt | date: 'dd/MM/yyyy' }}</p>
+            </div>
+            <div class="session-meta">
+              <span class="badge badge-{{ s.status | lowercase }}">{{ statusLabel(s.status) }}</span>
+              @if (s.status === 'READY') {
+                <span class="muted">{{ s.answeredCount }} / {{ s.questionCount }} réponses</span>
+              }
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>
