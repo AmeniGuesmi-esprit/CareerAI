@@ -1,0 +1,19 @@
+@use '../gestion-competences.shared.scss';
+
+.toolbar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.filter {
+  border: 1px solid #ececf4; background: #fff; color: #4b4b63; border-radius: 999px;
+  padding: .4rem .9rem; font-size: .85rem; font-weight: 600; cursor: pointer;
+  &.active { background: #7c5cfc; border-color: #7c5cfc; color: #fff; }
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.skill-top { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }
+.skill-name { margin: 0; font-weight: 700; color: #1f145a; font-size: 1.02rem; word-break: break-word; }
+.chip {
+  display: inline-block; margin-top: .3rem; font-size: .75rem; font-weight: 600;
+  padding: .18rem .6rem; border-radius: 999px; background: #f5f2ff; color: #7c5cfc;
+}
+.level { margin-top: .9rem; }
+.level-label { font-size: .8rem; color: #6b6b85; margin-bottom: .3rem; display: flex; justify-content: space-between; }
+.bars { display: flex; gap: 4px; }
+.bar { flex: 1; height: 6px; border-radius: 4px; background: #ececf4; &.on { background: linear-gradient(90deg, #7c5cfc, #00c2a8); } }

@@ -1,0 +1,116 @@
+<div class="page">
+  <div class="page-inner">
+
+    @if (success()) { <div class="toast-success">{{ success() }}</div> }
+    @if (pageError()) { <div class="toast-error" (click)="pageError.set('')">{{ pageError() }}</div> }
+
+    <div class="page-head">
+      <div>
+        <h1>Mes compétences</h1>
+        <p>Vos savoir-faire, utilisés pour générer vos CV et mesurer le matching avec une offre.</p>
+      </div>
+      <button class="btn-primary-g" (click)="openCreate()"><i class="ti ti-plus"></i> Ajouter une compétence</button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state"><div class="spinner-ring"></div><p>Chargement...</p></div>
+    } @else if (competences().length === 0) {
+      <div class="empty-state">
+        <i class="ti ti-bulb"></i>
+        <p>Aucune compétence pour le moment.</p>
+        <button class="btn-primary-g" (click)="openCreate()"><i class="ti ti-plus"></i> Ajouter ma première compétence</button>
+      </div>
+    } @else {
+      <div class="toolbar">
+        <button class="filter" [class.active]="filter() === 'ALL'" (click)="filter.set('ALL')">Toutes ({{ competences().length }})</button>
+        @for (c of categories; track c.value) {
+          <button class="filter" [class.active]="filter() === c.value" (click)="filter.set(c.value)">{{ c.label }}</button>
+        }
+      </div>
+
+      <div class="grid">
+        @for (c of filtered(); track c.id) {
+          <div class="card-item">
+            <div class="skill-top">
+              <div>
+                <h3 class="skill-name">{{ c.nom }}</h3>
+                <span class="chip">{{ categorieLabel(c.categorie) }}</span>
+              </div>
+              <div class="card-actions">
+                <button class="icon-btn" title="Modifier" (click)="openEdit(c)"><i class="ti ti-pencil"></i></button>
+                <button class="icon-btn danger" title="Supprimer" (click)="askDelete(c)"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+            <div class="level">
+              <div class="level-label"><span>Niveau</span><strong>{{ niveauLabel(c.niveau) }}</strong></div>
+              <div class="bars">
+                @for (i of [1,2,3,4]; track i) { <span class="bar" [class.on]="i <= niveauRank(c.niveau)"></span> }
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <p class="empty-state" style="grid-column: 1 / -1">Aucune compétence dans cette catégorie.</p>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ===== MODAL AJOUT / MODIFICATION ===== -->
+@if (showForm) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingId == null ? 'Ajouter une compétence' : 'Modifier la compétence' }}</h3>
+        <button class="icon-btn" (click)="closeForm()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="save()">
+          <div class="field">
+            <label>Nom *</label>
+            <input class="input" name="nom" [(ngModel)]="form.nom" placeholder="Ex : Spring Boot" maxlength="255">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Catégorie *</label>
+              <select class="input" name="categorie" [(ngModel)]="form.categorie">
+                @for (c of categories; track c.value) { <option [value]="c.value">{{ c.label }}</option> }
+              </select>
+            </div>
+            <div class="field">
+              <label>Niveau *</label>
+              <select class="input" name="niveau" [(ngModel)]="form.niveau">
+                @for (n of niveaux; track n.value) { <option [value]="n.value">{{ n.label }}</option> }
+              </select>
+            </div>
+          </div>
+
+          @if (formError()) { <div class="form-error">{{ formError() }}</div> }
+
+          <div class="actions">
+            <button type="button" class="btn-cancel" (click)="closeForm()">Annuler</button>
+            <button type="submit" class="btn-primary-g" [disabled]="saving()">
+              @if (saving()) { <span class="spinner"></span> }
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL SUPPRESSION ===== -->
+@if (toDelete) {
+  <div class="modal-backdrop">
+    <div class="modal-box confirm-box">
+      <div class="confirm-icon"><i class="ti ti-alert-triangle"></i></div>
+      <h4>Supprimer cette compétence ?</h4>
+      <p>« {{ toDelete.nom }} » sera définitivement supprimée.</p>
+      <div class="actions">
+        <button class="btn-cancel" (click)="toDelete = null">Annuler</button>
+        <button class="btn-danger" (click)="confirmDelete()">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+}

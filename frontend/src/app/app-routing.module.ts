@@ -128,6 +128,22 @@ const routes: Routes = [
           import('./compatibility/compatibility.routes').then(m => m.COMPATIBILITY_ROUTES)
       },
       {
+  path: 'formations',
+  loadComponent: () =>
+    import('./Gestion-Competences/formations/formations.component').then(c => c.FormationsComponent)
+},
+{
+  path: 'competences',
+  loadComponent: () =>
+    import('./Gestion-Competences/competences/competences.component').then(c => c.CompetencesComponent)
+},
+ {
+         path: 'orientation',
+         loadComponent: () =>
+           import('./Gestion-Orientation/orientation/orientation.component').then(c => c.OrientationComponent)
+       },
+
+      {
         path: 'profile',
         loadComponent: () =>
           import('./Gestion-Utilisateur/profile/profile.component').then(c => c.ProfileComponent)

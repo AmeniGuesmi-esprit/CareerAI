@@ -44,6 +44,11 @@ spring:
           predicates:
             - Path=/api/experiences/**, /api/pitch/**
 
+        - id: competence-service
+          uri: lb://competence-service
+          predicates:
+            - Path=/api/formations/**, /api/competences/**, /api/orientation/**
+
 
 eureka:
   client:
