@@ -17,5 +17,5 @@ RUN useradd --system --uid 1001 spring
 COPY --from=build /app/target/*.jar app.jar
 USER spring
 
-EXPOSE 8082
+EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"]

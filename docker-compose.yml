@@ -131,11 +131,11 @@ services:
 
   competence-service:
     build:
-      context: ./backend/competence-service
+      context: ./competence-service
       dockerfile: Dockerfile
     container_name: competence-service
     ports:
-      - "8082:8082"          # optionnel : utile pour tester sans passer par la gateway
+      - "8085:8085"          # optionnel : utile pour tester sans passer par la gateway
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_competences?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-root}
