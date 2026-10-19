@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../Gestion-Utilisateur/services/auth.service';
 import { User } from '../../Gestion-Utilisateur/models/user.model';
 
@@ -19,7 +19,7 @@ interface Tool {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -39,8 +39,9 @@ export class HomeComponent implements OnInit {
     {
       icon: 'ti-mail-opened',
       title: 'Lettre de motivation',
-      description: 'Une lettre personnalisée à partir de votre profil et de l\'offre.',
-      available: false
+      description: 'Rédigez et gérez vos lettres, une par entreprise.',
+      available: true,
+      route: '/frontoffice/lettres'
     },
     {
       icon: 'ti-target-arrow',

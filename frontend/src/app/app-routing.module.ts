@@ -72,6 +72,11 @@ const routes: Routes = [
           import('./Gestion-Utilisateur/users/users-list.component').then(c => c.UsersListComponent)
       },
       {
+        path: 'lettres',
+        loadComponent: () =>
+          import('./Gestion-Lettre/admin/admin-lettres.component').then(c => c.AdminLettresComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./Gestion-Utilisateur/profile/profile.component').then(c => c.ProfileComponent)
@@ -91,6 +96,39 @@ const routes: Routes = [
         path: 'home',
         loadComponent: () =>
           import('./frontoffice/home/home.component').then(c => c.HomeComponent)
+      },
+
+      // Gestion des lettres de motivation
+      {
+        path: 'lettres',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettres/lettres-list.component').then(c => c.LettresListComponent)
+      },
+      {
+        path: 'lettres/new',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-form/lettre-form.component').then(c => c.LettreFormComponent)
+      },
+      {
+        path: 'lettres/:id/edit',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-form/lettre-form.component').then(c => c.LettreFormComponent)
+      },
+      // Assistant IA (doit rester AVANT 'lettres/:id')
+      {
+        path: 'lettres/ai',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-generator/lettre-generator.component').then(c => c.LettreGeneratorComponent)
+      },
+      {
+        path: 'lettres/:id/ai',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-generator/lettre-generator.component').then(c => c.LettreGeneratorComponent)
+      },
+      {
+        path: 'lettres/:id',
+        loadComponent: () =>
+          import('./Gestion-Lettre/lettre-detail/lettre-detail.component').then(c => c.LettreDetailComponent)
       },
 
       // Gestion des expériences
@@ -128,20 +166,20 @@ const routes: Routes = [
           import('./compatibility/compatibility.routes').then(m => m.COMPATIBILITY_ROUTES)
       },
       {
-  path: 'formations',
-  loadComponent: () =>
-    import('./Gestion-Competences/formations/formations.component').then(c => c.FormationsComponent)
-},
-{
-  path: 'competences',
-  loadComponent: () =>
-    import('./Gestion-Competences/competences/competences.component').then(c => c.CompetencesComponent)
-},
- {
-         path: 'orientation',
-         loadComponent: () =>
-           import('./Gestion-Orientation/orientation/orientation.component').then(c => c.OrientationComponent)
-       },
+        path: 'formations',
+        loadComponent: () =>
+          import('./Gestion-Competences/formations/formations.component').then(c => c.FormationsComponent)
+      },
+      {
+        path: 'competences',
+        loadComponent: () =>
+          import('./Gestion-Competences/competences/competences.component').then(c => c.CompetencesComponent)
+      },
+      {
+        path: 'orientation',
+        loadComponent: () =>
+          import('./Gestion-Orientation/orientation/orientation.component').then(c => c.OrientationComponent)
+      },
 
       {
         path: 'profile',

@@ -1,0 +1,75 @@
+@use '../lettre-shared' as *;
+@include lt-common;
+
+// Dans le backoffice (layout Berry) le conteneur de page est déjà fourni : on n'ajoute pas de marge
+.lt-hero { margin-bottom: 0; }
+
+.lt-total {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 9px;
+  margin-left: 8px;
+  vertical-align: middle;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .2);
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.lt-search-hero {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .18);
+  min-width: 300px;
+
+  i { color: rgba(255, 255, 255, .75); }
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #fff;
+    font-size: .85rem;
+
+    &::placeholder { color: rgba(255, 255, 255, .65); }
+  }
+}
+
+.lt-table-card { border: none; border-radius: 16px; overflow: hidden; }
+
+.table {
+  > :not(caption) > * > * { vertical-align: middle; padding-top: 14px; padding-bottom: 14px; }
+
+  thead th {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #8a92a6;
+    font-weight: 700;
+    background: #f8f9fb;
+    border-bottom: none;
+  }
+
+  tbody tr:hover { background: rgba($primary, .04); }
+}
+
+.lt-actions { display: flex; gap: 6px; }
+
+.lt-sub { margin: 14px 0 6px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: $muted; }
+
+.lt-box {
+  background: #fafaff;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 14px 16px;
+  max-height: 260px;
+  overflow-y: auto;
+}
