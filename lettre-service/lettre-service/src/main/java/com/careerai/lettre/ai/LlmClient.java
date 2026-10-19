@@ -4,6 +4,8 @@ import com.careerai.lettre.exception.ApiException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestClientException;
+import java.util.concurrent.TimeoutException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -95,8 +97,8 @@ public class LlmClient {
                     continue;
                 }
                 throw mapHttpError(name, e);
-            } catch (ResourceAccessException e) {
-                throw mapIoError(name, e);
+            } catch (RestClientException e) {
+                throw mapClientError(name, e);
             }
         }
 
@@ -130,13 +132,26 @@ public class LlmClient {
         return ApiException.badGateway("Le fournisseur « " + name + " » a refusé la requête (HTTP " + status + ")." + suffix);
     }
 
-    private ApiException mapIoError(String name, ResourceAccessException e) {
-        Throwable c = e.getCause();
-        if (c instanceof HttpTimeoutException || c instanceof SocketTimeoutException) {
+    private ApiException mapClientError(String name, RestClientException e) {
+        if (isTimeout(e)) {
             return ApiException.gatewayTimeout("Le fournisseur « " + name + " » met trop de temps à répondre.");
         }
-        log.warn("LLM {} injoignable : {}", name, e.getMessage());
-        return ApiException.badGateway("Impossible de joindre le fournisseur « " + name + " ».");
+        if (e instanceof ResourceAccessException) {
+            log.warn("LLM {} injoignable : {}", name, e.getMessage());
+            return ApiException.badGateway("Impossible de joindre le fournisseur « " + name + " ».");
+        }
+        log.warn("LLM {} : réponse illisible : {}", name, e.getMessage());
+        return ApiException.badGateway("Réponse illisible du fournisseur « " + name + " ». Réessayez ou changez de modèle IA.");
+    }
+
+    private static boolean isTimeout(Throwable e) {
+        Throwable c = e;
+        for (int depth = 0; c != null && depth < 10; depth++, c = c.getCause()) {
+            if (c instanceof HttpTimeoutException || c instanceof SocketTimeoutException || c instanceof TimeoutException) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Message d'erreur lisible renvoyé par le fournisseur (champ « message » ou « error.message »). */

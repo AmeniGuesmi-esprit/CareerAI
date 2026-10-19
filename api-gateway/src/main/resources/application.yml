@@ -41,4 +41,4 @@ eureka:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:keujOyFNBRqHWgoEfycC1a/O8vloJYmQ0PFkbLuYaf4=}
+    secret: 
