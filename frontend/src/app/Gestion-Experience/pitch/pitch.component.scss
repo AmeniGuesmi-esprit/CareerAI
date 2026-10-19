@@ -1,0 +1,123 @@
+:host { display: block; }
+
+$primary: #7c5cfc;
+$teal: #00c2a8;
+$text: #1f2937;
+$muted: #6b7280;
+$border: #ececf5;
+
+.pitch-page {
+  min-height: calc(100vh - 73px);
+  background:
+    radial-gradient(900px 420px at 100% -5%, rgba(0, 194, 168, 0.07), transparent 60%),
+    radial-gradient(900px 420px at -5% 0%, rgba(124, 92, 252, 0.08), transparent 55%),
+    #f7f6fd;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.pitch-inner { max-width: 860px; margin: 0 auto; }
+
+/* ===== En-tête ===== */
+.pitch-header { margin-bottom: 1.5rem; }
+.pitch-title { font-size: 1.7rem; font-weight: 700; color: $text; margin: 0; }
+.pitch-subtitle { margin: 4px 0 0; color: $muted; font-size: .92rem; }
+
+/* ===== Cartes ===== */
+.pitch-card {
+  background: #fff; border: 1px solid #f0f0f5; border-radius: 16px;
+  padding: 1.4rem; margin-bottom: 1.25rem;
+  box-shadow: 0 4px 24px rgba(31, 20, 90, .07);
+}
+
+.field-label { display: block; font-size: .85rem; font-weight: 600; color: $text; margin-bottom: 8px; }
+.pitch-textarea {
+  width: 100%; box-sizing: border-box; padding: 12px 14px; resize: vertical; min-height: 140px;
+  border: 1px solid $border; border-radius: 10px; background: #fff;
+  font-size: .92rem; line-height: 1.55; color: $text; font-family: inherit;
+  &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba(124, 92, 252, .12); }
+  &:disabled { background: #faf9ff; cursor: not-allowed; }
+}
+
+.pitch-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; margin-top: 1rem;
+}
+.char-count { color: #9ca3af; font-size: .82rem; }
+
+/* ===== Boutons ===== */
+.btn-primary, .btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: none; border-radius: 10px; padding: 11px 20px;
+  font-size: .88rem; font-weight: 600; cursor: pointer; text-decoration: none;
+  transition: transform .15s, box-shadow .2s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, $primary, #4fb8ab); color: #fff;
+  box-shadow: 0 8px 18px rgba(124, 92, 252, .22);
+  &:hover:not(:disabled) { transform: translateY(-1px); color: #fff; }
+  &:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
+}
+.btn-secondary {
+  background: #fff; color: $primary; border: 1px solid $border;
+  &:hover { background: #f5f2ff; border-color: #d9d0ff; }
+}
+.btn-spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .45); border-top-color: #fff;
+  animation: spin .7s linear infinite;
+}
+
+/* ===== Onglets ===== */
+.tabs {
+  display: flex; gap: 6px; padding: 4px; margin-bottom: 1.1rem;
+  background: #f5f2ff; border-radius: 12px; flex-wrap: wrap;
+}
+.tab {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; background: transparent; color: $muted;
+  padding: 10px 14px; border-radius: 9px; font-size: .88rem; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+  &:hover { color: $primary; }
+  &.active { background: #fff; color: $primary; box-shadow: 0 2px 8px rgba(124, 92, 252, .15); }
+}
+
+.tab-panel { animation: fade .2s ease; }
+.pitch-text {
+  margin: 0; padding: 1.1rem 1.2rem; background: #faf9ff; border: 1px solid $border;
+  border-left: 4px solid $primary; border-radius: 12px;
+  color: #374151; font-size: .98rem; line-height: 1.7; white-space: pre-line;
+}
+.panel-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-top: 1rem; flex-wrap: wrap;
+}
+.word-count { display: inline-flex; align-items: center; gap: 6px; color: $muted; font-size: .85rem; }
+
+/* ===== États ===== */
+.state-box {
+  background: #fff; border: 1px dashed #d9d0ff; border-radius: 16px;
+  padding: 2.5rem 1.5rem; text-align: center; color: $muted; margin-bottom: 1.25rem;
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+  p { margin: 0; max-width: 420px; }
+}
+.spinner-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid #ece8ff; border-top-color: $primary; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ===== Toast erreur ===== */
+.toast-error {
+  position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 9999;
+  max-width: 90vw; text-align: center;
+  background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+  border-radius: 12px; padding: 12px 20px; font-size: .9rem; font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
+}
+
+@media (max-width: 600px) {
+  .pitch-page { padding: 1rem; }
+  .tab { flex: 1 1 100%; }
+}

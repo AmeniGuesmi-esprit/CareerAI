@@ -1,0 +1,89 @@
+# Jeu d'évaluation du retrieval : requêtes de type recruteur -> titres attendus (titres exacts des items).
+# track : piste utilisée pour le filtrage. docTypes : types de documents attendus (optionnel).
+- query: "différence entre == et equals en Java"
+  track: backend-java-spring
+  expected: ["Différence entre == et equals"]
+- query: "quelle structure de données choisir HashMap TreeMap LinkedHashMap"
+  track: backend-java-spring
+  expected: ["HashMap, TreeMap et LinkedHashMap"]
+- query: "problème N+1 avec JPA et Hibernate lazy loading"
+  track: backend-java-spring
+  expected: ["Lazy, Eager et problème N+1"]
+- query: "injection de dépendances par constructeur dans Spring"
+  track: backend-java-spring
+  expected: ["Injection par constructeur ou par champ"]
+- query: "@Transactional ne fonctionne pas en auto-invocation proxy"
+  track: backend-java-spring
+  expected: ["@Transactional et proxies"]
+- query: "fonctionnement d'un JWT et vérification de la signature"
+  track: backend-java-spring
+  expected: ["Fonctionnement d'un JWT"]
+- query: "empêcher un utilisateur d'accéder aux données d'un autre (IDOR)"
+  track: backend-java-spring
+  expected: ["Éviter l'accès aux données d'un autre utilisateur (IDOR)"]
+- query: "service discovery avec Eureka"
+  track: backend-java-spring
+  expected: ["Découverte de services avec Eureka"]
+- query: "passerelle API et routage Spring Cloud Gateway"
+  track: backend-java-spring
+  expected: ["Passerelle API et routage"]
+- query: "circuit breaker retry timeout pour la résilience"
+  track: backend-java-spring
+  expected: ["Résilience : timeouts, retry, circuit breaker"]
+- query: "Dockerfile multi-étapes pour une image légère"
+  track: backend-java-spring
+  expected: ["Dockerfile multi-étapes"]
+- query: "docker compose healthcheck et depends_on"
+  track: backend-java-spring
+  expected: ["Docker Compose : réseaux, volumes et healthchecks"]
+- query: "tests unitaires avec Mockito et mocks"
+  track: backend-java-spring
+  expected: ["Mocks avec Mockito"]
+- query: "tests d'intégration avec Testcontainers et MySQL"
+  track: backend-java-spring
+  expected: ["Tests d'intégration avec Testcontainers"]
+- query: "migrations de schéma versionnées avec Flyway"
+  track: backend-java-spring
+  expected: ["Migrations de schéma avec Flyway"]
+- query: "codes HTTP 201 202 204 pour une création ou un traitement asynchrone"
+  track: backend-java-spring
+  expected: ["Codes HTTP 200, 201, 202, 204"]
+- query: "Angular signals computed et effect"
+  track: frontend-angular
+  expected: ["Signals : signal, computed et effect"]
+- query: "OnPush et performance de détection de changements"
+  track: frontend-angular
+  expected: ["OnPush et détection de changements"]
+- query: "switchMap mergeMap concatMap différence RxJS"
+  track: frontend-angular
+  expected: ["switchMap, mergeMap et concatMap"]
+- query: "guards de route pour protéger les pages Angular"
+  track: frontend-angular
+  expected: ["Guards de route"]
+- query: "intercepteur HTTP qui ajoute le token JWT et gère les 401"
+  track: frontend-angular
+  expected: ["Intercepteurs HTTP"]
+- query: "racontez un conflit avec un membre de votre équipe"
+  track: backend-java-spring
+  docTypes: [question_bank]
+  expected: ["Parlez-moi d'un conflit avec un membre de votre équipe"]
+- query: "parlez-moi d'une erreur que vous avez commise"
+  track: backend-java-spring
+  docTypes: [question_bank]
+  expected: ["Racontez une erreur que vous avez commise"]
+- query: "un projet qui a échoué et ce que vous en avez retiré"
+  track: backend-java-spring
+  docTypes: [question_bank]
+  expected: ["Un projet qui a échoué"]
+- query: "pourquoi voulez-vous ce poste dans notre entreprise"
+  track: backend-java-spring
+  docTypes: [question_bank]
+  expected: ["Pourquoi ce poste et pourquoi notre entreprise"]
+- query: "méthode STAR pour structurer la réponse"
+  track: backend-java-spring
+  docTypes: [guide]
+  expected: ["Structure en quatre temps"]
+- query: "grille de notation des réponses sur 10"
+  track: backend-java-spring
+  docTypes: [rubric]
+  expected: ["Échelle de 0 à 10"]

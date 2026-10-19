@@ -26,11 +26,36 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+
         - id: lettre-service
           uri: lb://lettre-service
           predicates:
             - Path=/api/lettres/**
 
+        - id: skill-gap-service
+          uri: lb://skill-gap-service
+          predicates:
+            - Path=/api/skill-gap/**
+
+        - id: compatibility-service
+          uri: lb://compatibility-service
+          predicates:
+            - Path=/api/compatibility/**
+
+        - id: interview-service
+          uri: lb://interview-service
+          predicates:
+            - Path=/api/interview/**
+
+        - id: experience-service
+          uri: lb://experience-service
+          predicates:
+            - Path=/api/experiences/**, /api/pitch/**
+
+        - id: competence-service
+          uri: lb://competence-service
+          predicates:
+            - Path=/api/formations/**, /api/competences/**, /api/orientation/**
 
 eureka:
   client:
@@ -41,4 +66,4 @@ eureka:
 
 app:
   jwt:
-    secret: 
+    secret: ${JWT_SECRET:}

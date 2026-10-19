@@ -1,0 +1,32 @@
+[
+ {
+  "slug": "hygiene-infections",
+  "skill": "Hygiène hospitalière et prévention des infections",
+  "category": "Santé",
+  "content": "Précautions standard et complémentaires, hygiène des mains (les 5 moments de l'OMS), asepsie, gestion des déchets d'activités de soins, prévention des infections associées aux soins. Ressources : openwho.org (cours gratuits de l'OMS), who.int."
+ },
+ {
+  "slug": "premiers-secours",
+  "skill": "Premiers secours et gestes d'urgence",
+  "category": "Santé",
+  "content": "Bilan de la victime, alerte, position latérale de sécurité, réanimation cardio-pulmonaire, défibrillateur, hémorragies. Ressources : formations du Croissant-Rouge ou de la Croix-Rouge, certification BLS (American Heart Association) pour les soignants."
+ },
+ {
+  "slug": "qualite-soins",
+  "skill": "Qualité et sécurité des soins",
+  "category": "Santé",
+  "content": "Identitovigilance, gestion des événements indésirables, évaluation des pratiques professionnelles, accréditation des établissements (INEAS en Tunisie, HAS en France). Projet : analyser un événement indésirable avec la méthode ALARM. Ressources : has-sante.fr, ineas.tn."
+ },
+ {
+  "slug": "pharmacovigilance",
+  "skill": "Pharmacovigilance",
+  "category": "Santé",
+  "content": "Recueil et déclaration des effets indésirables des médicaments, imputabilité, gestion du signal, bonnes pratiques de pharmacovigilance. Références : Centre national de pharmacovigilance en Tunisie, ANSM, EMA. Ressources : openwho.org, ema.europa.eu."
+ },
+ {
+  "slug": "informatique-sante",
+  "skill": "Informatique de santé (dossier patient, HL7 FHIR)",
+  "category": "Santé",
+  "content": "Dossier patient informatisé, interopérabilité des systèmes de santé, standards HL7 FHIR et DICOM, confidentialité des données de santé. Projet : API exposant des ressources FHIR Patient et Observation. Ressources : hl7.org/fhir, dicomstandard.org."
+ }
+]

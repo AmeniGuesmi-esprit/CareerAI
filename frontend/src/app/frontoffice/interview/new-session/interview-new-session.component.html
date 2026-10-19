@@ -1,0 +1,58 @@
+<div class="interview-page">
+  <header class="page-header">
+    <div>
+      <h1>Nouvelle session</h1>
+      <p class="subtitle">Choisissez un CV et décrivez le poste visé. La génération des questions prend quelques dizaines de secondes.</p>
+    </div>
+    <a routerLink="/frontoffice/interview" class="btn btn-outline">Annuler</a>
+  </header>
+
+  @if (cvs.length === 0) {
+    <div class="empty">
+      <p>Vous n'avez pas encore de CV.</p>
+      <a routerLink="/frontoffice/interview/cvs" class="btn btn-primary">Ajouter un CV</a>
+    </div>
+  } @else {
+    <form class="card form" (ngSubmit)="submit()">
+      <label>
+        CV
+        <select name="cv" [(ngModel)]="cvId" required>
+          <option [ngValue]="null" disabled>Choisir un CV</option>
+          @for (cv of cvs; track cv.id) {
+            <option [ngValue]="cv.id">{{ cv.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Intitulé du poste
+        <input name="jobTitle" type="text" maxlength="150" [(ngModel)]="jobTitle" required />
+      </label>
+
+      <label>
+        Description de l'offre (50 caractères minimum)
+        <textarea name="jobDescription" rows="8" maxlength="8000" [(ngModel)]="jobDescription" required></textarea>
+        <span class="muted">{{ jobDescription.length }} / 8000</span>
+      </label>
+
+      <div class="row">
+        <label>
+          Nombre de questions
+          <input name="questionCount" type="number" min="3" max="10" [(ngModel)]="questionCount" />
+        </label>
+        <label>
+          Analyse de compatibilité liée (optionnel, ID)
+          <input name="analysisId" type="number" min="1" [(ngModel)]="analysisId" />
+        </label>
+      </div>
+
+      @if (error) { <p class="alert">{{ error }}</p> }
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="!valid || submitting">
+          {{ submitting ? 'Création…' : 'Générer les questions' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

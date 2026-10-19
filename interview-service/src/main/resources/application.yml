@@ -1,0 +1,70 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: interview-service
+  datasource:
+    url: ${INTERVIEW_DB_URL:jdbc:mysql://localhost:3306/interview_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  cloud:
+    loadbalancer:
+      cache:
+        ttl: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD:admin123}@localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+ollama:
+  base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+  chat-model: ${OLLAMA_CHAT_MODEL:qwen3.5:4b}
+  embed-model: ${OLLAMA_EMBED_MODEL:bge-m3}
+  think: false
+  num-ctx: 8192
+  temperature: 0.3
+  seed: 42
+  keep-alive: 10m
+  connect-timeout-seconds: 5
+  read-timeout-seconds: 240
+
+rag:
+  knowledge-path: ${RAG_KNOWLEDGE_PATH:../knowledge}
+  prompt-version: rag-v1
+  questions-top-k: 6
+  feedback-top-k: 4
+  rrf-k: 60
+  mmr-lambda: 0.7
+  embed-batch-size: 32
+
+interview:
+  compat-service-url: http://compatibility-service
+  max-cv-chars: 12000
+  question-count-default: 6
+  question-count-min: 3
+  question-count-max: 10
+  answer-max-chars: 5000

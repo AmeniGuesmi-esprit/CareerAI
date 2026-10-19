@@ -1,0 +1,71 @@
+@use '../compat-vars' as *;
+
+:host { display: block; }
+
+.page { @include page; }
+.inner { max-width: 900px; margin: 0 auto; }
+
+@include buttons;
+@include alert-error;
+
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+h1 { font-size: 1.6rem; font-weight: 700; color: $text; margin: 0 0 6px; letter-spacing: -.02em; }
+.subtitle { color: $muted; font-size: .85rem; line-height: 1.6; margin: 0; max-width: 560px; }
+
+.card { @include card; }
+.count { font-size: .78rem; color: $muted; margin: 0 0 10px; }
+
+.btn.small { padding: 6px 12px; font-size: .78rem; }
+
+.state {
+  padding: 56px 24px; text-align: center; color: $muted;
+  h2 { font-size: 1.05rem; color: $text; margin: 12px 0 6px; }
+  p { margin: 0 0 18px; font-size: .86rem; }
+  .state-icon { font-size: 2.4rem; color: $primary; }
+}
+.spinner {
+  width: 40px; height: 40px; margin: 0 auto 10px;
+  border: 4px solid #ece8ff; border-top-color: $primary; border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+.row {
+  display: flex; align-items: center; gap: 16px; padding: 14px 18px;
+  transition: box-shadow .2s ease, transform .2s ease;
+  --level: #{$danger};
+  &[data-level='medium'] { --level: #{$warning}; }
+  &[data-level='high'] { --level: #{$success}; }
+
+  &:hover { box-shadow: 0 8px 22px rgba(31, 20, 90, .09); transform: translateY(-1px); }
+}
+
+.score {
+  flex-shrink: 0; width: 62px; height: 62px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; font-weight: 700; color: var(--level);
+  border: 4px solid var(--level); background: #fff;
+  small { font-size: .65rem; font-weight: 600; margin-left: 1px; }
+}
+
+.info {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; text-decoration: none;
+  strong { font-size: .95rem; color: $text; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  span { font-size: .76rem; color: $muted; .dot { margin: 0 4px; } }
+  &:hover strong { color: $primary; }
+}
+
+.row-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.confirm { font-size: .8rem; color: $text; font-weight: 600; }
+
+.pager {
+  display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px;
+  span { font-size: .82rem; color: $muted; }
+}
+
+@media (max-width: 600px) {
+  .row { flex-wrap: wrap; }
+  .row-actions { width: 100%; justify-content: flex-end; }
+}

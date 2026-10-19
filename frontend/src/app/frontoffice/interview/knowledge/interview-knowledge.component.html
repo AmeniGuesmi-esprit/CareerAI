@@ -1,0 +1,137 @@
+<div class="kb-page">
+  <header class="hero">
+    <div>
+      <a routerLink="/frontoffice/interview" class="back">← Mes sessions</a>
+      <p class="eyebrow">Base de connaissances</p>
+      <h1>Ce sur quoi s'appuie votre préparation</h1>
+      <p class="lede">
+        Chaque question générée provient de ces ressources, versionnées et vérifiables. Explorez-les ou testez
+        la recherche : c'est exactement ce que l'IA consulte avant de vous poser une question.
+      </p>
+    </div>
+    @if (overview) {
+      <div class="mode-card" [class.hybrid]="overview.mode === 'hybrid'">
+        <span class="mode-dot"></span>
+        <div>
+          <strong>{{ overview.mode === 'hybrid' ? 'Recherche hybride' : 'Mots-clés seuls' }}</strong>
+          <small>
+            {{ overview.mode === 'hybrid' ? 'Vecteurs bge-m3 + BM25, fusionnés (RRF)' : 'Index vectoriel absent : BM25 seul' }}
+          </small>
+        </div>
+      </div>
+    }
+  </header>
+
+  @if (error) { <p class="alert">{{ error }}</p> }
+
+  @if (overview; as o) {
+    <section class="stats">
+      <div class="stat">
+        <span class="stat-value">{{ o.items }}</span>
+        <span class="stat-label">items indexés</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ o.documents.length }}</span>
+        <span class="stat-label">documents</span>
+      </div>
+      @for (t of trackEntries; track t.key) {
+        <div class="stat">
+          <span class="stat-value">{{ t.count }}</span>
+          <span class="stat-label">{{ trackLabel(t.key) }}</span>
+        </div>
+      }
+      @if (o.manifest; as m) {
+        <div class="stat stat-wide">
+          <span class="stat-label">Version de l'index</span>
+          <code>{{ m.corpusHash.slice(0, 12) }}</code>
+          <span class="stat-label">{{ m.chunkCount }} chunks · {{ m.embedModel ?? 'sans embeddings' }}{{ m.dims ? ' · ' + m.dims + ' dims' : '' }}</span>
+        </div>
+      }
+    </section>
+
+    <section class="docs">
+      @for (d of o.documents; track d.docId) {
+        <article class="doc-card">
+          <div class="doc-top">
+            <span class="doc-type doc-{{ d.docType }}">{{ docLabel(d.docType) }}</span>
+            <span class="muted small">{{ trackLabel(d.track) }}</span>
+          </div>
+          <h3>{{ title(d) }}</h3>
+          <p class="muted small">{{ d.items }} élément{{ d.items > 1 ? 's' : '' }}</p>
+          <div class="sections">
+            @for (s of d.sections.slice(0, 6); track s) { <span class="section-chip">{{ s }}</span> }
+            @if (d.sections.length > 6) { <span class="section-chip more">+{{ d.sections.length - 6 }}</span> }
+          </div>
+        </article>
+      }
+    </section>
+  }
+
+  <section class="search-card">
+    <h2>Testez la recherche</h2>
+    <p class="muted">Tapez une notion, une situation ou une compétence. Les résultats montrent pourquoi chaque source est retenue.</p>
+
+    <form class="search-bar" (ngSubmit)="search()">
+      <input name="q" type="search" placeholder="Ex. : différence entre HashMap et TreeMap" [(ngModel)]="query" maxlength="500" />
+      <select name="track" [(ngModel)]="track" aria-label="Piste">
+        <option value="">Piste auto</option>
+        <option value="backend-java-spring">Backend Java / Spring</option>
+        <option value="frontend-angular">Frontend Angular</option>
+        <option value="generic">Générique</option>
+      </select>
+      <select name="docType" [(ngModel)]="docType" aria-label="Type">
+        <option value="">Tous les types</option>
+        <option value="question_bank">Questions types</option>
+        <option value="guide">Méthode</option>
+        <option value="rubric">Grille</option>
+      </select>
+      <button type="submit" class="btn-search" [disabled]="!query.trim() || searching">
+        {{ searching ? 'Recherche…' : 'Rechercher' }}
+      </button>
+    </form>
+
+    <div class="examples">
+      @for (ex of examples; track ex) {
+        <button type="button" class="example" (click)="search(ex)">{{ ex }}</button>
+      }
+    </div>
+
+    @if (result) {
+      <div class="results-head">
+        <span>{{ result.hits.length }} résultat{{ result.hits.length > 1 ? 's' : '' }} pour « {{ result.query }} »</span>
+        <span class="muted small">
+          Piste {{ trackLabel(result.track) }} · {{ result.mode === 'hybrid' ? 'hybride' : 'mots-clés seuls' }}
+        </span>
+      </div>
+
+      @if (!result.hits.length) {
+        <p class="muted">Aucune source pertinente. Essayez d'autres termes ou changez la piste.</p>
+      }
+
+      <ol class="results">
+        @for (h of result.hits; track h.citationId; let i = $index) {
+          <li class="result">
+            <div class="result-rank">{{ i + 1 }}</div>
+            <div class="result-body">
+              <div class="result-top">
+                <strong>{{ h.title }}</strong>
+                <span class="doc-type doc-{{ h.docType }}">{{ docLabel(h.docType) }}</span>
+                @if (h.niveau !== 'all') { <span class="level">{{ h.niveau }}</span> }
+              </div>
+              <p class="section">{{ h.section }}</p>
+              <p class="excerpt">{{ h.excerpt }}</p>
+              <p class="explain">💡 {{ explain(h) }}</p>
+            </div>
+            <div class="result-side">
+              <div class="score"><div class="score-fill" [style.width.%]="barWidth(h)"></div></div>
+              <div class="signals">
+                @if (h.denseRank !== null) { <span class="sig sig-vec">vecteur #{{ h.denseRank }}</span> }
+                @if (h.bm25Rank !== null) { <span class="sig sig-kw">mots-clés #{{ h.bm25Rank }}</span> }
+              </div>
+            </div>
+          </li>
+        }
+      </ol>
+    }
+  </section>
+</div>

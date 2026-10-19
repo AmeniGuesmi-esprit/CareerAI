@@ -1,0 +1,41 @@
+<div class="interview-page">
+  <header class="page-header">
+    <div>
+      <h1>Mes CV</h1>
+      <p class="subtitle">Ajoutez vos CV une fois, puis choisissez-en un pour chaque session.</p>
+    </div>
+    <a routerLink="/frontoffice/interview" class="btn btn-outline">Retour aux sessions</a>
+  </header>
+
+  <section class="card">
+    <h2>Ajouter un CV (PDF, 5 Mo max)</h2>
+    <div class="form-row">
+      <input type="file" accept="application/pdf,.pdf" (change)="onFileSelected($event)" />
+      <input type="text" maxlength="150" placeholder="Libellé (ex. CV backend 2026)" [(ngModel)]="label" />
+      <button class="btn btn-primary" [disabled]="!file || uploading" (click)="upload()">
+        {{ uploading ? 'Envoi…' : 'Ajouter' }}
+      </button>
+    </div>
+    @if (success) { <p class="ok">{{ success }}</p> }
+    @if (error) { <p class="alert">{{ error }}</p> }
+  </section>
+
+  <section class="card">
+    <h2>Mes CV enregistrés</h2>
+    @if (cvs.length === 0) {
+      <p class="muted">Aucun CV pour le moment.</p>
+    } @else {
+      <ul class="cv-list">
+        @for (cv of cvs; track cv.id) {
+          <li>
+            <div>
+              <strong>{{ cv.label }}</strong>
+              <div class="muted">{{ cv.fileName }} · {{ cv.createdAt | date: 'dd/MM/yyyy' }}</div>
+            </div>
+            <button class="btn btn-danger" (click)="remove(cv)">Supprimer</button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
