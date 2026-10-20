@@ -29,19 +29,42 @@ export class HomeComponent implements OnInit {
 
   user: User | null = null;
 
+  // Mêmes modules, dans le même ordre et avec les mêmes icônes que la barre de navigation
   tools: Tool[] = [
     {
-      icon: 'ti-file-cv',
-      title: 'Générer mon CV',
-      description: 'Créez un CV professionnel adapté à l\'offre visée.',
-      available: false
-    },
-    {
       icon: 'ti-mail-opened',
-      title: 'Lettre de motivation',
-      description: 'Rédigez et gérez vos lettres, une par entreprise.',
+      title: 'Lettres',
+      description: 'Générez ou améliorez vos lettres de motivation avec l\'IA, une par entreprise.',
       available: true,
       route: '/frontoffice/lettres'
+    },
+    {
+      icon: 'ti-school',
+      title: 'Formations',
+      description: 'Gérez vos diplômes et formations : établissement, domaine et dates.',
+      available: true,
+      route: '/frontoffice/formations'
+    },
+    {
+      icon: 'ti-bulb',
+      title: 'Compétences',
+      description: 'Listez vos compétences par catégorie et par niveau de maîtrise.',
+      available: true,
+      route: '/frontoffice/competences'
+    },
+    {
+      icon: 'ti-compass',
+      title: 'Orientation',
+      description: 'Demandez conseil à l\'IA sur votre parcours, vos formations et vos certifications.',
+      available: true,
+      route: '/frontoffice/orientation'
+    },
+    {
+      icon: 'ti-briefcase',
+      title: 'Mes expériences',
+      description: 'Gérez vos expériences et générez votre pitch « Présentez-vous » avec l\'IA.',
+      available: true,
+      route: '/frontoffice/experiences'
     },
     {
       icon: 'ti-target-arrow',
@@ -52,15 +75,15 @@ export class HomeComponent implements OnInit {
     },
     {
       icon: 'ti-chart-donut',
-      title: 'Score de matching',
-      description: 'Mesurez la compatibilité entre votre CV et une description d\'offre.',
+      title: 'Matching CV',
+      description: 'Mesurez la compatibilité entre votre CV et une offre avec un score sur 100.',
       available: true,
       route: '/frontoffice/compatibility'
     },
     {
       icon: 'ti-messages',
-      title: 'Questions d\'entretien',
-      description: 'Préparez-vous avec les questions les plus probables pour le poste.',
+      title: 'Entretien',
+      description: 'Entraînez-vous avec des questions d\'entretien et recevez un feedback noté.',
       available: true,
       route: '/frontoffice/interview'
     }
