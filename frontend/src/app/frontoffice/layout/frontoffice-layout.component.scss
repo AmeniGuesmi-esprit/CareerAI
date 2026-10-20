@@ -18,7 +18,7 @@ $border:       #ececf5;
   backdrop-filter: blur(20px);
   border-bottom: 1px solid $border;
   box-shadow: 0 4px 24px rgba(31, 20, 90, .07);
-  padding: 12px 40px;
+  padding: 12px 20px;
 
   // Fine ligne d'accent tout en haut de la navbar
   &::before {
@@ -44,7 +44,7 @@ $border:       #ececf5;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
+  gap: 16px;
   position: relative;
 }
 
@@ -92,25 +92,28 @@ $border:       #ececf5;
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   flex: 1;
   justify-content: center;
+  flex-wrap: nowrap;
+  min-width: 0;
 
   a {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 5px;
     color: $muted;
     text-decoration: none;
     font-weight: 600;
-    font-size: .93rem;
-    padding: 9px 16px;
+    font-size: .8rem;
+    padding: 7px 10px;
     border-radius: 30px;
+    white-space: nowrap;
     position: relative;
     transition: color .2s ease, background .2s ease, transform .15s ease;
 
     i {
-      font-size: 1rem;
+      font-size: .9rem;
       opacity: .75;
       transition: opacity .2s ease, transform .2s ease;
     }
