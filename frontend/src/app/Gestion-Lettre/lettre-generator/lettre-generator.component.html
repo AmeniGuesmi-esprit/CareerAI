@@ -1,0 +1,155 @@
+<div class="lt-page">
+  <div class="lt-inner">
+
+    <div class="lt-hero">
+      <div>
+        <span class="lt-eyebrow"><i class="ti ti-sparkles"></i> Assistant IA</span>
+        <h1>{{ editId ? 'Modifier la lettre' : 'Nouvelle lettre' }}</h1>
+        <p>Collez l'offre et votre CV : l'IA rédige un premier jet que vous relisez, améliorez et enregistrez.</p>
+      </div>
+      <a routerLink="/frontoffice/lettres" class="lt-btn lt-btn-white">
+        <i class="ti ti-arrow-left"></i> Mes lettres
+      </a>
+    </div>
+
+    @if (error) {
+      <div class="lt-alert danger" role="alert"><span>{{ error }}</span></div>
+    }
+    @if (info) {
+      <div class="lt-alert success" role="status"><span>{{ info }}</span></div>
+    }
+
+    @if (loadingLetter) {
+      <div class="lt-state">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Chargement de la lettre...</p>
+      </div>
+    } @else {
+      <div class="gen-grid">
+
+        <!-- ───────── Colonne gauche : informations ───────── -->
+        <form class="gen-panel" (ngSubmit)="generate()" #f="ngForm">
+          <h2 class="gen-title"><span class="gen-title-icon"><i class="ti ti-briefcase"></i></span> Candidature</h2>
+
+          <div class="gen-row">
+            <div class="gen-field">
+              <label for="g-entreprise">Entreprise *</label>
+              <input id="g-entreprise" class="gen-input" name="nomEntreprise" [(ngModel)]="nomEntreprise"
+                     maxlength="150" required autocomplete="off" placeholder="Ex. : Vermeg">
+            </div>
+            <div class="gen-field">
+              <label for="g-poste">Poste visé</label>
+              <input id="g-poste" class="gen-input" name="poste" [(ngModel)]="poste"
+                     maxlength="150" autocomplete="off" placeholder="Ex. : Ingénieur logiciel">
+            </div>
+          </div>
+
+          <div class="gen-field">
+            <label for="g-offre">Offre d'emploi *</label>
+            <textarea id="g-offre" class="gen-input" name="offre" [(ngModel)]="offre" rows="7" maxlength="12000"
+                      placeholder="Collez ici le texte de l'offre"></textarea>
+          </div>
+
+          <div class="gen-field">
+            <div class="gen-label-line">
+              <label for="g-cv">Votre CV *</label>
+              <label class="gen-file" [class.is-disabled]="extracting">
+                <i class="ti ti-upload"></i>
+                {{ extracting ? 'Lecture du fichier...' : 'Importer un fichier' }}
+                <input type="file" accept=".pdf,.docx,.txt" (change)="onFile($event)" [disabled]="extracting" hidden>
+              </label>
+            </div>
+            <textarea id="g-cv" class="gen-input" name="cv" [(ngModel)]="cv" rows="9" maxlength="20000"
+                      placeholder="Collez votre CV ou importez un PDF, DOCX ou TXT (5 Mo max)"></textarea>
+            <small class="gen-note"><i class="ti ti-shield-check"></i> Votre nom et votre adresse sont retirés du CV avant l'envoi à l'IA.</small>
+          </div>
+
+          <div class="gen-row gen-row-3">
+            <div class="gen-field">
+              <label for="g-ton">Ton</label>
+              <select id="g-ton" class="gen-input" name="ton" [(ngModel)]="ton">
+                @for (t of tones; track t.value) {
+                  <option [value]="t.value">{{ t.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="gen-field">
+              <label for="g-langue">Langue</label>
+              <select id="g-langue" class="gen-input" name="langue" [(ngModel)]="langue">
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="gen-field">
+              <label for="g-provider">Modèle IA</label>
+              <select id="g-provider" class="gen-input" name="provider" [(ngModel)]="provider">
+                @for (p of providers; track p.name) {
+                  <option [value]="p.name" [disabled]="!p.configured">
+                    {{ p.name }}{{ p.configured ? '' : ' (clé manquante)' }}
+                  </option>
+                }
+                @if (!providers.length) {
+                  <option value="">Par défaut</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="lt-btn lt-btn-primary gen-submit" [disabled]="!canGenerate">
+            @if (generating) { <span class="spinner-border spinner-border-sm"></span> } @else { <i class="ti ti-sparkles"></i> }
+            {{ generating ? 'Rédaction en cours...' : (contenu ? 'Régénérer la lettre' : 'Générer la lettre') }}
+          </button>
+        </form>
+
+        <!-- ───────── Colonne droite : lettre ───────── -->
+        <div class="gen-panel">
+          <h2 class="gen-title"><span class="gen-title-icon"><i class="ti ti-mail-opened"></i></span> Lettre</h2>
+
+          <textarea class="gen-input gen-letter" name="contenu" [(ngModel)]="contenu" rows="18" maxlength="20000"
+                    placeholder="La lettre apparaîtra ici. Vous pouvez aussi l'écrire ou la coller vous-même."></textarea>
+          @if (usedModel) {
+            <small class="gen-note"><i class="ti ti-robot"></i> Rédigée avec {{ usedModel }}. Relisez-la : l'IA peut se tromper.</small>
+          }
+
+          <div class="gen-improve">
+            <div class="gen-field">
+              <label for="g-instruction">Améliorer cette lettre</label>
+              <input id="g-instruction" class="gen-input" name="instruction" [(ngModel)]="instruction" maxlength="500"
+                     placeholder="Ex. : plus court, ton plus direct, insister sur mon stage (facultatif)"
+                     (keydown.enter)="improve(); $event.preventDefault()">
+            </div>
+            <button type="button" class="lt-btn lt-btn-light gen-improve-btn" (click)="improve()" [disabled]="!contenu.trim() || busy">
+              @if (improving) { <span class="spinner-border spinner-border-sm"></span> } @else { <i class="ti ti-wand"></i> }
+              {{ improving ? 'Analyse...' : 'Améliorer' }}
+            </button>
+          </div>
+
+          @if (score !== null) {
+            <div class="gen-score">
+              <div class="gen-score-line">
+                <span>Note de la version précédente</span>
+                <strong>{{ score }}/100</strong>
+              </div>
+              <div class="gen-bar"><div class="gen-bar-fill" [style.width.%]="score"></div></div>
+            </div>
+          }
+          @if (suggestions.length) {
+            <ul class="gen-tips">
+              @for (s of suggestions; track $index) {
+                <li>{{ s }}</li>
+              }
+            </ul>
+          }
+
+          <div class="gen-actions">
+            <button type="button" class="lt-btn lt-btn-primary" (click)="save()" [disabled]="!canSave">
+              @if (saving) { <span class="spinner-border spinner-border-sm"></span> } @else { <i class="ti ti-device-floppy"></i> }
+              {{ saving ? 'Enregistrement...' : (editId ? 'Enregistrer les modifications' : 'Enregistrer la lettre') }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+</div>

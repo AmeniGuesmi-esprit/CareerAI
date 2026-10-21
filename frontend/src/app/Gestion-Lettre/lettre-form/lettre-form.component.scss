@@ -1,0 +1,52 @@
+@use '../lettre-shared' as *;
+@include lt-common;
+
+.lt-inner-narrow { max-width: 860px; }
+
+.lt-form {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 26px;
+  box-shadow: 0 2px 10px rgba(31, 20, 90, .04);
+}
+
+.lt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.lt-field {
+  margin-bottom: 18px;
+
+  label { display: block; font-size: .8rem; font-weight: 700; color: $text; margin-bottom: 6px; }
+}
+
+.lt-optional { font-weight: 500; color: $muted; }
+
+.lt-input {
+  width: 100%;
+  border: 1px solid #e4e6ef;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: .9rem;
+  font-family: inherit;
+  color: $text;
+  background: #fff;
+  resize: vertical;
+  transition: border-color .15s ease, box-shadow .15s ease;
+
+  &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); }
+  &.invalid { border-color: $danger; }
+}
+
+textarea.lt-input { line-height: 1.6; }
+
+.lt-field-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+
+.lt-error { font-size: .75rem; color: $danger; font-weight: 600; }
+
+.lt-counter { font-size: .72rem; color: $muted; &.over { color: $danger; font-weight: 700; } }
+
+.lt-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+
+@media (max-width: 640px) {
+  .lt-row { grid-template-columns: 1fr; gap: 0; }
+}

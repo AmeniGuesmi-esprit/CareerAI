@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SkillGapService } from '../services/skill-gap.service';
 import { CvUpload, Priority, SkillGapAnalysis } from '../models/skill-gap.model';
@@ -7,6 +7,14 @@ const MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED_EXT = ['pdf', 'docx', 'txt'];
 export const JOB_MIN = 50;    // mêmes bornes que AnalysisCreateRequest (backend)
 export const JOB_MAX = 6000;
+
+/** Élément en attente de confirmation de suppression. */
+interface PendingDelete {
+  kind: 'cv' | 'analysis';
+  id: number;
+  name: string;
+  linked: number;   // analyses supprimées avec le CV
+}
 
 const PRIORITY_LABEL: Record<Priority, string> = {
   HIGH: 'Prioritaire',
@@ -39,9 +47,17 @@ export class SkillGapComponent implements OnInit {
 
   uploading = signal(false);
   analyzing = signal(false);
+  dragOver = signal(false);
   error = signal('');
 
   jobLength = computed(() => this.jobDescription().trim().length);
+  jobProgress = computed(() => Math.min(100, Math.round(this.jobLength() / JOB_MIN * 100)));
+  /** Nombre de compétences à améliorer par priorité, pour le résumé du résultat. */
+  priorityCounts = computed(() => {
+    const counts: Record<Priority, number> = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+    for (const m of this.result()?.result.missingSkills ?? []) counts[m.priority] = (counts[m.priority] ?? 0) + 1;
+    return counts;
+  });
   canAnalyze = computed(() =>
     !!this.selectedCvId() && !this.analyzing() &&
     this.jobLength() >= JOB_MIN && this.jobLength() <= JOB_MAX);
@@ -68,8 +84,26 @@ export class SkillGapComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = ''; // permet de re-sélectionner le même fichier
-    if (!file) return;
+    if (file) this.upload(file);
+  }
 
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    if (!this.uploading()) this.dragOver.set(true);
+  }
+
+  onDragLeave() {
+    this.dragOver.set(false);
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.dragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file && !this.uploading()) this.upload(file);
+  }
+
+  private upload(file: File) {
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
     if (!ALLOWED_EXT.includes(ext)) {
       this.error.set('Format non supporté (PDF, DOCX ou TXT).');
@@ -97,19 +131,56 @@ export class SkillGapComponent implements OnInit {
     });
   }
 
+  // ── Suppression (fenêtre de confirmation) ───────────────────────────────
+
+  pendingDelete = signal<PendingDelete | null>(null);
+  deleting = signal(false);
+
   deleteCv(cv: CvUpload, event: Event) {
     event.stopPropagation();
-    if (!confirm(`Supprimer « ${cv.fileName} » et ses analyses ?`)) return;
+    const linked = this.history().filter(a => a.cvId === cv.id).length;
+    this.pendingDelete.set({ kind: 'cv', id: cv.id, name: cv.fileName, linked });
+  }
 
-    this.api.deleteCv(cv.id).subscribe({
+  deleteAnalysis(a: SkillGapAnalysis, event: Event) {
+    event.stopPropagation();
+    this.pendingDelete.set({ kind: 'analysis', id: a.id, name: a.jobTitle || 'Offre sans titre', linked: 0 });
+  }
+
+  cancelDelete() {
+    if (!this.deleting()) this.pendingDelete.set(null);
+  }
+
+  confirmDelete() {
+    const p = this.pendingDelete();
+    if (!p || this.deleting()) return;
+    this.deleting.set(true);
+    const call = p.kind === 'cv' ? this.api.deleteCv(p.id) : this.api.deleteAnalysis(p.id);
+    call.subscribe({
       next: () => {
-        this.cvs.update(list => list.filter(c => c.id !== cv.id));
-        this.history.update(list => list.filter(a => a.cvId !== cv.id));
-        if (this.selectedCvId() === cv.id) this.selectedCvId.set(this.cvs()[0]?.id ?? null);
-        if (this.result()?.cvId === cv.id) this.result.set(null);
+        if (p.kind === 'cv') {
+          this.cvs.update(list => list.filter(c => c.id !== p.id));
+          this.history.update(list => list.filter(a => a.cvId !== p.id));
+          if (this.selectedCvId() === p.id) this.selectedCvId.set(this.cvs()[0]?.id ?? null);
+          if (this.result()?.cvId === p.id) this.result.set(null);
+        } else {
+          this.history.update(list => list.filter(x => x.id !== p.id));
+          if (this.result()?.id === p.id) this.result.set(null);
+        }
+        this.deleting.set(false);
+        this.pendingDelete.set(null);
       },
-      error: e => this.fail(e, 'Suppression impossible.')
+      error: e => {
+        this.deleting.set(false);
+        this.pendingDelete.set(null);
+        this.fail(e, 'Suppression impossible.');
+      }
     });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.cancelDelete();
   }
 
   // ── Analyse ─────────────────────────────────────────────────────────────
@@ -147,17 +218,6 @@ export class SkillGapComponent implements OnInit {
   view(a: SkillGapAnalysis) {
     this.error.set('');
     this.result.set(a);
-  }
-
-  deleteAnalysis(a: SkillGapAnalysis, event: Event) {
-    event.stopPropagation();
-    this.api.deleteAnalysis(a.id).subscribe({
-      next: () => {
-        this.history.update(list => list.filter(x => x.id !== a.id));
-        if (this.result()?.id === a.id) this.result.set(null);
-      },
-      error: e => this.fail(e, 'Suppression impossible.')
-    });
   }
 
   // ── Affichage ───────────────────────────────────────────────────────────

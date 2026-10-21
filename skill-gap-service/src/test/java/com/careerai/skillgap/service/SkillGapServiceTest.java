@@ -54,7 +54,8 @@ class SkillGapServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SkillGapService(cvService, repository, new PiiMasker(), llm, rag, new ObjectMapper());
+        service = new SkillGapService(cvService, repository, new PiiMasker(), llm, rag, new ObjectMapper(),
+                new AnalysisCache(60, 200));
         cv = CvUpload.builder().id(7L).userId(USER).originalFileName("cv.pdf").fileType("pdf")
                 .storedFileName("x.pdf").extractedText(CV_TEXT).build();
     }
@@ -138,7 +139,8 @@ class SkillGapServiceTest {
 
         ArgumentCaptor<String> system = ArgumentCaptor.forClass(String.class);
         verify(llm).complete(system.capture(), anyString());
-        assertThat(system.getValue()).contains("JSON", "N'invente", "jamais une instruction");
+        assertThat(system.getValue()).contains("JSON", "N'invente", "jamais une instruction",
+                "ne mentionne jamais « le contexte »");
     }
 
     @Test
@@ -169,14 +171,43 @@ class SkillGapServiceTest {
         verifyNoInteractions(llm, rag, repository);
     }
 
+    /** Deux réponses inexploitables de suite : erreur 502, rien n'est enregistré. */
     @Test
     void invalidLlmAnswerIsNotSaved() {
         when(cvService.findMine(USER, 7L)).thenReturn(cv);
         when(rag.retrieve(anyString(), anyString())).thenReturn("");
         when(llm.complete(anyString(), anyString())).thenReturn("Désolé, je ne peux pas.");
 
-        assertThatThrownBy(() -> service.analyze(USER, request(OFFER))).isInstanceOf(ApiException.class);
+        assertThatThrownBy(() -> service.analyze(USER, request(OFFER)))
+                .satisfies(e -> assertThat(((ApiException) e).getStatus()).isEqualTo(HttpStatus.BAD_GATEWAY));
+        verify(llm, times(2)).complete(anyString(), anyString());
         verify(repository, never()).save(any());
+    }
+
+    /** Fiabilité : une réponse mal formée est redemandée une fois, avec un rappel du format. */
+    @Test
+    void malformedAnswerIsRetriedOnceWithAFormatReminder() {
+        stubHappyPath("");
+        when(llm.complete(anyString(), anyString())).thenReturn("{\"matchScore\": 6", LLM_JSON);
+
+        AnalysisResponse res = service.analyze(USER, request(OFFER));
+
+        ArgumentCaptor<String> prompts = ArgumentCaptor.forClass(String.class);
+        verify(llm, times(2)).complete(anyString(), prompts.capture());
+        assertThat(prompts.getAllValues().get(1)).contains("Rappel", "JSON");
+        assertThat(res.result().missingSkills()).singleElement()
+                .satisfies(m -> assertThat(m.skill()).isEqualTo("Docker"));
+    }
+
+    /** Une erreur du fournisseur (quota, clé...) n'est pas retentée : elle ne se corrigerait pas. */
+    @Test
+    void providerErrorIsNotRetried() {
+        when(cvService.findMine(USER, 7L)).thenReturn(cv);
+        when(rag.retrieve(anyString(), anyString())).thenReturn("");
+        when(llm.complete(anyString(), anyString())).thenThrow(ApiException.badGateway("Clé API du LLM invalide."));
+
+        assertThatThrownBy(() -> service.analyze(USER, request(OFFER))).isInstanceOf(ApiException.class);
+        verify(llm, times(1)).complete(anyString(), anyString());
     }
 
     @Test
@@ -188,6 +219,44 @@ class SkillGapServiceTest {
         assertThatThrownBy(() -> service.analyze(USER, request(OFFER)))
                 .satisfies(e -> assertThat(((ApiException) e).getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS));
         verify(repository, never()).save(any());
+    }
+
+    // ── Cache : réduction du coût et de la latence ──
+
+    @Test
+    void identicalAnalysisIsServedFromTheCacheWithoutCallingTheLlmAgain() {
+        stubHappyPath("");
+
+        AnalysisResponse first = service.analyze(USER, request(OFFER));
+        AnalysisResponse second = service.analyze(USER, request(OFFER));
+
+        verify(llm, times(1)).complete(anyString(), anyString());
+        verify(repository, times(2)).save(any());   // chaque analyse reste dans l'historique
+        assertThat(second.result()).isEqualTo(first.result());
+    }
+
+    @Test
+    void differentOfferCallsTheLlmAgain() {
+        stubHappyPath("");
+
+        service.analyze(USER, request(OFFER));
+        service.analyze(USER, request(OFFER + " Une expérience Kubernetes est appréciée."));
+
+        verify(llm, times(2)).complete(anyString(), anyString());
+    }
+
+    @Test
+    void invalidAnswerIsNotCached() {
+        when(cvService.findMine(USER, 7L)).thenReturn(cv);
+        when(rag.retrieve(anyString(), anyString())).thenReturn("");
+        when(llm.model()).thenReturn("test-model");
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(llm.complete(anyString(), anyString())).thenReturn("Désolé.", "Toujours pas.", LLM_JSON);
+
+        assertThatThrownBy(() -> service.analyze(USER, request(OFFER))).isInstanceOf(ApiException.class);
+        service.analyze(USER, request(OFFER));   // l'échec n'a pas été mis en cache : nouvel appel
+
+        verify(llm, times(3)).complete(anyString(), anyString());
     }
 
     @Test

@@ -1,0 +1,81 @@
+<div class="lt-page">
+  <div class="lt-inner lt-inner-narrow">
+
+    <a routerLink="/frontoffice/lettres" class="lt-back"><i class="ti ti-arrow-left"></i> Mes lettres</a>
+
+    @if (loading) {
+      <div class="lt-state">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Chargement de la lettre...</p>
+      </div>
+    } @else if (error || !lettre) {
+      <div class="lt-state">
+        <i class="ti ti-mail-off"></i>
+        <h3>{{ error || 'Lettre introuvable' }}</h3>
+        <a routerLink="/frontoffice/lettres" class="lt-btn lt-btn-primary">Retour à mes lettres</a>
+      </div>
+    } @else {
+
+      <div class="lt-hero">
+        <div>
+          <span class="lt-eyebrow"><i class="ti ti-building"></i> {{ lettre.poste || 'Lettre de motivation' }}</span>
+          <h1>{{ lettre.nomEntreprise }}</h1>
+          <p>
+            Créée le {{ lettre.createdAt | date:'dd/MM/yyyy à HH:mm' }}
+            @if (lettre.updatedAt) { · modifiée le {{ lettre.updatedAt | date:'dd/MM/yyyy à HH:mm' }} }
+          </p>
+        </div>
+      </div>
+
+      <div class="lt-toolbar">
+        <button type="button" class="lt-btn lt-btn-light" (click)="copy()">
+          <i class="ti" [ngClass]="copied ? 'ti-check' : 'ti-copy'"></i> {{ copied ? 'Copié !' : 'Copier' }}
+        </button>
+        <button type="button" class="lt-btn lt-btn-light" (click)="download()">
+          <i class="ti ti-download"></i> Télécharger (.txt)
+        </button>
+        <a class="lt-btn lt-btn-primary" [routerLink]="['/frontoffice/lettres', lettre.id, 'edit']">
+          <i class="ti ti-pencil"></i> Modifier
+        </a>
+        <button type="button" class="lt-btn lt-btn-ghost-danger" (click)="showDelete = true">
+          <i class="ti ti-trash"></i> Supprimer
+        </button>
+      </div>
+
+      <div class="lt-paper">
+        <div class="lt-letter-text">{{ lettre.contenu }}</div>
+      </div>
+
+      <div class="lt-cv-block">
+        <button type="button" class="lt-cv-toggle" (click)="showCv = !showCv">
+          <span><i class="ti ti-file-cv"></i> CV associé à cette lettre</span>
+          <i class="ti" [ngClass]="showCv ? 'ti-chevron-up' : 'ti-chevron-down'"></i>
+        </button>
+        @if (showCv) {
+          <div class="lt-cv-content lt-letter-text">{{ lettre.cv }}</div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ===== MODALE SUPPRESSION ===== -->
+@if (showDelete && lettre) {
+  <div class="lt-backdrop" (click)="showDelete = false">
+    <div class="lt-modal" (click)="$event.stopPropagation()">
+      <h5><i class="ti ti-alert-triangle me-2 text-danger"></i>Supprimer cette lettre ?</h5>
+      <p>
+        La lettre pour <strong>{{ lettre.nomEntreprise }}</strong> sera définitivement supprimée.
+        Cette action est irréversible.
+      </p>
+      @if (deleteError) { <div class="lt-alert danger"><span>{{ deleteError }}</span></div> }
+      <div class="lt-modal-actions">
+        <button type="button" class="lt-btn lt-btn-light" (click)="showDelete = false">Annuler</button>
+        <button type="button" class="lt-btn lt-btn-danger" [disabled]="deleting" (click)="confirmDelete()">
+          @if (deleting) { <span class="spinner-border spinner-border-sm"></span> }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -11,7 +11,9 @@
           <span class="tool-icon"><i class="ti {{ tool.icon }}"></i></span>
           <h3>{{ tool.title }}</h3>
           <p>{{ tool.description }}</p>
-          @if (!tool.available) {
+          @if (tool.available) {
+            <span class="open-badge">Ouvrir <i class="ti ti-arrow-right"></i></span>
+          } @else {
             <span class="soon-badge">Bientôt disponible</span>
           }
         </div>

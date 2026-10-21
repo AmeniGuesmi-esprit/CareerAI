@@ -40,6 +40,12 @@
   &:focus { outline: none; box-shadow: 0 0 0 3px rgba(124, 92, 252, .15); }
 }
 .meta { color: $muted; font-size: .8rem; margin: 8px 0 0; .dot { margin: 0 6px; } }
+.ai-metrics { margin-top: 4px; }
+.cache-badge { color: $teal; font-weight: 600; }
+.disclaimer {
+  display: flex; gap: 6px; align-items: flex-start;
+  margin: 10px 0 0; font-size: .75rem; color: $muted; line-height: 1.4;
+}
 
 /* ── Score ── */
 .score-card {

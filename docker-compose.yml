@@ -131,11 +131,11 @@ services:
 
   competence-service:
     build:
-      context: ./backend/competence-service
+      context: ./competence-service
       dockerfile: Dockerfile
     container_name: competence-service
     ports:
-      - "8082:8082"          # optionnel : utile pour tester sans passer par la gateway
+      - "8085:8085"          # optionnel : utile pour tester sans passer par la gateway
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_competences?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-root}
@@ -222,6 +222,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
     depends_on:
       mysql:
         condition: service_healthy
@@ -257,6 +258,34 @@ services:
         condition: service_healthy
       ollama-pull:
         condition: service_completed_successfully   # attend qwen3.5:4b et bge-m3
+    networks:
+      - careerai-net
+    restart: unless-stopped
+
+  # ========================= LETTRE SERVICE =========================
+
+  lettre-service:
+    build:
+      context: ./lettre-service/lettre-service
+      dockerfile: Dockerfile
+    container_name: lettre-service
+    ports:
+      - "8095:8095"          # optionnel : utile pour tester sans passer par la gateway
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/careerai_lettre?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://${EUREKA_USER:-admin}:${EUREKA_PASSWORD:-admin123}@eureka-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant, copiez .env.example vers .env}
+      LLM_DEFAULT_PROVIDER: ${LLM_DEFAULT_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      COHERE_API_KEY: ${COHERE_API_KEY:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - careerai-net
     restart: unless-stopped

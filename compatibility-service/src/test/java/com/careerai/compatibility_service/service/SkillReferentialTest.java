@@ -60,6 +60,37 @@ class SkillReferentialTest {
         assertThat(one("Integration continue").competence()).isEqualTo("CI/CD");
     }
 
+    /** Régression : qwen2.5:7b envoie des expressions ("conteneurisation Docker") et non des intitulés. */
+    @Test
+    void reconnaitUneCompetenceConnueDansUneExpression() {
+        LookupResult r = one("conteneurisation Docker");
+
+        assertThat(r.trouve()).isTrue();
+        assertThat(r.terme()).isEqualTo("conteneurisation Docker");
+        assertThat(r.competence()).isEqualTo("Docker");
+    }
+
+    @Test
+    void renvoieChaqueCompetenceDUneExpressionDansLOrdre() {
+        List<LookupResult> results = referential.lookup(List.of("microservices Spring Boot"));
+
+        assertThat(results).extracting(LookupResult::competence).containsExactly("Microservices", "Spring Boot");
+        assertThat(results).extracting(LookupResult::terme).containsOnly("microservices Spring Boot");
+    }
+
+    @Test
+    void neRecomptePasUneCleIncluseDansUneClePlusLongue() {
+        List<LookupResult> results = referential.lookup(List.of("développement Spring Boot"));
+
+        assertThat(results).extracting(LookupResult::competence).containsExactly("Spring Boot");
+    }
+
+    @Test
+    void neReconnaitPasUnSigleAuMilieuDUnMot() {
+        assertThat(one("format JSON").trouve()).isFalse(); // "JS" n'est pas JavaScript
+        assertThat(one("Gitbook").trouve()).isFalse();     // "Git" n'est pas un mot entier ici
+    }
+
     @Test
     void renvoieNonTrouvePourUnTermeInconnu() {
         LookupResult r = one("Cobol");

@@ -64,6 +64,13 @@ class FakeOllama implements AutoCloseable {
         return this;
     }
 
+    /** Réponse streamée comme le vrai Ollama : un objet JSON par ligne (NDJSON). */
+    FakeOllama replyStream(Object... chunks) {
+        StringBuilder body = new StringBuilder();
+        for (Object chunk : chunks) body.append(json(chunk)).append('\n');
+        return reply(200, body.toString());
+    }
+
     /** Message assistant simple (texte libre, sans appel d'outil). */
     FakeOllama replyContent(String content) {
         return reply(200, json(Map.of("message", Map.of("role", "assistant", "content", content))));

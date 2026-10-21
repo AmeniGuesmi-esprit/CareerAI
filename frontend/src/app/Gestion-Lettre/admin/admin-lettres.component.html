@@ -1,0 +1,135 @@
+<div class="row g-4">
+
+  <div class="col-12">
+    <div class="lt-hero">
+      <div>
+        <span class="lt-eyebrow"><i class="ti ti-mail-opened"></i> Lettres de motivation</span>
+        <h1>Toutes les lettres <span class="lt-total">{{ lettres.length }}</span></h1>
+        <p>Consultation et modération des lettres créées par les utilisateurs.</p>
+      </div>
+      <div class="lt-search lt-search-hero">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Rechercher (entreprise, email, poste)..."
+               [(ngModel)]="search" (ngModelChange)="applyFilter()">
+      </div>
+    </div>
+  </div>
+
+  @if (actionMessage) {
+    <div class="col-12">
+      <div class="lt-alert" [ngClass]="actionMessage.type">
+        <span>{{ actionMessage.text }}</span>
+        <button type="button" (click)="actionMessage = null">×</button>
+      </div>
+    </div>
+  }
+
+  <div class="col-12">
+    <div class="card shadow-sm lt-table-card">
+      <div class="card-body">
+        @if (loading) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Chargement...</p>
+          </div>
+        } @else if (error) {
+          <div class="alert alert-danger d-flex align-items-center gap-2">
+            <i class="ti ti-alert-circle f-20"></i><span>{{ error }}</span>
+          </div>
+        } @else if (filtered.length === 0) {
+          <p class="text-muted text-center py-4">
+            <i class="ti ti-database-off f-30 d-block mb-2"></i>
+            Aucune lettre à afficher
+          </p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Entreprise</th>
+                  <th>Poste</th>
+                  <th>Utilisateur</th>
+                  <th>Créée le</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (l of paged; track l.id) {
+                  <tr>
+                    <td class="text-muted">#{{ l.id }}</td>
+                    <td class="fw-medium">{{ l.nomEntreprise }}</td>
+                    <td class="text-muted">{{ l.poste || '—' }}</td>
+                    <td class="text-muted">{{ l.userEmail }}</td>
+                    <td class="text-muted">{{ l.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>
+                      <div class="lt-actions">
+                        <button type="button" class="lt-icon-btn" title="Consulter" (click)="selected = l">
+                          <i class="ti ti-eye"></i>
+                        </button>
+                        <button type="button" class="lt-icon-btn danger" title="Supprimer" (click)="lettreToDelete = l">
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPages > 1) {
+            <div class="d-flex align-items-center justify-content-between px-3 py-3 border-top">
+              <span class="text-muted f-14">Page {{ currentPage }} sur {{ totalPages }} — {{ filtered.length }} lettre(s)</span>
+              <div class="d-flex gap-2">
+                <button type="button" class="lt-btn lt-btn-light" [disabled]="currentPage === 1"
+                        (click)="goToPage(currentPage - 1)"><i class="ti ti-chevron-left"></i></button>
+                <button type="button" class="lt-btn lt-btn-light" [disabled]="currentPage === totalPages"
+                        (click)="goToPage(currentPage + 1)"><i class="ti ti-chevron-right"></i></button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALE CONSULTATION ===== -->
+@if (selected) {
+  <div class="lt-backdrop" (click)="selected = null">
+    <div class="lt-modal lt-modal-lg" (click)="$event.stopPropagation()">
+      <h5><i class="ti ti-building me-2"></i>{{ selected.nomEntreprise }}
+        @if (selected.poste) { <small class="text-muted"> — {{ selected.poste }}</small> }
+      </h5>
+      <p class="text-muted f-13">Par {{ selected.userEmail }} · {{ selected.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+
+      <h6 class="lt-sub">Lettre</h6>
+      <div class="lt-letter-text lt-box">{{ selected.contenu }}</div>
+
+      <h6 class="lt-sub">CV</h6>
+      <div class="lt-letter-text lt-box">{{ selected.cv }}</div>
+
+      <div class="lt-modal-actions">
+        <button type="button" class="lt-btn lt-btn-light" (click)="selected = null">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== MODALE SUPPRESSION ===== -->
+@if (lettreToDelete) {
+  <div class="lt-backdrop" (click)="lettreToDelete = null">
+    <div class="lt-modal" (click)="$event.stopPropagation()">
+      <h5><i class="ti ti-alert-triangle me-2 text-danger"></i>Supprimer cette lettre ?</h5>
+      <p>
+        La lettre de <strong>{{ lettreToDelete.userEmail }}</strong> pour
+        <strong>{{ lettreToDelete.nomEntreprise }}</strong> sera définitivement supprimée.
+      </p>
+      <div class="lt-modal-actions">
+        <button type="button" class="lt-btn lt-btn-light" (click)="lettreToDelete = null">Annuler</button>
+        <button type="button" class="lt-btn lt-btn-danger" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}

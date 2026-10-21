@@ -1,0 +1,77 @@
+<div class="lt-page">
+  <div class="lt-inner lt-inner-narrow">
+
+    <div class="lt-hero">
+      <div>
+        <span class="lt-eyebrow"><i class="ti ti-mail-opened"></i> Lettre de motivation</span>
+        <h1>{{ isEdit ? 'Modifier la lettre' : 'Nouvelle lettre de motivation' }}</h1>
+        <p>Renseignez l'entreprise visée, votre CV et le texte de votre lettre.</p>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="lt-state">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Chargement de la lettre...</p>
+      </div>
+    } @else {
+      <form class="lt-form" (ngSubmit)="submit()" novalidate>
+
+        <div class="lt-row">
+          <div class="lt-field">
+            <label for="nomEntreprise">Nom de l'entreprise *</label>
+            <input id="nomEntreprise" name="nomEntreprise" type="text" class="lt-input"
+                   [class.invalid]="submitted && nomError"
+                   [(ngModel)]="form.nomEntreprise" placeholder="Ex. : Vermeg">
+            @if (submitted && nomError) { <span class="lt-error">{{ nomError }}</span> }
+          </div>
+
+          <div class="lt-field">
+            <label for="poste">Poste visé <span class="lt-optional">(optionnel)</span></label>
+            <input id="poste" name="poste" type="text" class="lt-input"
+                   [class.invalid]="submitted && posteError"
+                   [(ngModel)]="form.poste" placeholder="Ex. : Ingénieur logiciel">
+            @if (submitted && posteError) { <span class="lt-error">{{ posteError }}</span> }
+          </div>
+        </div>
+
+        <div class="lt-field">
+          <label for="cv">CV *</label>
+          <textarea id="cv" name="cv" rows="9" class="lt-input"
+                    [class.invalid]="submitted && cvError"
+                    [(ngModel)]="form.cv"
+                    placeholder="Collez ici le contenu de votre CV (expériences, formation, compétences...)"></textarea>
+          <div class="lt-field-foot">
+            @if (submitted && cvError) { <span class="lt-error">{{ cvError }}</span> } @else { <span></span> }
+            <span class="lt-counter" [class.over]="form.cv.length > MAX_TEXT">{{ form.cv.length }} / {{ MAX_TEXT }}</span>
+          </div>
+        </div>
+
+        <div class="lt-field">
+          <label for="contenu">Lettre de motivation *</label>
+          <textarea id="contenu" name="contenu" rows="14" class="lt-input"
+                    [class.invalid]="submitted && contenuError"
+                    [(ngModel)]="form.contenu"
+                    placeholder="Madame, Monsieur,&#10;&#10;..."></textarea>
+          <div class="lt-field-foot">
+            @if (submitted && contenuError) { <span class="lt-error">{{ contenuError }}</span> } @else { <span></span> }
+            <span class="lt-counter" [class.over]="form.contenu.length > MAX_TEXT">{{ form.contenu.length }} / {{ MAX_TEXT }}</span>
+          </div>
+        </div>
+
+        @if (error) {
+          <div class="lt-alert danger"><span>{{ error }}</span></div>
+        }
+
+        <div class="lt-form-actions">
+          <a class="lt-btn lt-btn-light"
+             [routerLink]="isEdit ? ['/frontoffice/lettres', id] : ['/frontoffice/lettres']">Annuler</a>
+          <button type="submit" class="lt-btn lt-btn-primary" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm"></span> }
+            <i class="ti ti-device-floppy"></i> {{ isEdit ? 'Enregistrer' : 'Créer la lettre' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

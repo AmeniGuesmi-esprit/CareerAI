@@ -33,6 +33,20 @@ public class Analysis {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String resultJson;
 
+    // Mesures de l'appel IA (colonnes nullables : les analyses plus anciennes n'en ont pas)
+    @Column(length = 80)
+    private String model;
+
+    private Integer llmCalls;
+
+    private Long latencyMs;
+
+    private Integer promptTokens;
+
+    private Integer completionTokens;
+
+    private Boolean fromCache;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
