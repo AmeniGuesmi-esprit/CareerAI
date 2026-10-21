@@ -37,6 +37,17 @@
           <span class="dot">·</span>
           {{ a.createdAt | date:'dd/MM/yyyy HH:mm' }}
         </p>
+        @if (metrics(); as m) {
+          <p class="meta ai-metrics">
+            <i class="ti ti-cpu"></i> {{ m.model }}
+            <span class="dot">·</span>
+            @if (m.cached) {
+              <span class="cache-badge"><i class="ti ti-bolt"></i> Résultat déjà calculé, resservi en {{ duration() }}</span>
+            } @else {
+              {{ duration() }} · {{ m.llmCalls }} appel(s) au modèle · {{ tokens() }} jetons
+            }
+          </p>
+        }
       </div>
 
       @if (actionError(); as message) {
@@ -54,6 +65,11 @@
         <div class="score-text">
           <span class="badge">{{ label() }}</span>
           <p>{{ a.summary }}</p>
+          <p class="disclaimer">
+            <i class="ti ti-info-circle"></i>
+            Estimation générée par une IA locale à partir du texte du CV : c'est une aide pour adapter votre
+            candidature, pas une décision de recrutement.
+          </p>
         </div>
       </div>
 
