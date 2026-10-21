@@ -25,10 +25,24 @@ public final class AnalysisDtos {
         }
     }
 
+    /**
+     * Mesures d'une analyse : modèle, appels au LLM, latence cumulée (ms), jetons envoyés / générés,
+     * et cached=true si le résultat a été resservi depuis le cache (aucun appel au LLM).
+     */
+    public record AiMetrics(String model, int llmCalls, long latencyMs,
+                            int promptTokens, int completionTokens, boolean cached) {
+
+        public AiMetrics asCached(long lookupMs) {
+            return new AiMetrics(model, 0, lookupMs, 0, 0, true);
+        }
+    }
+
+    /** metrics vaut null pour les analyses créées avant la mesure de la latence. */
     public record AnalysisResponse(
             Long id, String cvFileName, String jobTitle, int score, String summary,
             List<String> strengths, List<String> missingSkills, List<String> suggestions,
-            List<String> verifiedSkills, String jobDescription, LocalDateTime createdAt) { }
+            List<String> verifiedSkills, String jobDescription, LocalDateTime createdAt,
+            AiMetrics metrics) { }
 
     public record AnalysisListItem(
             Long id, String cvFileName, String jobTitle, int score, LocalDateTime createdAt) { }

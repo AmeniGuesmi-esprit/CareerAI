@@ -145,7 +145,7 @@ cd frontend ; yarn test --watch=false --browsers=ChromeHeadless
 |---|---|
 | `user-service` | 48 |
 | `skill-gap-service` | 91 (+ `ModelComparisonTest`, désactivé par défaut) |
-| `compatibility-service` | 101 |
+| `compatibility-service` | 147 (+ `ModelEvaluationTest`, désactivé par défaut) |
 | `interview-service` | 28 (+ 43 vérifications de bout en bout avec `scripts/smoke-test.ps1`) |
 | `lettre-service` | 84 |
 | `experience-service` | 128 |
@@ -158,6 +158,14 @@ Comparaison réelle des modèles de `skill-gap-service` (appelle l'API Groq, con
 cd skill-gap-service
 mvn test -Dtest=ModelComparisonTest -Dcompare.models=openai/gpt-oss-120b,openai/gpt-oss-20b -Dcompare.runs=2
 # résultat : target/model-comparison.md
+```
+
+Évaluation chiffrée et comparaison des modèles de `compatibility-service` (Ollama local, 6 cas annotés) :
+
+```powershell
+cd compatibility-service
+.\mvnw clean test -Dtest=ModelEvaluationTest -Deval.models=qwen2.5:7b,qwen2.5:3b -Deval.runs=2
+# résultat : target/evaluation/model-comparison.md
 ```
 
 ## Structure du dépôt
@@ -189,5 +197,5 @@ CareerAI/
 | `scripts/rag-reindex.ps1` | Réindexe la base de connaissances du module d'entretien (compte ADMIN) |
 | `scripts/smoke-test.ps1` | Test de bout en bout du module d'entretien à travers la gateway |
 
-Des README détaillés existent pour [`skill-gap-service`](skill-gap-service/README.md) et
-[`interview-service`](interview-service/README.md).
+Des README détaillés existent pour [`skill-gap-service`](skill-gap-service/README.md),
+[`compatibility-service`](compatibility-service/README.md) et [`interview-service`](interview-service/README.md).

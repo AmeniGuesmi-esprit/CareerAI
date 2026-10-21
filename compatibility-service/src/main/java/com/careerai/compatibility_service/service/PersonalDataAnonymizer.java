@@ -13,7 +13,10 @@ public class PersonalDataAnonymizer {
     private static final Pattern URL = Pattern.compile(
             "(?i)\\b(?:https?://|www\\.|(?:linkedin|github|gitlab)\\.com/)\\S+");
     private static final Pattern PHONE_CANDIDATE = Pattern.compile("\\+?\\d[\\d\\s().-]{6,}\\d");
-    private static final Pattern DATE_RANGE = Pattern.compile("^\\d{4}\\s*[-–]\\s*\\d{4}$");
+    /** Une date de CV : 2022, 01.2022, 01/2022, 15/03/2022 ou 2022-01 (année plausible 19xx / 20xx). */
+    private static final String DATE = "(?:(?:\\d{1,2}[./-]){0,2}(?:19|20)\\d{2}|(?:19|20)\\d{2}(?:[./-]\\d{1,2}){1,2})";
+    /** Une date seule ou une période « date - date » : jamais un numéro de téléphone. */
+    private static final Pattern DATE_PERIOD = Pattern.compile("^" + DATE + "(?:\\s*[-–]\\s*" + DATE + ")?$");
 
     public String anonymize(String text) {
         if (text == null) {
@@ -30,8 +33,9 @@ public class PersonalDataAnonymizer {
         while (m.find()) {
             String candidate = m.group();
             int digits = candidate.replaceAll("\\D", "").length();
-            boolean dateRange = DATE_RANGE.matcher(candidate.trim()).matches(); // "2021 - 2023" n'est pas un numéro
-            m.appendReplacement(sb, Matcher.quoteReplacement(digits >= 8 && !dateRange ? "[TELEPHONE]" : candidate));
+            // "2021 - 2023" ou "01.2022 - 06.2022" sont des périodes, pas des numéros
+            boolean date = DATE_PERIOD.matcher(candidate.trim()).matches();
+            m.appendReplacement(sb, Matcher.quoteReplacement(digits >= 8 && !date ? "[TELEPHONE]" : candidate));
         }
         m.appendTail(sb);
         return sb.toString();

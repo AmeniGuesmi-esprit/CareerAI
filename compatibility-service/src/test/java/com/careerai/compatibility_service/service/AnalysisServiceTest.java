@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -43,10 +45,14 @@ class AnalysisServiceTest {
 
     private final AiResult aiResult = new AiResult(72, "Bon profil.", List.of("Spring Boot"),
             List.of("Kubernetes"), List.of("Ajouter Docker"), List.of("Java", "SQL"));
+    private final AiMetrics metrics = new AiMetrics("qwen-test", 3, 41_250, 2_100, 380, false);
+    private final OllamaAnalysisClient.Analyzed analyzed = new OllamaAnalysisClient.Analyzed(aiResult, metrics);
+    private AnalysisCache cache;
 
     @BeforeEach
     void setUp() {
-        service = new AnalysisService(repository, pdfTextExtractor, anonymizer, aiClient, mapper);
+        cache = new AnalysisCache(Duration.ofHours(1), 200, Clock.systemUTC());
+        service = new AnalysisService(repository, pdfTextExtractor, anonymizer, aiClient, cache, mapper);
     }
 
     private static MockMultipartFile cv(String name) {
@@ -67,7 +73,7 @@ class AnalysisServiceTest {
         when(pdfTextExtractor.extract(any())).thenReturn("texte du cv");
         when(anonymizer.anonymize("texte du cv")).thenReturn("cv anonymisé");
         when(anonymizer.anonymize(DESCRIPTION)).thenReturn("offre anonymisée");
-        when(aiClient.analyze("cv anonymisé", "offre anonymisée")).thenReturn(aiResult);
+        when(aiClient.analyzeWithMetrics("cv anonymisé", "offre anonymisée")).thenReturn(analyzed);
     }
 
     private Analysis stored(long id, long userId, String resultJson) {
@@ -101,7 +107,7 @@ class AnalysisServiceTest {
     void sauvegardeLEntiteAvecLesChampsNettoyesEtLeResultatEnJson() throws Exception {
         when(pdfTextExtractor.extract(any())).thenReturn("texte du cv");
         when(anonymizer.anonymize(anyString())).thenReturn("anonyme");
-        when(aiClient.analyze(anyString(), anyString())).thenReturn(aiResult);
+        when(aiClient.analyzeWithMetrics(anyString(), anyString())).thenReturn(analyzed);
         saveAssignsId(42);
         ArgumentCaptor<Analysis> captor = ArgumentCaptor.forClass(Analysis.class);
 
@@ -120,7 +126,7 @@ class AnalysisServiceTest {
     void envoieALIaUniquementLesTextesAnonymises() {
         when(pdfTextExtractor.extract(any())).thenReturn("texte du cv");
         when(anonymizer.anonymize(anyString())).thenReturn("anonyme");
-        when(aiClient.analyze(anyString(), anyString())).thenReturn(aiResult);
+        when(aiClient.analyzeWithMetrics(anyString(), anyString())).thenReturn(analyzed);
         saveAssignsId(1);
 
         service.create(1L, cv("cv.pdf"), "Dev", "  " + DESCRIPTION);
@@ -128,7 +134,7 @@ class AnalysisServiceTest {
         verify(anonymizer).anonymize("texte du cv");
         // la description est anonymisée telle que reçue (non trimée)
         verify(anonymizer).anonymize("  " + DESCRIPTION);
-        verify(aiClient).analyze("anonyme", "anonyme");
+        verify(aiClient).analyzeWithMetrics("anonyme", "anonyme");
     }
 
     @Test
@@ -175,7 +181,7 @@ class AnalysisServiceTest {
     void propageLErreurIaSansSauvegarder() {
         when(pdfTextExtractor.extract(any())).thenReturn("texte du cv");
         when(anonymizer.anonymize(anyString())).thenReturn("anonyme");
-        when(aiClient.analyze(anyString(), anyString())).thenThrow(
+        when(aiClient.analyzeWithMetrics(anyString(), anyString())).thenThrow(
                 new ApiException(HttpStatus.GATEWAY_TIMEOUT, "AI_TIMEOUT", "Ollama n'a pas répondu."));
 
         assertThatThrownBy(() -> service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION))
@@ -183,6 +189,98 @@ class AnalysisServiceTest {
                 .extracting("code", "status")
                 .containsExactly("AI_TIMEOUT", HttpStatus.GATEWAY_TIMEOUT);
         verifyNoInteractions(repository);
+    }
+
+    // ── mesures et cache ────────────────────────────────────────────────────
+
+    @Test
+    void enregistreEtRenvoieLesMesuresDeLAppelIa() {
+        nominalPipeline();
+        saveAssignsId(42);
+        ArgumentCaptor<Analysis> captor = ArgumentCaptor.forClass(Analysis.class);
+
+        AnalysisResponse response = service.create(7L, cv("cv.pdf"), "Dev Java", DESCRIPTION);
+
+        verify(repository).save(captor.capture());
+        Analysis saved = captor.getValue();
+        assertThat(saved.getModel()).isEqualTo("qwen-test");
+        assertThat(saved.getLlmCalls()).isEqualTo(3);
+        assertThat(saved.getLatencyMs()).isEqualTo(41_250L);
+        assertThat(saved.getPromptTokens()).isEqualTo(2_100);
+        assertThat(saved.getCompletionTokens()).isEqualTo(380);
+        assertThat(saved.getFromCache()).isFalse();
+        assertThat(response.metrics()).isEqualTo(metrics);
+    }
+
+    @Test
+    void resertUneAnalyseIdentiqueDepuisLeCacheSansRappelerLIa() {
+        nominalPipeline();
+        when(aiClient.model()).thenReturn("qwen-test");
+        saveAssignsId(1);
+
+        AnalysisResponse first = service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION);
+        AnalysisResponse second = service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION);
+
+        verify(aiClient, times(1)).analyzeWithMetrics(anyString(), anyString());
+        verify(repository, times(2)).save(any(Analysis.class)); // chaque demande reste dans l'historique
+        assertThat(second.score()).isEqualTo(first.score());
+        assertThat(second.verifiedSkills()).isEqualTo(first.verifiedSkills());
+        assertThat(second.metrics().cached()).isTrue();
+        assertThat(second.metrics().llmCalls()).isZero();
+        assertThat(second.metrics().promptTokens()).isZero();
+        assertThat(second.metrics().model()).isEqualTo("qwen-test");
+        assertThat(cache.hits()).isEqualTo(1);
+    }
+
+    @Test
+    void rappelleLIaQuandLOffreChange() {
+        when(pdfTextExtractor.extract(any())).thenReturn("texte du cv");
+        when(anonymizer.anonymize(anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(aiClient.analyzeWithMetrics(anyString(), anyString())).thenReturn(analyzed);
+        saveAssignsId(1);
+
+        service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION);
+        service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION + " Kafka souhaité.");
+
+        verify(aiClient, times(2)).analyzeWithMetrics(anyString(), anyString());
+        assertThat(cache.size()).isEqualTo(2);
+    }
+
+    @Test
+    void rappelleLIaQuandLeModeleChange() {
+        nominalPipeline();
+        when(aiClient.model()).thenReturn("qwen2.5:7b", "qwen2.5:3b");
+        saveAssignsId(1);
+
+        service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION);
+        service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION);
+
+        verify(aiClient, times(2)).analyzeWithMetrics(anyString(), anyString());
+    }
+
+    @Test
+    void neMetPasEnCacheUneErreurIa() {
+        when(pdfTextExtractor.extract(any())).thenReturn("texte du cv");
+        when(anonymizer.anonymize(anyString())).thenReturn("anonyme");
+        when(aiClient.analyzeWithMetrics(anyString(), anyString()))
+                .thenThrow(new ApiException(HttpStatus.GATEWAY_TIMEOUT, "AI_TIMEOUT", "Ollama n'a pas répondu."))
+                .thenReturn(analyzed);
+        saveAssignsId(1);
+
+        assertThatThrownBy(() -> service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION))
+                .isInstanceOf(ApiException.class);
+        AnalysisResponse retry = service.create(1L, cv("cv.pdf"), "Dev", DESCRIPTION);
+
+        assertThat(retry.metrics().cached()).isFalse();
+        verify(aiClient, times(2)).analyzeWithMetrics(anyString(), anyString());
+    }
+
+    @Test
+    void renvoieDesMesuresNullesPourUneAnalyseAnterieureALaMesure() throws Exception {
+        when(repository.findByIdAndUserId(3L, 7L))
+                .thenReturn(Optional.of(stored(3, 7, mapper.writeValueAsString(aiResult))));
+
+        assertThat(service.get(7L, 3L).metrics()).isNull();
     }
 
     // ── list / get ──────────────────────────────────────────────────────────

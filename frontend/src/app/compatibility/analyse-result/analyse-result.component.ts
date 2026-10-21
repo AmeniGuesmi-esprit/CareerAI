@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AnalysisResponse, scoreLabel, scoreLevel } from '../compatibility.models';
+import { AnalysisResponse, formatDuration, scoreLabel, scoreLevel } from '../compatibility.models';
 import { CompatibilityService, apiErrorMessage } from '../compatibility.service';
 
 @Component({
@@ -32,6 +32,12 @@ export class AnalyseResultComponent implements OnInit {
   readonly level = computed(() => scoreLevel(this.analysis()?.score ?? 0));
   readonly label = computed(() => scoreLabel(this.analysis()?.score ?? 0));
   readonly dashOffset = computed(() => this.circumference * (1 - (this.analysis()?.score ?? 0) / 100));
+  readonly metrics = computed(() => this.analysis()?.metrics ?? null);
+  readonly duration = computed(() => formatDuration(this.metrics()?.latencyMs ?? 0));
+  readonly tokens = computed(() => {
+    const m = this.metrics();
+    return m ? m.promptTokens + m.completionTokens : 0;
+  });
 
   private id = 0;
 
