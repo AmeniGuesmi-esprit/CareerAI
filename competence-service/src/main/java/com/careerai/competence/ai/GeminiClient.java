@@ -40,10 +40,19 @@ public class GeminiClient {
                 .build();
     }
 
-    /** Réponse en texte libre (conseil). */
+    public String getModel() {
+        return model;
+    }
+
+    /** Réponse en texte libre (conseil) avec le modèle par défaut. */
     public String generateText(String system, String user) {
+        return generateText(model, system, user);
+    }
+
+    /** Idem avec un modèle choisi (utilisé pour comparer plusieurs modèles). */
+    public String generateText(String modelName, String system, String user) {
         Map<String, Object> config = Map.of("temperature", 0.4, "maxOutputTokens", 2048);
-        return call(system, user, config);
+        return call(modelName, system, user, config);
     }
 
     /** Réponse JSON forcée par un schéma (juge). */
@@ -54,13 +63,13 @@ public class GeminiClient {
                 "responseMimeType", "application/json",
                 "responseSchema", schema);
         try {
-            return MAPPER.readTree(call(system, user, config));
+            return MAPPER.readTree(call(model, system, user, config));
         } catch (JsonProcessingException e) {
             throw new AiException(HttpStatus.BAD_GATEWAY, "Réponse IA illisible.");
         }
     }
 
-    private String call(String system, String user, Map<String, Object> generationConfig) {
+    private String call(String modelName, String system, String user, Map<String, Object> generationConfig) {
         if (apiKey == null || apiKey.isBlank()) {
             throw new AiException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Clé Gemini non configurée (variable GEMINI_API_KEY).");
@@ -71,7 +80,7 @@ public class GeminiClient {
                 "generationConfig", generationConfig);
         try {
             JsonNode res = rest.post()
-                    .uri("/models/{model}:generateContent", model)
+                    .uri("/models/{model}:generateContent", modelName)
                     .header("x-goog-api-key", apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
