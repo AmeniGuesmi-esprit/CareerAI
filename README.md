@@ -16,7 +16,7 @@ Mini-projet **IA for Software Engineering** · ESPRIT · année universitaire 20
 | `interview-service` | Fawzi Saidi | Questions d'entretien et feedback | Ollama `qwen3.5:4b` + `bge-m3` (RAG hybride) |
 | `lettre-service` | Farah Amami | Génération et amélioration de lettres de motivation | Google Gemini ou Cohere |
 | `experience-service` | Marah Mhadhbi | Expériences et pitch « Présentez-vous » | Google Gemini 3.5 Flash-Lite (prompts enchaînés + juge) |
-| `competence-service` | Yesmine Chakroun | Formations, compétences, conseiller d'orientation | Google Gemini 3.1 Flash-Lite (conseiller + juge) |
+| `competence-service` | Yesmine Chakroun | Formations, compétences, conseiller d'orientation | Google Gemini 3.5 Flash-Lite (conseiller + juge), retenu après comparaison de 3 modèles |
 
 Aucun modèle n'est entraîné : chaque module utilise un modèle existant, adapté par le prompt, le RAG, la
 validation de la sortie, le cache ou un second appel « juge ». Règles communes : **aucune donnée personnelle brute
@@ -144,15 +144,17 @@ cd frontend ; yarn test --watch=false --browsers=ChromeHeadless
 | Module | Tests |
 |---|---|
 | `user-service` | 48 |
-| `skill-gap-service` | 91 (+ `ModelComparisonTest`, désactivé par défaut) |
+| `skill-gap-service` | 113 (dont 18 tests de repository sur H2 et `ModelComparisonTest` en mode hors ligne) |
 | `compatibility-service` | 147 (+ `ModelEvaluationTest`, désactivé par défaut) |
 | `interview-service` | 28 (+ 43 vérifications de bout en bout avec `scripts/smoke-test.ps1`) |
 | `lettre-service` | 84 |
 | `experience-service` | 128 |
-| `competence-service` | 83 |
+| `competence-service` | 127 (+ `ModelBenchmarkTest`, désactivé par défaut) |
 | `frontend` | 86 |
 
-Comparaison réelle des modèles de `skill-gap-service` (appelle l'API Groq, consomme du quota) :
+Comparaison des modèles de `skill-gap-service`. Avec `mvn test`, `ModelComparisonTest` tourne **hors ligne**
+contre un faux serveur Groq : il vérifie toute la chaîne de comparaison sans quota (rapport :
+`target/model-comparison-hors-ligne.md`). La comparaison réelle appelle l'API Groq et consomme du quota :
 
 ```powershell
 cd skill-gap-service

@@ -7,9 +7,11 @@ import com.careerai.skillgap.model.CvUpload;
 import com.careerai.skillgap.repository.SkillGapAnalysisRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -26,12 +29,37 @@ import static org.mockito.Mockito.*;
  * Comparaison réelle de modèles Groq sur le vrai pipeline (anonymisation, RAG lexical sur les 135 fiches,
  * prompt système, validation) : seul le modèle change.
  *
- * Désactivé par défaut (appels payants en quota) ; lancement explicite :
+ * Deux modes :
+ * - par défaut (mvn test) : un faux serveur Groq local répond à la place des modèles. Le test vérifie toute la
+ *   chaîne de comparaison (pipeline réel, RAG, mesures, nouvelle tentative, rapport) sans quota ni réseau.
+ *   Rapport : target/model-comparison-hors-ligne.md
+ * - comparaison réelle, lancement explicite :
  *   mvn test -Dtest=ModelComparisonTest -Dcompare.models=openai/gpt-oss-120b,openai/gpt-oss-20b -Dcompare.runs=2
- * avec la clé dans la variable d'environnement LLM_API_KEY. Résultat : target/model-comparison.md
+ *   avec la clé dans la variable d'environnement LLM_API_KEY. Rapport : target/model-comparison.md
  */
-@EnabledIfSystemProperty(named = "compare.models", matches = ".+")
 class ModelComparisonTest {
+
+    /** Modèles simulés du mode hors ligne : un qui répond correctement, un qui renvoie une réponse inutilisable. */
+    private static final String FAKE_GOOD = "simulation/modele-correct";
+    private static final String FAKE_BROKEN = "simulation/modele-casse";
+
+    /** Réponse que donnerait un bon modèle pour ce CV et cette offre. */
+    private static final String FAKE_ANSWER = """
+
+            {"matchScore": 45,
+             "summary": "Bon socle Java et Spring Boot, mais l'offre exige Docker, Kubernetes, Kafka et la CI/CD.",
+             "strengths": ["Java 17", "Spring Boot", "API REST"],
+             "missingSkills": [
+               {"skill": "Docker", "priority": "HIGH", "reason": "Exigé par l'offre.",
+                "howToImprove": "Conteneuriser un projet Spring Boot en suivant la documentation officielle."},
+               {"skill": "Kubernetes", "priority": "HIGH", "reason": "Exigé par l'offre.",
+                "howToImprove": "Déployer ce conteneur sur un cluster local avec Minikube."},
+               {"skill": "Apache Kafka", "priority": "MEDIUM", "reason": "Souhaité par l'offre.",
+                "howToImprove": "Réaliser un échange asynchrone producteur / consommateur."},
+               {"skill": "CI/CD (GitLab CI)", "priority": "MEDIUM", "reason": "Demandé dans les missions.",
+                "howToImprove": "Écrire un pipeline qui lance les tests puis construit l'image."}],
+             "cvTips": ["Chiffrer l'impact des API REST réalisées chez Sofrecom."]}
+            """;
 
     private static final String CV = """
             Sami Trabelsi
@@ -68,12 +96,32 @@ class ModelComparisonTest {
 
     @Test
     void compareModels() throws Exception {
-        String apiKey = System.getenv("LLM_API_KEY");
-        if (apiKey == null || apiKey.isBlank()) throw new IllegalStateException("LLM_API_KEY absente");
-        String url = System.getenv().getOrDefault("LLM_API_URL", "https://api.groq.com/openai/v1");
-        List<String> models = List.of(System.getProperty("compare.models").split(","));
-        int runs = Integer.parseInt(System.getProperty("compare.runs", "1"));
+        String requested = System.getProperty("compare.models", "");
+        boolean real = !requested.isBlank();
         ObjectMapper mapper = new ObjectMapper();
+        HttpServer fake = real ? null : startFakeGroq(mapper);
+        try {
+            if (real) {
+                String apiKey = System.getenv("LLM_API_KEY");
+                if (apiKey == null || apiKey.isBlank()) throw new IllegalStateException("LLM_API_KEY absente");
+                String url = System.getenv().getOrDefault("LLM_API_URL", "https://api.groq.com/openai/v1");
+                List<Row> rows = compare(mapper, url, apiKey, List.of(requested.split(",")),
+                        Integer.parseInt(System.getProperty("compare.runs", "1")), Long.getLong("compare.pause-ms", 20_000));
+                writeReport(rows, Path.of("target", "model-comparison.md"));
+            } else {
+                String url = "http://127.0.0.1:" + fake.getAddress().getPort() + "/v1";
+                List<Row> rows = compare(mapper, url, "cle-de-test", List.of(FAKE_GOOD, FAKE_BROKEN), 1, 0);
+                String report = writeReport(rows, Path.of("target", "model-comparison-hors-ligne.md"));
+                checkOfflineResults(rows, report);
+            }
+        } finally {
+            if (fake != null) fake.stop(0);
+        }
+    }
+
+    /** Lance la même analyse pour chaque modèle et mesure appels, latence, jetons et qualité. */
+    private static List<Row> compare(ObjectMapper mapper, String url, String apiKey, List<String> models,
+                                     int runs, long pauseMs) throws Exception {
 
         // Contexte RAG calculé comme en production (recherche lexicale sur la vraie base de connaissances)
         PiiMasker masker = new PiiMasker();
@@ -115,12 +163,65 @@ class ModelComparisonTest {
                     Files.createDirectories(raw.getParent());
                     Files.writeString(raw, calls.get(0).text(), StandardCharsets.UTF_8);
                 }
-                Thread.sleep(Long.getLong("compare.pause-ms", 20_000));   // marge pour la limite de jetons par minute
+                if (pauseMs > 0) Thread.sleep(pauseMs);   // marge pour la limite de jetons par minute
             }
         }
+        return rows;
+    }
+
+    private static String writeReport(List<Row> rows, Path file) throws Exception {
+        int runs = rows.stream().mapToInt(Row::run).max().orElse(1);
         String report = report(rows, runs);
         System.out.println(report);
-        Files.writeString(Path.of("target", "model-comparison.md"), report, StandardCharsets.UTF_8);
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, report, StandardCharsets.UTF_8);
+        return report;
+    }
+
+    /** Mode hors ligne : les mesures et le rapport doivent refléter exactement ce que le faux Groq a répondu. */
+    private static void checkOfflineResults(List<Row> rows, String report) {
+        Row good = rows.stream().filter(r -> r.model().equals(FAKE_GOOD)).findFirst().orElseThrow();
+        Row broken = rows.stream().filter(r -> r.model().equals(FAKE_BROKEN)).findFirst().orElseThrow();
+
+        assertThat(good.valid()).isTrue();
+        assertThat(good.calls()).isEqualTo(1);
+        assertThat(good.gapsFound()).as("écarts attendus : Docker, Kubernetes, Kafka, CI").isEqualTo(4);
+        assertThat(good.strengthsFound()).as("atouts attendus : Java, Spring").isEqualTo(2);
+        assertThat(good.missingCount()).isEqualTo(4);
+        assertThat(good.score()).isEqualTo(45);
+        assertThat(good.leaks()).isZero();
+        assertThat(good.promptTokens()).isEqualTo(1500);
+        assertThat(good.completionTokens()).isEqualTo(400);
+        assertThat(good.latencyMs()).isGreaterThanOrEqualTo(0);
+
+        assertThat(broken.valid()).isFalse();
+        assertThat(broken.calls()).as("une seule nouvelle tentative sur une réponse inutilisable").isEqualTo(2);
+        assertThat(broken.error()).isNotBlank();
+
+        assertThat(report).contains("| " + FAKE_GOOD + " | 1 | 1 | oui |", "| " + FAKE_BROKEN + " | 1 | 2 | non |");
+    }
+
+    /** Faux Groq : répond selon le modèle demandé, avec un champ usage comme la vraie API. */
+    private static HttpServer startFakeGroq(ObjectMapper mapper) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/v1/chat/completions", exchange -> {
+            try (exchange) {
+                JsonNode request = mapper.readTree(exchange.getRequestBody());
+                String content = FAKE_GOOD.equals(request.path("model").asText())
+                        ? FAKE_ANSWER : "Désolé, je ne peux pas produire de JSON.";
+                ObjectNode body = mapper.createObjectNode();
+                ObjectNode choice = body.putArray("choices").addObject();
+                choice.put("finish_reason", "stop");
+                choice.putObject("message").put("role", "assistant").put("content", content);
+                body.putObject("usage").put("prompt_tokens", 1500).put("completion_tokens", 400);
+                byte[] bytes = mapper.writeValueAsBytes(body);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, bytes.length);
+                exchange.getResponseBody().write(bytes);
+            }
+        });
+        server.start();
+        return server;
     }
 
     private static SkillGapService service(LlmClient llm, String context, ObjectMapper mapper) {

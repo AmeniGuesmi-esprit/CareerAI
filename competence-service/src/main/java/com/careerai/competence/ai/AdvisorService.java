@@ -32,7 +32,7 @@ public class AdvisorService {
 
     /**
      * Cache : même prompt = pas de nouvel appel Gemini (et le rate limiter est ignoré).
-     * Aucune donnée personnelle n'entre dans le prompt, donc le partage du cache entre utilisateurs est sans risque.
+     * Les données personnelles sont masquées avant l'appel (PersonalDataMasker) : Gemini ne les reçoit jamais.
      * Les métriques d'une réponse en cache sont celles de sa génération d'origine.
      */
     @Cacheable(value = "advice", key = "#req.prompt().strip().toLowerCase()")
@@ -49,8 +49,12 @@ public class AdvisorService {
      * @param modelName modèle du conseiller, ou null pour le modèle par défaut
      */
     public AdviceResponse generate(String modelName, String rawPrompt, boolean withJudge) {
-        // Garde-fou d'entrée
-        String prompt = clean(rawPrompt);
+        // Garde-fou d'entrée : nettoyage, puis masquage des données personnelles avant tout envoi à Gemini
+        PersonalDataMasker.Result masked = PersonalDataMasker.mask(clean(rawPrompt));
+        String prompt = masked.text();
+        if (masked.count() > 0) {
+            log.info("Anonymisation : {} donnée(s) personnelle(s) masquée(s) avant l'appel à Gemini", masked.count());
+        }
         String usedModel = modelName != null ? modelName : gemini.getModel();
 
         // Étape 1 : le conseiller répond (prompt système + few-shot)
