@@ -21,4 +21,10 @@ class PromptTemplatesTest {
         assertThat(PromptTemplates.JUDGE_SCHEMA).containsKeys("type", "properties", "required");
         assertThat(PromptTemplates.JUDGE_SCHEMA.get("required").toString()).contains("verdict", "raison");
     }
+
+    @Test
+    void judgeSchema_requiresTheFourQualityScores() {
+        assertThat(PromptTemplates.JUDGE_SCHEMA.get("required").toString())
+                .contains("pertinence", "fiabilite", "format", "prudence");
+    }
 }
