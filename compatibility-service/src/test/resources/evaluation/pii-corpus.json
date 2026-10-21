@@ -1,0 +1,35 @@
+[
+  {"text": "Contact : sami.trabelsi@gmail.com", "pii": [{"type": "EMAIL", "value": "sami.trabelsi@gmail.com"}]},
+  {"text": "E-mail : f.chbeb+cv@esprit.tn", "pii": [{"type": "EMAIL", "value": "f.chbeb+cv@esprit.tn"}]},
+  {"text": "Écrire à rh@entreprise.com.tn pour postuler", "pii": [{"type": "EMAIL", "value": "rh@entreprise.com.tn"}]},
+  {"text": "Mail: ahmed_ben-ali@outlook.fr | Tunis", "pii": [{"type": "EMAIL", "value": "ahmed_ben-ali@outlook.fr"}]},
+  {"text": "Tél : +216 22 123 456", "pii": [{"type": "TELEPHONE", "value": "+216 22 123 456"}]},
+  {"text": "Mobile 98 765 432", "pii": [{"type": "TELEPHONE", "value": "98 765 432"}]},
+  {"text": "Téléphone : 06.12.34.56.78", "pii": [{"type": "TELEPHONE", "value": "06.12.34.56.78"}]},
+  {"text": "Appelez le (+33) 6 12 34 56 78", "pii": [{"type": "TELEPHONE", "value": "6 12 34 56 78"}]},
+  {"text": "GSM: 0021655443322", "pii": [{"type": "TELEPHONE", "value": "0021655443322"}]},
+  {"text": "Tel 71-234-567", "pii": [{"type": "TELEPHONE", "value": "71-234-567"}]},
+  {"text": "Profil : https://www.linkedin.com/in/farah-chbeb", "pii": [{"type": "LIEN", "value": "linkedin.com/in/farah-chbeb"}]},
+  {"text": "Code : github.com/fchbeb/careerai", "pii": [{"type": "LIEN", "value": "github.com/fchbeb/careerai"}]},
+  {"text": "Portfolio www.sami-dev.tn", "pii": [{"type": "LIEN", "value": "sami-dev.tn"}]},
+  {"text": "Démo : http://192.168.1.20:4200/cv", "pii": [{"type": "LIEN", "value": "192.168.1.20:4200/cv"}]},
+  {"text": "sami@mail.com, +216 50 111 222, gitlab.com/sami", "pii": [
+    {"type": "EMAIL", "value": "sami@mail.com"}, {"type": "TELEPHONE", "value": "50 111 222"}, {"type": "LIEN", "value": "gitlab.com/sami"}]},
+
+  {"text": "Expérience : 2019 - 2023 chez Vermeg", "pii": []},
+  {"text": "Stage 01.2022 - 06.2022 à Tunis", "pii": []},
+  {"text": "CDD du 15/03/2021 au 30/09/2022", "pii": []},
+  {"text": "Mission 2022-01 - 2022-06 en régie", "pii": []},
+  {"text": "Java 17, Spring Boot 3.2.0, Angular 21", "pii": []},
+  {"text": "Plateforme de 120 000 utilisateurs et 2 500 000 requêtes par jour", "pii": []},
+  {"text": "Budget géré : 1 200 000 TND", "pii": []},
+  {"text": "Score TOEIC 905, certification AWS SAA-C03", "pii": []},
+  {"text": "Bac+5, 3 ans d'expérience, anglais C1", "pii": []},
+  {"text": "Réduction du temps de build de 40 % (de 25 à 15 min)", "pii": []},
+  {"text": "Version 2.10.1 du framework, port 8082", "pii": []},
+
+  {"text": "Sami Trabelsi, développeur Java", "pii": [{"type": "NOM", "value": "Sami Trabelsi"}], "outOfScope": true},
+  {"text": "Adresse : 12 rue de Marseille, 1002 Tunis", "pii": [{"type": "ADRESSE", "value": "12 rue de Marseille"}], "outOfScope": true},
+  {"text": "Né le 04/05/1998 à Sousse", "pii": [{"type": "DATE_NAISSANCE", "value": "04/05/1998"}], "outOfScope": true},
+  {"text": "CIN 09876543", "pii": [{"type": "IDENTIFIANT", "value": "09876543"}], "outOfScope": true}
+]
