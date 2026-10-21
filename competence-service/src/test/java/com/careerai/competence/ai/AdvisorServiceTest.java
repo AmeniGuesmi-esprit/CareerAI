@@ -118,6 +118,27 @@ class AdvisorServiceTest {
     }
 
     @Test
+    void personalData_isMaskedBeforeGeminiAndJudge() throws Exception {
+        when(gemini.generateText(anyString(), anyString())).thenReturn("Ma réponse");
+        when(gemini.generateJson(anyString(), anyString(), anyMap()))
+                .thenReturn(JSON.readTree("{\"verdict\":\"OK\",\"raison\":\"\"}"));
+        AdviceRequest req = new AdviceRequest("Je m'appelle Karim Mansouri, karim@gmail.com, +216 22 123 456. "
+                + "Je connais Java 17, quelles certifications cloud ?");
+
+        service.advise(1L, req);
+
+        ArgumentCaptor<String> prompt = ArgumentCaptor.forClass(String.class);
+        verify(gemini).generateText(anyString(), prompt.capture());
+        assertThat(prompt.getValue())
+                .doesNotContain("Karim", "Mansouri", "karim@gmail.com", "22 123 456")
+                .contains("[NOM]", "[EMAIL]", "[TÉLÉPHONE]", "Java 17", "certifications cloud");
+
+        ArgumentCaptor<String> judge = ArgumentCaptor.forClass(String.class);
+        verify(gemini).generateJson(anyString(), judge.capture(), anyMap());
+        assertThat(judge.getValue()).doesNotContain("Karim", "karim@gmail.com", "22 123 456");
+    }
+
+    @Test
     void judgeInput_wrapsRequestAndAnswerInTags() throws Exception {
         when(gemini.generateText(anyString(), anyString())).thenReturn("Ma réponse");
         when(gemini.generateJson(anyString(), anyString(), anyMap()))
