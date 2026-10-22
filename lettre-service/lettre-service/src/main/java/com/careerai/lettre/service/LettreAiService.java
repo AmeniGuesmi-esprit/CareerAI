@@ -85,9 +85,29 @@ public class LettreAiService {
 
     // ───────────────────────── Génération ─────────────────────────
 
+    /** Prompts envoyés au LLM (système + utilisateur). */
+    public record Prompts(String system, String user) {}
+
     public AiLetterResponse generate(String userEmail, GenerateLetterRequest req) {
         checkRate(userEmail);
+        Prompts prompts = buildGeneratePrompts(req);
+        LlmClient.Result r = llm.chat(req.getProvider(), prompts.system(), prompts.user());
+        return AiLetterResponse.builder()
+                .contenu(cleanGeneratedLetter(r.text()))
+                .provider(r.provider()).model(r.model())
+                .build();
+    }
 
+    /** Nettoie une lettre générée (balises, jetons, markdown) ; réutilisé par le benchmark. */
+    public String cleanGeneratedLetter(String raw) {
+        return cleanLetter(raw, Map.of());
+    }
+
+    /**
+     * Construit exactement les prompts de production (anonymisation comprise), sans appeler le LLM.
+     * Utilisé par {@link #generate} et par le benchmark, pour que les mesures portent sur le vrai prompt.
+     */
+    public Prompts buildGeneratePrompts(GenerateLetterRequest req) {
         String cv = piiMasker.anonymizeCv(cut(req.getCv(), MAX_CV_CHARS));       // nom + adresse supprimés
         String offre = forContext(cut(req.getOffre(), MAX_OFFER_CHARS));
         String langue = "en".equals(req.getLangue()) ? "anglais" : "français";
@@ -112,12 +132,7 @@ public class LettreAiService {
                 + "<poste>" + Optional.ofNullable(req.getPoste()).orElse("non précisé").trim() + "</poste>\n"
                 + "<offre>\n" + offre + "\n</offre>\n"
                 + "<cv>\n" + cv + "\n</cv>";
-
-        LlmClient.Result r = llm.chat(req.getProvider(), system, user);
-        return AiLetterResponse.builder()
-                .contenu(cleanLetter(r.text(), Map.of()))
-                .provider(r.provider()).model(r.model())
-                .build();
+        return new Prompts(system, user);
     }
 
     // ───────────────────────── Amélioration ─────────────────────────

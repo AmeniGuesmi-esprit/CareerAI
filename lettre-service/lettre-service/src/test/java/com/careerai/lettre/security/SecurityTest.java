@@ -1,5 +1,6 @@
 package com.careerai.lettre.security;
 
+import com.careerai.lettre.ai.LlmClient;
 import com.careerai.lettre.config.SecurityConfig;
 import com.careerai.lettre.controller.LettreAiController;
 import com.careerai.lettre.controller.LettreController;
@@ -36,16 +37,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Sécurité JWT et contrat de l'API, sans MySQL ni Eureka : seule la couche web est chargée
- * (filtre JWT réel, règles de sécurité réelles), les services sont simulés.
+ * Sécurité JWT et contrat de l'API, sans MySQL ni Eureka :
+ * seule la couche web est chargée (filtre JWT réel, règles de sécurité réelles),
+ * les services et le client LLM sont simulés.
  */
 @WebMvcTest(controllers = {LettreController.class, LettreAiController.class})
 @Import({SecurityConfig.class, JwtService.class})
 @TestPropertySource(properties = "app.jwt.secret=" + SecurityTest.SECRET)
 class SecurityTest {
 
-    static final String SECRET = "bGV0dHJlLXRlc3RzLXNlY3JldC1rZXktMzJieXRlcyE=";
-    private static final String OTHER_SECRET = "YW5vdGhlci1zZWNyZXQta2V5LWZvci1mb3JnZXJ5ISE=";
+    static final String SECRET =
+            "bGV0dHJlLXRlc3RzLXNlY3JldC1rZXktMzJieXRlcyE=";
+
+    private static final String OTHER_SECRET =
+            "YW5vdGhlci1zZWNyZXQta2V5LWZvci1mb3JnZXJ5ISE=";
 
     @Autowired
     MockMvc mvc;
@@ -56,21 +61,32 @@ class SecurityTest {
     @MockBean
     LettreAiService aiService;
 
+    // Required by LettreAiController in the WebMvcTest context.
+    @MockBean
+    LlmClient llmClient;
+
     // ───────────────────────── Fabrication de jetons ─────────────────────────
 
     private static SecretKey key(String base64) {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(base64));
     }
 
-    private static String token(String subject, String role, long expiresInMs, String secret) {
+    private static String token(
+            String subject, String role, long expiresInMs, String secret) {
+
         long now = System.currentTimeMillis();
-        JwtBuilder b = Jwts.builder()
+
+        JwtBuilder builder = Jwts.builder()
                 .subject(subject)
                 .issuedAt(new Date(now - 120_000))
                 .expiration(new Date(now + expiresInMs))
                 .signWith(key(secret));
-        if (role != null) b.claim("role", role);
-        return b.compact();
+
+        if (role != null) {
+            builder.claim("role", role);
+        }
+
+        return builder.compact();
     }
 
     private static String bearer(String subject, String role) {
@@ -81,39 +97,55 @@ class SecurityTest {
 
     @Test
     void requestWithoutTokenIsRejectedWith401() throws Exception {
-        mvc.perform(get("/api/lettres")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/lettres"))
+                .andExpect(status().isUnauthorized());
+
         verify(lettreService, never()).getMine(any());
     }
 
     @Test
     void garbageTokenIsRejectedWith401() throws Exception {
-        mvc.perform(get("/api/lettres").header("Authorization", "Bearer n'importe.quoi.ici"))
+        mvc.perform(get("/api/lettres")
+                        .header("Authorization", "Bearer n'importe.quoi.ici"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void expiredTokenIsRejectedWith401() throws Exception {
-        String expired = "Bearer " + token("alice@example.com", "USER", -60_000, SECRET);
-        mvc.perform(get("/api/lettres").header("Authorization", expired)).andExpect(status().isUnauthorized());
+        String expired = "Bearer "
+                + token("alice@example.com", "USER", -60_000, SECRET);
+
+        mvc.perform(get("/api/lettres").header("Authorization", expired))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void tokenSignedWithAnotherKeyIsRejectedWith401() throws Exception {
-        String forged = "Bearer " + token("alice@example.com", "ADMIN", 3_600_000, OTHER_SECRET);
-        mvc.perform(get("/api/lettres").header("Authorization", forged)).andExpect(status().isUnauthorized());
+        String forged = "Bearer "
+                + token("alice@example.com", "ADMIN", 3_600_000, OTHER_SECRET);
+
+        mvc.perform(get("/api/lettres").header("Authorization", forged))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void tokenWithoutRoleIsRejectedWith401() throws Exception {
-        String noRole = "Bearer " + token("alice@example.com", null, 3_600_000, SECRET);
-        mvc.perform(get("/api/lettres").header("Authorization", noRole)).andExpect(status().isUnauthorized());
+        String noRole = "Bearer "
+                + token("alice@example.com", null, 3_600_000, SECRET);
+
+        mvc.perform(get("/api/lettres").header("Authorization", noRole))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void aValidTokenGivesAccess() throws Exception {
-        when(lettreService.getMine("alice@example.com")).thenReturn(ApiResponse.success("Lettres récupérées", List.of()));
+        when(lettreService.getMine("alice@example.com"))
+                .thenReturn(ApiResponse.success(
+                        "Lettres récupérées", List.of()));
 
-        mvc.perform(get("/api/lettres").header("Authorization", bearer("alice@example.com", "USER")))
+        mvc.perform(get("/api/lettres")
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -122,24 +154,33 @@ class SecurityTest {
 
     @Test
     void theUserIdentityComesFromTheTokenOnly() throws Exception {
-        when(lettreService.getMineById("bob@example.com", 5L)).thenReturn(ApiResponse.error("Lettre non trouvée"));
+        when(lettreService.getMineById("bob@example.com", 5L))
+                .thenReturn(ApiResponse.error("Lettre non trouvée"));
 
-        mvc.perform(get("/api/lettres/5").header("Authorization", bearer("bob@example.com", "USER")))
+        mvc.perform(get("/api/lettres/5")
+                        .header("Authorization",
+                                bearer("bob@example.com", "USER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("Lettre non trouvée"));
 
         verify(lettreService).getMineById("bob@example.com", 5L);
-        verify(lettreService, never()).getMineById(eq("alice@example.com"), any());
+        verify(lettreService, never())
+                .getMineById(eq("alice@example.com"), any());
     }
 
     // ───────────────────────── Rôles ─────────────────────────
 
     @Test
     void aSimpleUserCannotUseTheAdminEndpoints() throws Exception {
-        mvc.perform(get("/api/lettres/admin/all").header("Authorization", bearer("alice@example.com", "USER")))
+        mvc.perform(get("/api/lettres/admin/all")
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER")))
                 .andExpect(status().isForbidden());
-        mvc.perform(delete("/api/lettres/admin/3").header("Authorization", bearer("alice@example.com", "USER")))
+
+        mvc.perform(delete("/api/lettres/admin/3")
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER")))
                 .andExpect(status().isForbidden());
 
         verify(lettreService, never()).getAll();
@@ -148,9 +189,13 @@ class SecurityTest {
 
     @Test
     void anAdminCanListEveryLetter() throws Exception {
-        when(lettreService.getAll()).thenReturn(ApiResponse.success("Lettres récupérées", List.of()));
+        when(lettreService.getAll())
+                .thenReturn(ApiResponse.success(
+                        "Lettres récupérées", List.of()));
 
-        mvc.perform(get("/api/lettres/admin/all").header("Authorization", bearer("admin@example.com", "ADMIN")))
+        mvc.perform(get("/api/lettres/admin/all")
+                        .header("Authorization",
+                                bearer("admin@example.com", "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -158,57 +203,117 @@ class SecurityTest {
     // ───────────────────────── Validation et erreurs de l'API ─────────────────────────
 
     @Test
-    void aLetterWithoutCompanyNameIsRefusedWith400AndAFrenchMessage() throws Exception {
-        String body = "{\"nomEntreprise\":\"\",\"cv\":\"mon cv\",\"contenu\":\"ma lettre\"}";
+    void aLetterWithoutCompanyNameIsRefusedWith400AndAFrenchMessage()
+            throws Exception {
+
+        String body =
+                "{\"nomEntreprise\":\"\",\"cv\":\"mon cv\",\"contenu\":\"ma lettre\"}";
 
         mvc.perform(post("/api/lettres")
-                        .header("Authorization", bearer("alice@example.com", "USER"))
-                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Le nom de l'entreprise est obligatoire"));
+                .andExpect(jsonPath("$.message")
+                        .value("Le nom de l'entreprise est obligatoire"));
     }
 
     @Test
     void aMalformedBodyIsRefusedWith400() throws Exception {
         mvc.perform(post("/api/lettres")
-                        .header("Authorization", bearer("alice@example.com", "USER"))
-                        .contentType(MediaType.APPLICATION_JSON).content("{pas du json"))
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{pas du json"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Corps de requête invalide"));
+                .andExpect(jsonPath("$.message")
+                        .value("Corps de requête invalide"));
     }
 
     @Test
     void anUnknownToneIsRefusedByTheAiEndpoint() throws Exception {
-        String body = "{\"nomEntreprise\":\"Acme\",\"offre\":\"Une offre\",\"cv\":\"Un CV\",\"ton\":\"agressif\"}";
+        String body =
+                "{\"nomEntreprise\":\"Acme\",\"offre\":\"Une offre\","
+                        + "\"cv\":\"Un CV\",\"ton\":\"agressif\"}";
 
         mvc.perform(post("/api/lettres/ai/generate")
-                        .header("Authorization", bearer("alice@example.com", "USER"))
-                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Ton non reconnu"));
     }
 
     @Test
-    void anAiTimeoutReachesTheClientAs504WithAClearMessage() throws Exception {
+    void anAiTimeoutReachesTheClientAs504WithAClearMessage()
+            throws Exception {
+
         when(aiService.generate(eq("alice@example.com"), any()))
-                .thenThrow(ApiException.gatewayTimeout("Le fournisseur « mistral » met trop de temps à répondre."));
-        String body = "{\"nomEntreprise\":\"Acme\",\"offre\":\"Une offre\",\"cv\":\"Un CV\"}";
+                .thenThrow(ApiException.gatewayTimeout(
+                        "Le fournisseur « mistral » met trop de temps à répondre."));
+
+        String body =
+                "{\"nomEntreprise\":\"Acme\",\"offre\":\"Une offre\","
+                        + "\"cv\":\"Un CV\"}";
 
         mvc.perform(post("/api/lettres/ai/generate")
-                        .header("Authorization", bearer("alice@example.com", "USER"))
-                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                        .header("Authorization",
+                                bearer("alice@example.com", "USER"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isGatewayTimeout())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Le fournisseur « mistral » met trop de temps à répondre."));
+                .andExpect(jsonPath("$.message").value(
+                        "Le fournisseur « mistral » met trop de temps à répondre."));
     }
 
     @Test
     void theAiEndpointsRequireAToken() throws Exception {
-        String body = "{\"nomEntreprise\":\"Acme\",\"offre\":\"Une offre\",\"cv\":\"Un CV\"}";
+        String body =
+                "{\"nomEntreprise\":\"Acme\",\"offre\":\"Une offre\","
+                        + "\"cv\":\"Un CV\"}";
 
-        mvc.perform(post("/api/lettres/ai/generate").contentType(MediaType.APPLICATION_JSON).content(body))
+        mvc.perform(post("/api/lettres/ai/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isUnauthorized());
+
         verify(aiService, never()).generate(any(), any());
+    }
+
+    // ───────────────────────── Mesures IA réservées à l'admin ─────────────────────────
+
+    @Test
+    void aSimpleUserCannotRunComparisonsOrReadMetrics() throws Exception {
+        String body = "{\"providers\":[\"gemini\",\"mistral\"],\"systemPrompt\":\"s\",\"userPrompt\":\"u\"}";
+        String user = bearer("alice@example.com", "USER");
+
+        mvc.perform(post("/api/lettres/ai/compare").header("Authorization", user)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/api/lettres/ai/metrics").header("Authorization", user))
+                .andExpect(status().isForbidden());
+        mvc.perform(post("/api/lettres/ai/metrics/reset").header("Authorization", user))
+                .andExpect(status().isForbidden());
+
+        verify(llmClient, never()).chat(any(), any(), any(), org.mockito.ArgumentMatchers.anyBoolean());
+        verify(llmClient, never()).resetMetrics();
+    }
+
+    @Test
+    void anAdminCanReadAndResetTheMetrics() throws Exception {
+        when(llmClient.metrics()).thenReturn(java.util.Map.<String, Object>of("cacheHits", 0));
+        String admin = bearer("admin@example.com", "ADMIN");
+
+        mvc.perform(get("/api/lettres/ai/metrics").header("Authorization", admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.cacheHits").value(0));
+        mvc.perform(post("/api/lettres/ai/metrics/reset").header("Authorization", admin))
+                .andExpect(status().isOk());
+
+        verify(llmClient).resetMetrics();
     }
 }
