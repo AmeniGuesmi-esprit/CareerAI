@@ -17,6 +17,10 @@ public class LlmProperties {
     private double temperature = 0.7;
     private int maxTokens = 1500;
     private int timeoutSeconds = 60;
+    /** Durée de vie d'une réponse en cache (secondes). 0 = cache désactivé. */
+    private long cacheTtlSeconds = 300;
+    /** Nombre maximal de réponses gardées en cache (LRU). */
+    private int cacheMaxEntries = 100;
     private Map<String, Provider> providers = new LinkedHashMap<>();
 
     @Data
