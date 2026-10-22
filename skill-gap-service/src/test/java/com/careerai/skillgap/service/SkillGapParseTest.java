@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /** Exigence du sujet : la sortie du LLM est validée avant affichage. */
 class SkillGapParseTest {
 
-    private final SkillGapService service = new SkillGapService(null, null, null, null, null, new ObjectMapper());
+    private final SkillGapService service = new SkillGapService(null, null, null, null, null, new ObjectMapper(), null);
 
     @Test
     void jsonWrappedInMarkdownIsAccepted() {
@@ -51,6 +51,33 @@ class SkillGapParseTest {
         assertThat(r.summary()).doesNotContain("[[");
         assertThat(r.strengths()).isEmpty();
         assertThat(r.cvTips()).singleElement().asString().doesNotContain("[[");
+    }
+
+    /** Défaut relevé par la comparaison de modèles : gpt-oss-120b renvoie au « contexte » que le candidat ne voit pas. */
+    @Test
+    void internalPromptReferencesAreRemoved() {
+        AnalysisResult r = service.parse("""
+                {"matchScore": 40, "summary": "s",
+                 "missingSkills": [{"skill": "Docker", "priority": "HIGH", "reason": "r",
+                   "howToImprove": "Suivre le parcours Docker du contexte et obtenir la certification Docker Certified Associate."},
+                  {"skill": "CI/CD", "priority": "MEDIUM", "reason": "r",
+                   "howToImprove": "Créer un pipeline GitLab CI en suivant le parcours CI/CD du contexte."}],
+                 "cvTips": ["Mettre en avant les projets cités dans la fiche."]}
+                """);
+        assertThat(r.missingSkills()).extracting(m -> m.howToImprove()).containsExactly(
+                "Suivre le parcours Docker et obtenir la certification Docker Certified Associate.",
+                "Créer un pipeline GitLab CI en suivant le parcours CI/CD.");
+        assertThat(r.cvTips()).containsExactly("Mettre en avant les projets cités.");
+    }
+
+    /** Le mot « contexte » employé normalement n'est pas touché. */
+    @Test
+    void ordinaryUseOfTheWordContextIsKept() {
+        AnalysisResult r = service.parse("""
+                {"matchScore": 40, "summary": "Expérience Java dans un contexte bancaire exigeant.", "strengths": ["Java"],
+                 "missingSkills": [], "cvTips": []}
+                """);
+        assertThat(r.summary()).isEqualTo("Expérience Java dans un contexte bancaire exigeant.");
     }
 
     @Test

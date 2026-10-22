@@ -99,6 +99,24 @@ class LlmClientTest {
                 "\"reasoning_effort\":\"low\"", "\"role\":\"system\"", "Tu es un conseiller.");
     }
 
+    /** Mesures pour l'évaluation des performances : latence de l'appel et jetons consommés. */
+    @Test
+    void measuresLatencyAndTokenUsage() {
+        delayMs = 150;
+        respond(200, """
+                {"choices":[{"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],
+                 "usage":{"prompt_tokens":1200,"completion_tokens":350,"total_tokens":1550}}
+                """);
+
+        LlmClient.Completion c = client("k").call("s", "u");
+
+        assertThat(c.text()).isEqualTo("ok");
+        assertThat(c.latencyMs()).isGreaterThanOrEqualTo(150);
+        assertThat(c.promptTokens()).isEqualTo(1200);
+        assertThat(c.completionTokens()).isEqualTo(350);
+        assertThat(c.totalTokens()).isEqualTo(1550);
+    }
+
     // ── Clé absente ──
 
     @Test

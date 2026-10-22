@@ -57,8 +57,20 @@ public class LlmClient {
         return model;
     }
 
+    /** Réponse du modèle avec ses mesures : latence de l'appel et jetons consommés (champ usage de l'API). */
+    public record Completion(String text, long latencyMs, int promptTokens, int completionTokens) {
+        public int totalTokens() {
+            return promptTokens + completionTokens;
+        }
+    }
+
     /** Retourne le texte de la réponse du modèle. */
     public String complete(String system, String user) {
+        return call(system, user).text();
+    }
+
+    /** Appelle le modèle et mesure la latence et les jetons (journalisés, jamais le contenu du CV). */
+    public Completion call(String system, String user) {
         boolean local = apiUrl.contains("localhost") || apiUrl.contains("127.0.0.1");
         if (!local && (apiKey == null || apiKey.isBlank())) {
             throw ApiException.unavailable("Service d'analyse indisponible : clé API du LLM absente (LLM_API_KEY).");
@@ -76,6 +88,7 @@ public class LlmClient {
         }
 
         String raw;
+        long start = System.nanoTime();
         try {
             RestClient.RequestBodySpec req = http.post()
                     .uri("/chat/completions")
@@ -97,8 +110,11 @@ public class LlmClient {
             throw ApiException.unavailable("Service IA injoignable. Vérifiez la connexion et réessayez.");
         }
 
+        long latencyMs = (System.nanoTime() - start) / 1_000_000;
+
         try {
-            JsonNode choice = mapper.readTree(raw).path("choices").path(0);
+            JsonNode root = mapper.readTree(raw);
+            JsonNode choice = root.path("choices").path(0);
             if ("length".equals(choice.path("finish_reason").asText())) {
                 throw ApiException.badGateway("La réponse de l'IA a été tronquée. Réessayez avec une offre plus courte.");
             }
@@ -106,7 +122,12 @@ public class LlmClient {
             if (text.isBlank()) {
                 throw ApiException.badGateway("Réponse vide du service IA. Réessayez.");
             }
-            return text;
+            JsonNode usage = root.path("usage");
+            int promptTokens = usage.path("prompt_tokens").asInt(0);
+            int completionTokens = usage.path("completion_tokens").asInt(0);
+            log.info("Appel LLM : modèle {}, {} ms, jetons {} envoyés + {} générés = {}",
+                    model, latencyMs, promptTokens, completionTokens, promptTokens + completionTokens);
+            return new Completion(text, latencyMs, promptTokens, completionTokens);
         } catch (ApiException e) {
             throw e;
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package com.careerai.competence.ai;
 
 import com.careerai.competence.dto.AdviceRequest;
 import com.careerai.competence.dto.AdviceResponse;
+import com.careerai.competence.dto.AdviceResponse.Metriques;
 import com.careerai.competence.exception.AiException;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +11,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdvisorService {
+
+    private static final String[] CRITERES = {"pertinence", "fiabilite", "format", "prudence"};
 
     private final GeminiClient gemini;
     private final RateLimiter rateLimiter;
@@ -26,35 +32,85 @@ public class AdvisorService {
 
     /**
      * Cache : même prompt = pas de nouvel appel Gemini (et le rate limiter est ignoré).
-     * Aucune donnée personnelle n'entre dans le prompt, donc le partage du cache entre utilisateurs est sans risque.
+     * Les données personnelles sont masquées avant l'appel (PersonalDataMasker) : Gemini ne les reçoit jamais.
+     * Les métriques d'une réponse en cache sont celles de sa génération d'origine.
      */
     @Cacheable(value = "advice", key = "#req.prompt().strip().toLowerCase()")
     public AdviceResponse advise(Long userId, AdviceRequest req) {
         rateLimiter.check(userId, ratePerMinute, 60_000);
+        return generate(null, req.prompt(), judgeEnabled);
+    }
 
-        // Garde-fou d'entrée
-        String prompt = clean(req.prompt());
+    /**
+     * Chaîne complète conseiller -> juge, sans cache ni rate limiter.
+     * Sert aussi à l'évaluation comparative des modèles (modelName = modèle du conseiller ;
+     * le juge reste toujours le modèle par défaut pour que la notation soit comparable).
+     *
+     * @param modelName modèle du conseiller, ou null pour le modèle par défaut
+     */
+    public AdviceResponse generate(String modelName, String rawPrompt, boolean withJudge) {
+        // Garde-fou d'entrée : nettoyage, puis masquage des données personnelles avant tout envoi à Gemini
+        PersonalDataMasker.Result masked = PersonalDataMasker.mask(clean(rawPrompt));
+        String prompt = masked.text();
+        if (masked.count() > 0) {
+            log.info("Anonymisation : {} donnée(s) personnelle(s) masquée(s) avant l'appel à Gemini", masked.count());
+        }
+        String usedModel = modelName != null ? modelName : gemini.getModel();
 
         // Étape 1 : le conseiller répond (prompt système + few-shot)
-        String answer = gemini.generateText(PromptTemplates.ADVISOR_SYSTEM, prompt);
+        long t0 = System.nanoTime();
+        String answer = modelName == null
+                ? gemini.generateText(PromptTemplates.ADVISOR_SYSTEM, prompt)
+                : gemini.generateText(modelName, PromptTemplates.ADVISOR_SYSTEM, prompt);
+        long advisorMs = ms(t0);
         answer = cut(answer, 4000);
 
-        if (!judgeEnabled) return new AdviceResponse(answer, "NON_VERIFIEE", null);
+        if (!withJudge) {
+            return build(answer, "NON_VERIFIEE", null,
+                    new Metriques(usedModel, advisorMs, null, advisorMs, null));
+        }
 
-        // Étape 2 : le juge relit la réponse (chaînage + sortie JSON)
+        // Étape 2 : le juge relit la réponse (chaînage + sortie JSON + notes chiffrées)
+        long t1 = System.nanoTime();
         try {
             String judgeInput = "<demande>%s</demande>\n<reponse>%s</reponse>".formatted(prompt, answer);
             JsonNode verdict = gemini.generateJson(PromptTemplates.JUDGE_SYSTEM, judgeInput,
                     PromptTemplates.JUDGE_SCHEMA);
+            long judgeMs = ms(t1);
+            Metriques m = new Metriques(usedModel, advisorMs, judgeMs, advisorMs + judgeMs, score(verdict));
             if ("OK".equals(verdict.path("verdict").asText())) {
-                return new AdviceResponse(answer, "VERIFIEE", null);
+                return build(answer, "VERIFIEE", null, m);
             }
-            return new AdviceResponse(answer, "A_VERIFIER", verdict.path("raison").asText(null));
+            return build(answer, "A_VERIFIER", verdict.path("raison").asText(null), m);
         } catch (AiException e) {
             // Le juge est un bonus : s'il échoue, on garde la réponse du conseiller
             log.warn("Juge indisponible : {}", e.getMessage());
-            return new AdviceResponse(answer, "NON_VERIFIEE", null);
+            long judgeMs = ms(t1);
+            return build(answer, "NON_VERIFIEE", null,
+                    new Metriques(usedModel, advisorMs, judgeMs, advisorMs + judgeMs, null));
         }
+    }
+
+    private AdviceResponse build(String answer, String statut, String warning, Metriques m) {
+        log.info("Conseil généré : modèle={} statut={} conseil={}ms juge={}ms total={}ms score={}",
+                m.modele(), statut, m.latenceConseilMs(), m.latenceJugeMs(), m.latenceTotaleMs(), m.scoreQualite());
+        return new AdviceResponse(answer, statut, warning, m, AdviceResponse.LIMITES_IA);
+    }
+
+    /** Moyenne /5 des critères présents et valides (1..5) ; null si le juge n'a rien noté. */
+    static Double score(JsonNode verdict) {
+        List<Integer> notes = new ArrayList<>();
+        for (String c : CRITERES) {
+            int n = verdict.path(c).asInt(0);
+            if (n >= 1 && n <= 5) notes.add(n);
+        }
+        if (notes.isEmpty()) return null;
+        double avg = notes.stream().mapToInt(Integer::intValue).average().orElse(0);
+        return Math.round(avg * 10) / 10.0;
+    }
+
+    private static long ms(long startNanos) {
+        return (System.nanoTime() - startNanos) / 1_000_000;
     }
 
     private static String clean(String s) {

@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: api-gateway
+  config:
+    # JWT_SECRET lu dans le .env de la racine (lancement depuis la racine ou depuis ce dossier) ;
+    # une vraie variable d'environnement reste prioritaire
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
   cloud:
     loadbalancer:
       cache:

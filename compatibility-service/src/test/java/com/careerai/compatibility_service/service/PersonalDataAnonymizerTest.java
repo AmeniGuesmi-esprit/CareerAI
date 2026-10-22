@@ -1,6 +1,5 @@
 package com.careerai.compatibility_service.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,15 +72,25 @@ class PersonalDataAnonymizerTest {
         assertThat(anonymizer.anonymize(text)).isEqualTo(text);
     }
 
-    /** BUG : une période avec mois (MM.AAAA - MM.AAAA) a 12 chiffres et est prise pour un numéro. */
-    @Disabled("Bug connu de PersonalDataAnonymizer : les périodes avec mois sont masquées en [TELEPHONE]")
+    /** Régression : une période avec mois (MM.AAAA - MM.AAAA, 12 chiffres) était masquée en [TELEPHONE]. */
     @Test
     void conserveUnePeriodeAvecMois() {
         assertThat(anonymizer.anonymize("Stage 01.2022 - 06.2022")).isEqualTo("Stage 01.2022 - 06.2022");
     }
 
     @Test
-    void documenteLeComportementActuelSurLesPeriodesAvecMois() {
-        assertThat(anonymizer.anonymize("Stage 01.2022 - 06.2022")).isEqualTo("Stage [TELEPHONE]");
+    void conserveLesAutresFormatsDeDatesDeCv() {
+        String text = "CDD 09/2021 – 08/2023, diplômé le 15/06/2021, mission 2022-01 - 2022-06";
+        assertThat(anonymizer.anonymize(text)).isEqualTo(text);
+    }
+
+    @Test
+    void masqueToujoursUnNumeroAuFormatPointe() {
+        assertThat(anonymizer.anonymize("Tél. 06.12.34.56.78")).isEqualTo("Tél. [TELEPHONE]");
+    }
+
+    @Test
+    void masqueUnNumeroQuiNeRessemblePasAUneAnneePlausible() {
+        assertThat(anonymizer.anonymize("Appeler le 71 2345 6789")).isEqualTo("Appeler le [TELEPHONE]");
     }
 }

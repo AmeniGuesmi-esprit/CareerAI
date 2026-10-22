@@ -52,8 +52,14 @@ logistique, sante, juridique, design et communication, data et bureautique, comp
 - **Ne citer que des ressources reelles** dans les fiches : le prompt interdit au LLM d'en inventer d'autres.
 
 ## Tests
-`mvn test` (77 tests, sans MySQL ni appel reseau) :
+`mvn test` (113 tests, 0 ignore, sans MySQL ni appel reseau) :
 - RAG : recherche sur la vraie base de connaissances (offres de plusieurs domaines), format des fiches ;
 - donnees personnelles : masquage du CV et de l'offre, et verification que le LLM ne recoit que le texte masque ;
 - LLM : faux serveur Groq local (cle absente ou invalide, quota, timeout, serveur injoignable, reponse tronquee) ;
-- validation de la sortie du LLM, import des CV (PDF, DOCX, TXT), securite JWT (l'utilisateur vient du jeton).
+- validation de la sortie du LLM (une nouvelle tentative si la reponse est inutilisable), cache des analyses ;
+- import des CV (PDF, DOCX, TXT), securite JWT (l'utilisateur vient du jeton), erreurs de base de donnees (503) ;
+- repositories (18 tests sur H2 en mode MySQL) : requetes reelles, chaque utilisateur ne voit que ses CV et ses
+  analyses, contraintes d'unicite, suppression des analyses d'un CV avant le CV (cle etrangere) ;
+- comparaison de modeles : `ModelComparisonTest` tourne hors ligne contre un faux Groq (un modele correct, un modele
+  qui repond mal) et verifie les mesures et le rapport. Comparaison reelle :
+  `mvn test -Dtest=ModelComparisonTest -Dcompare.models=openai/gpt-oss-120b,openai/gpt-oss-20b`.

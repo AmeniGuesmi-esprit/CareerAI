@@ -118,6 +118,27 @@ class AdvisorServiceTest {
     }
 
     @Test
+    void personalData_isMaskedBeforeGeminiAndJudge() throws Exception {
+        when(gemini.generateText(anyString(), anyString())).thenReturn("Ma réponse");
+        when(gemini.generateJson(anyString(), anyString(), anyMap()))
+                .thenReturn(JSON.readTree("{\"verdict\":\"OK\",\"raison\":\"\"}"));
+        AdviceRequest req = new AdviceRequest("Je m'appelle Karim Mansouri, karim@gmail.com, +216 22 123 456. "
+                + "Je connais Java 17, quelles certifications cloud ?");
+
+        service.advise(1L, req);
+
+        ArgumentCaptor<String> prompt = ArgumentCaptor.forClass(String.class);
+        verify(gemini).generateText(anyString(), prompt.capture());
+        assertThat(prompt.getValue())
+                .doesNotContain("Karim", "Mansouri", "karim@gmail.com", "22 123 456")
+                .contains("[NOM]", "[EMAIL]", "[TÉLÉPHONE]", "Java 17", "certifications cloud");
+
+        ArgumentCaptor<String> judge = ArgumentCaptor.forClass(String.class);
+        verify(gemini).generateJson(anyString(), judge.capture(), anyMap());
+        assertThat(judge.getValue()).doesNotContain("Karim", "karim@gmail.com", "22 123 456");
+    }
+
+    @Test
     void judgeInput_wrapsRequestAndAnswerInTags() throws Exception {
         when(gemini.generateText(anyString(), anyString())).thenReturn("Ma réponse");
         when(gemini.generateJson(anyString(), anyString(), anyMap()))
@@ -128,5 +149,60 @@ class AdvisorServiceTest {
         ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
         verify(gemini).generateJson(eq(PromptTemplates.JUDGE_SYSTEM), input.capture(), eq(PromptTemplates.JUDGE_SCHEMA));
         assertThat(input.getValue()).contains("<demande>", "</demande>", "<reponse>Ma réponse</reponse>");
+    }
+
+    @Test
+    void judgeScores_areAveragedIntoQualityScore() throws Exception {
+        when(gemini.getModel()).thenReturn("m-test");
+        when(gemini.generateText(anyString(), anyString())).thenReturn("Réponse");
+        when(gemini.generateJson(anyString(), anyString(), anyMap())).thenReturn(JSON.readTree(
+                "{\"verdict\":\"OK\",\"raison\":\"ras\",\"pertinence\":5,\"fiabilite\":4,\"format\":5,\"prudence\":4}"));
+
+        AdviceResponse res = service.advise(1L, REQ);
+
+        assertThat(res.metriques().scoreQualite()).isEqualTo(4.5);
+        assertThat(res.metriques().modele()).isEqualTo("m-test");
+        assertThat(res.limites()).isEqualTo(AdviceResponse.LIMITES_IA);
+    }
+
+    @Test
+    void latencies_areMeasured_andTotalIsTheSum() throws Exception {
+        when(gemini.generateText(anyString(), anyString())).thenReturn("Réponse");
+        when(gemini.generateJson(anyString(), anyString(), anyMap()))
+                .thenReturn(JSON.readTree("{\"verdict\":\"OK\",\"raison\":\"ras\"}"));
+
+        var m = service.advise(1L, REQ).metriques();
+
+        assertThat(m.latenceConseilMs()).isGreaterThanOrEqualTo(0);
+        assertThat(m.latenceJugeMs()).isNotNull().isGreaterThanOrEqualTo(0);
+        assertThat(m.latenceTotaleMs()).isEqualTo(m.latenceConseilMs() + m.latenceJugeMs());
+        assertThat(m.scoreQualite()).isNull(); // le juge n'a donné aucune note
+    }
+
+    @Test
+    void invalidJudgeNotes_areIgnored() throws Exception {
+        assertThat(AdvisorService.score(JSON.readTree("{\"pertinence\":9,\"fiabilite\":0}"))).isNull();
+        assertThat(AdvisorService.score(JSON.readTree("{\"pertinence\":9,\"fiabilite\":3}"))).isEqualTo(3.0);
+    }
+
+    @Test
+    void judgeDisabled_hasNoJudgeLatencyNorScore() {
+        ReflectionTestUtils.setField(service, "judgeEnabled", false);
+        when(gemini.generateText(anyString(), anyString())).thenReturn("Réponse");
+
+        var m = service.advise(1L, REQ).metriques();
+
+        assertThat(m.latenceJugeMs()).isNull();
+        assertThat(m.scoreQualite()).isNull();
+    }
+
+    @Test
+    void generateWithModel_usesTheChosenModel() {
+        when(gemini.generateText(eq("autre-modele"), eq(PromptTemplates.ADVISOR_SYSTEM), anyString())).thenReturn("Réponse");
+
+        AdviceResponse res = service.generate("autre-modele", REQ.prompt(), false);
+
+        assertThat(res.metriques().modele()).isEqualTo("autre-modele");
+        verify(gemini, never()).generateText(eq(PromptTemplates.ADVISOR_SYSTEM), anyString());
     }
 }
