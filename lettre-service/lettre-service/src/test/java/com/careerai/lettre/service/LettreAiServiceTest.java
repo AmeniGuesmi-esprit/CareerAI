@@ -381,4 +381,14 @@ class LettreAiServiceTest {
         assertThat(list.get(1).configured()).isFalse();
         assertThat(list.get(1).preferred()).isFalse();
     }
+
+    @Test
+    void theBenchmarkUsesExactlyTheProductionPromptWithoutCallingTheLlm() {
+        LettreAiService.Prompts p = service.buildGeneratePrompts(generateRequest());
+
+        assertThat(p.system()).contains("N'invente JAMAIS").contains("250 à 350 mots");
+        assertThat(p.user()).contains("<entreprise>Acme Corp</entreprise>").contains("<cv>");
+        assertThat(p.user()).doesNotContain("sami.trabelsi@example.com").doesNotContain("Sami Trabelsi");
+        org.mockito.Mockito.verifyNoInteractions(llm);
+    }
 }

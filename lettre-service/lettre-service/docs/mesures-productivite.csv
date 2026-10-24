@@ -1,0 +1,3 @@
+participant,case_id,manual_minutes,ai_total_minutes,corrections_count,accepted_oui_non,notes
+# Une ligne par lettre. manual_minutes = rédaction sans IA ; ai_total_minutes = génération + relecture + corrections.
+# Exemple (à supprimer) : P1,C01,35,9,2,oui,ajout d'un projet oublié
