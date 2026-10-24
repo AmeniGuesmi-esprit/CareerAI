@@ -21,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,7 +37,10 @@ class GeminiClientTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String SCHEMA = "{\"type\":\"OBJECT\",\"properties\":{\"ok\":{\"type\":\"BOOLEAN\"}}}";
 
-    private record Stub(int status, String body) {
+    private record Stub(int status, String body, String contentType) {
+        Stub(int status, String body) {
+            this(status, body, "application/json");
+        }
     }
 
     private record RecordedRequest(String method, String path, String apiKey, String body) {
@@ -63,7 +69,7 @@ class GeminiClientTest {
                 lastStub = stub;
             }
             byte[] out = stub.body().getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.getResponseHeaders().add("Content-Type", stub.contentType());
             exchange.sendResponseHeaders(stub.status(), out.length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(out);
@@ -89,6 +95,10 @@ class GeminiClientTest {
 
     private void respond(int status, String body) {
         stubs.addLast(new Stub(status, body));
+    }
+
+    private void respond(int status, String body, String contentType) {
+        stubs.addLast(new Stub(status, body, contentType));
     }
 
     /** Reponse Gemini valide contenant {@code text}. */
@@ -283,6 +293,87 @@ class GeminiClientTest {
                 .isInstanceOf(GeminiException.class)
                 .hasMessageContaining("injoignable apres 3 tentatives")
                 .hasCauseInstanceOf(ResourceAccessException.class);
+    }
+
+    // =====================================================================
+    // Reponses 200 au format inattendu (regression : RestClientException ... application/octet-stream)
+    // =====================================================================
+
+    @Test
+    @DisplayName("generate : JSON valide servi en application/octet-stream -> texte retourne")
+    void generate_octetStreamContentType_isParsed() throws Exception {
+        respond(200, okBody("{\"ok\":true}"), "application/octet-stream");
+
+        assertThat(client("k", 1).generate("s", "u", 0.1, null)).isEqualTo("{\"ok\":true}");
+    }
+
+    @Test
+    @DisplayName("generate : corps 200 non JSON puis succes -> retry transparent")
+    void generate_nonJsonBodyThenSuccess_retries() throws Exception {
+        respond(200, "<html>Bad gateway</html>", "text/html");
+        respond(200, okBody("{\"ok\":true}"));
+
+        assertThat(client("k", 3).generate("s", "u", 0.1, null)).isEqualTo("{\"ok\":true}");
+        assertThat(requests).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("generate : corps 200 non JSON en permanence -> GeminiException avec extrait du corps")
+    void generate_nonJsonBodyAlways_throws() {
+        respond(200, "pas du json", "application/octet-stream");
+
+        assertThatThrownBy(() -> client("k", 2).generate("s", "u", 0.1, null))
+                .isInstanceOf(GeminiException.class)
+                .hasMessageContaining("inexploitable apres 2 tentatives")
+                .hasMessageContaining("pas du json");
+        assertThat(requests).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("generate : corps 200 vide -> GeminiException apres retries")
+    void generate_emptyBody_throws() {
+        respond(200, "");
+
+        assertThatThrownBy(() -> client("k", 2).generate("s", "u", 0.1, null))
+                .isInstanceOf(GeminiException.class)
+                .hasMessageContaining("corps de reponse vide");
+    }
+
+    @Test
+    @DisplayName("generate : timeout de lecture pendant le corps -> retry puis GeminiException (pas de RestClientException brute)")
+    void generate_readTimeoutDuringBody_retriesThenGeminiException() throws IOException {
+        AtomicInteger hits = new AtomicInteger();
+        HttpServer slow = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+        slow.createContext("/", exchange -> {
+            hits.incrementAndGet();
+            exchange.getRequestBody().readAllBytes();
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, 0); // chunked : les en-tetes partent, le corps jamais
+            try {
+                exchange.getResponseBody().flush();
+                Thread.sleep(1500);
+            } catch (Exception ignored) {
+                // le client a deja coupe
+            } finally {
+                exchange.close();
+            }
+        });
+        // plusieurs threads : sinon la 2e requete attend la fin de la 1re (1,5 s) et n'arrive pas avant le timeout du client
+        ExecutorService pool = Executors.newCachedThreadPool();
+        slow.setExecutor(pool);
+        slow.start();
+        try {
+            GeminiClient slowClient = new GeminiClient(MAPPER, "k",
+                    "http://127.0.0.1:" + slow.getAddress().getPort() + "/v1beta", "gemini-test", 500, 300, 2, 0);
+
+            assertThatThrownBy(() -> slowClient.generate("s", "u", 0.1, null))
+                    .isInstanceOf(GeminiException.class)
+                    .hasMessageContaining("apres 2 tentatives");
+            assertThat(hits.get()).isEqualTo(2);
+        } finally {
+            slow.stop(0);
+            pool.shutdownNow();
+        }
     }
 
     // =====================================================================
