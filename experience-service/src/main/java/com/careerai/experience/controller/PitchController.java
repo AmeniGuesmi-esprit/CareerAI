@@ -3,6 +3,7 @@ package com.careerai.experience.controller;
 import com.careerai.experience.dto.ApiResponse;
 import com.careerai.experience.dto.PitchRequest;
 import com.careerai.experience.dto.PitchResponse;
+import com.careerai.experience.exception.GeminiException;
 import com.careerai.experience.exception.PitchException;
 import com.careerai.experience.exception.RateLimitException;
 import com.careerai.experience.security.AuthUser;
@@ -77,6 +78,24 @@ public class PitchController {
         return problem(HttpStatus.BAD_GATEWAY, e.getMessage());
     }
 
+    /**
+     * Erreur de l'appel Gemini (GeminiClient enveloppe toutes ses erreurs dans GeminiException).
+     * 503 : injoignable/timeout ou quota (429) ; 502 : autre erreur HTTP, reponse vide/bloquee, cle absente.
+     * Le message de l'exception est journalise mais jamais renvoye au client.
+     */
+    @ExceptionHandler(GeminiException.class)
+    public ResponseEntity<ProblemDetail> handleGemini(GeminiException e) {
+        log.error("Pitch : erreur Gemini : {}", e.getMessage(), e);
+        Throwable cause = e.getCause();
+        if (isNetworkFailure(cause)) {
+            return problem(HttpStatus.SERVICE_UNAVAILABLE, "Le service d'IA est temporairement indisponible");
+        }
+        if (cause instanceof RestClientResponseException http && http.getStatusCode().value() == 429) {
+            return problem(HttpStatus.SERVICE_UNAVAILABLE, "Le service d'IA est temporairement surcharge");
+        }
+        return problem(HttpStatus.BAD_GATEWAY, "Erreur du service d'IA");
+    }
+
     /** 503 : Gemini injoignable (timeout, reseau). */
     @ExceptionHandler(ResourceAccessException.class)
     public ResponseEntity<ProblemDetail> handleGeminiUnreachable(ResourceAccessException e) {
@@ -99,6 +118,21 @@ public class PitchController {
     public ResponseEntity<ProblemDetail> handleGeminiOther(RestClientException e) {
         log.error("Pitch : erreur Gemini", e);
         return problem(HttpStatus.BAD_GATEWAY, "Erreur du service d'IA");
+    }
+
+    /**
+     * Vrai si la chaine de causes contient une panne reseau : connexion refusee/coupee, timeout de lecture.
+     * Spring enveloppe les timeouts survenus pendant la lecture du corps dans une RestClientException
+     * (et non dans une ResourceAccessException) : tester la cause directe ne suffit donc pas.
+     */
+    private static boolean isNetworkFailure(Throwable cause) {
+        for (Throwable t = cause; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            if (t instanceof ResourceAccessException || t instanceof java.net.SocketException
+                    || t instanceof java.net.SocketTimeoutException || t instanceof java.io.EOFException) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ResponseEntity<ProblemDetail> problem(HttpStatus status, String detail) {
